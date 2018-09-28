@@ -1,0 +1,44 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public Animator Animator;
+
+    private void Start()
+    {
+	this.Animator.SetInteger("Vertical", -1);
+	this.Animator.SetInteger("Horizontal", 0);
+	this.Animator.SetBool("Moving", false);
+    }
+    
+    private void Update()
+    {
+	// Solution to make the animation play at least for a foot step will be to add a coroutine that plays for at least x amount of time before allowing to be
+	// stopped
+	int horizontal = 0;
+	int vertical = 0;
+	bool moving = false;
+	
+	if(Input.GetKey(KeyCode.A)) horizontal -= 1;
+	if(Input.GetKey(KeyCode.D)) horizontal += 1;
+
+	if(Input.GetKey(KeyCode.S)) vertical -= 1;
+	if(Input.GetKey(KeyCode.W)) vertical += 1;
+	
+	moving = horizontal != 0 || vertical != 0;
+
+	if(moving)
+	{
+	    this.Animator.SetInteger("Horizontal", horizontal);
+	    this.Animator.SetInteger("Vertical", vertical);
+	    Debug.Log(vertical);
+	}
+
+	this.Animator.SetBool("Moving", moving);
+
+
+	this.transform.Translate(horizontal * Time.deltaTime, vertical * Time.deltaTime, 0);
+    }
+}
