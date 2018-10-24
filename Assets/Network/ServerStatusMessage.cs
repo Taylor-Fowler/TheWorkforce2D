@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(UnityEngine.UI.Text))]
+[RequireComponent(typeof(Text))]
 public class ServerStatusMessage : MonoBehaviour
 {
-    public UnityEngine.UI.Text Text;
-    public Color SuccessColour;
     public Color ErrorColour;
+    public Color SuccessColour;
+    public Text Text;
 
     //public override void OnConnectedToMaster()
     //{

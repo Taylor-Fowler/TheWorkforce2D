@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\User\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\User\.Rider2018.2\system\resharper-host\Local\Transient\ReSharperHost\v182\SolutionCaches\_Testing 2D.-505099116.00" t="ExcludeRecursive" />
+    <e p="C:\Users\User\Documents\ACTUAL DOCUMENTS\Game Development\Unity\Testing 2D" t="IncludeRecursive">
+      <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="JsonDotNet" t="Include">
+          <e p="link.xml" t="Include" />
+        </e>
+        <e p="Network" t="Include">
+          <e p="ServerConnection.cs" t="Include" />
+          <e p="ServerCreateGame.cs" t="Include" />
+          <e p="ServerStatusMessage.cs" t="Include" />
+        </e>
+        <e p="Player" t="Include">
+          <e p="Player.cs" t="Include" />
+          <e p="PlayerController.cs" t="Include" />
+          <e p="PlayerMovement.cs" t="Include" />
+          <e p="User.cs" t="Include" />
+        </e>
+        <e p="Plugins" t="Include">
+          <e p="PhotonWebGL" t="Include">
+            <e p="SocketWebTcp.cs" t="Include" />
+            <e p="WebSocket" t="Include">
+              <e p="WebSocket.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Static Classes" t="Include">
+          <e p="AssetProcessor.cs" t="Include" />
+          <e p="GameFileIO.cs" t="Include" />
+        </e>
+        <e p="World" t="Include">
+          <e p="Chunk" t="Include">
+            <e p="Chunk.cs" t="Include" />
+            <e p="ChunkController.cs" t="Include" />
+            <e p="NetworkChunk.cs" t="Include" />
+          </e>
+          <e p="TerrainTileset.cs" t="Include" />
+          <e p="Tile" t="Include">
+            <e p="Tile.cs" t="Include" />
+            <e p="TileController.cs" t="Include" />
+          </e>
+          <e p="World.cs" t="Include" />
+          <e p="WorldController.cs" t="Include" />
+          <e p="WorldGeneration.cs" t="Include" />
+        </e>
+      </e>
+      <e p="Library" t="ExcludeRecursive" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Temp" t="ExcludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+      </e>
+      <e p="Testing 2D.sln" t="IncludeFlat" />
+    </e>
+  </component>
+</project>

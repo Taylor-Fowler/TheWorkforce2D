@@ -1,51 +1,57 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class WorldGeneration
+public class WorldGeneration : World
 {
-    private World _world;
-
-    public WorldGeneration(World world)
+    public WorldGeneration(int seed) : base(seed)
     {
-        this._world = world;
     }
 
-    public List<Chunk> UpdateWorld(Vector2 position)
+    public override List<Chunk> GetChunks(List<Vector2> chunkPositions)
     {
-        Vector2[] chunksToLoad = Chunk.ChunksToLoad(position);
-        List<Chunk> spawnedChunks = new List<Chunk>();
+        List<Chunk> chunksFound = base.GetChunks(chunkPositions);
 
-        chunksToLoad = this._world.NotLoaded(chunksToLoad);
+        if (chunkPositions.Count == 0) return chunksFound;
 
-        foreach(var chunkPosition in chunksToLoad)
+        LoadGeneratedChunks(chunkPositions, chunksFound);
+        chunksFound.AddRange(GenerateChunks(chunkPositions));
+        return chunksFound;
+    }
+
+    public List<Chunk> GenerateChunks(List<Vector2> positionsOfchunksToGenerate)
+    {
+        List<Chunk> chunks = new List<Chunk>();
+
+        foreach (var position in positionsOfchunksToGenerate)
         {
-            Chunk chunk = new Chunk(chunkPosition);
-            spawnedChunks.Add(chunk);
+            Chunk chunk = new Chunk(position);
+            chunks.Add(chunk);
+
             for (int x = 0; x < Chunk.SIZE; x++)
-                for (int y = 0; y < Chunk.SIZE; y++)
+            for (int y = 0; y < Chunk.SIZE; y++)
+            {
+                Vector2 worldChunkPosition = chunk.WorldPosition();
+
+                float noise = GetNoise((int) worldChunkPosition.x + x, (int) worldChunkPosition.y + y);
+
+                chunk.Tiles[x, y] = new Tile
                 {
-                    Vector2 worldChunkPosition = chunk.WorldPositon();
-
-                    float noise = this.GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y);
-
-                    chunk.Tiles[x, y] = new Tile {
-                        Position = new Vector2(x, y),
-                        TilesetID = noise < 0.333f ? 0 : (noise > 0.666f) ? 1 : 2
-                    };
-                }
+                    Position = new Vector2(x, y),
+                    TilesetID = noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2
+                };
+            }
         }
 
-        this._world.UpdateChunks(spawnedChunks.ToArray());
-        return spawnedChunks;
+        return chunks;
     }
 
     private float GetNoise(int x, int y)
     {
-        float xModifier = (float)this._world.Seed / int.MaxValue;
-        float yModifier = (float)this._world.Seed / int.MaxValue;
+        float xModifier = (float) Seed / int.MaxValue;
+        float yModifier = (float) Seed / int.MaxValue;
         if (x < 0)
         {
-            xModifier += (float)this._world.NegativeXSeed / int.MaxValue;
+            xModifier += (float) NegativeXSeed / int.MaxValue;
             xModifier *= 0.5f;
             //xModifier *= xModifier;
             //xModifier *= 0.666f;
@@ -53,9 +59,9 @@ public class WorldGeneration
 
         xModifier *= 0.5f;
 
-        if(y < 0)
+        if (y < 0)
         {
-            yModifier += (float)this._world.NegativeYSeed / int.MaxValue;
+            yModifier += (float) NegativeYSeed / int.MaxValue;
             yModifier *= 0.5f;
             //yModifier *= yModifier;
             //yModifier *= 0.666f;
@@ -66,6 +72,4 @@ public class WorldGeneration
 
         return Mathf.PerlinNoise(x * xModifier, y * yModifier);
     }
-
-
 }

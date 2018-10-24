@@ -8,7 +8,7 @@ public class ServerCreateGame : MonoBehaviour
 
     private void Awake()
     {
-        this.CreateGameButton.onClick.AddListener(this.Create);
+        CreateGameButton.onClick.AddListener(Create);
     }
 
     public void Create()

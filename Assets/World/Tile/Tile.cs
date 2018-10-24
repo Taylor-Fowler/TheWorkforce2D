@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public struct Tile
 {
     public const int PX_SIZE = 32;
@@ -11,13 +12,13 @@ public struct Tile
     public Vector3 GetWorldPosition(Vector2 chunkPosition)
     {
         chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
-        return new Vector3(chunkPosition.x + this.Position.x, chunkPosition.y + this.Position.y, 1f);
+        return new Vector3(chunkPosition.x + Position.x, chunkPosition.y + Position.y, 1f);
     }
 
     public Vector3 GetWorldPositionPrecedence(Vector2 chunkPosition, int paddingTilesetID)
     {
-        Vector3 position = this.GetWorldPosition(chunkPosition);
-        position.z -= TerrainTileset.LoadedTilesets[paddingTilesetID].Precedence;
+        Vector3 position = GetWorldPosition(chunkPosition);
+        position.z -= TerrainTileSet.LoadedTileSets[paddingTilesetID].Precedence;
 
         return position;
     }

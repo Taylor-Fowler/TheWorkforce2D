@@ -5,17 +5,15 @@ public class ServerConnection : MonoBehaviour
 {
     private void Awake()
     {
-        this.Connect();
+        Connect();
     }
 
     public void Connect()
     {
-
     }
 
     public void Disconnect()
     {
-
     }
 }
 
@@ -27,7 +25,7 @@ public class ServerConnectionEditor : Editor
     {
         DrawDefaultInspector();
 
-        ServerConnection connection = (ServerConnection)target;
+        ServerConnection connection = (ServerConnection) target;
         GUIStyle _connectStyle = new GUIStyle(GUI.skin.button);
         GUIStyle _disconnectStyle = new GUIStyle(GUI.skin.button);
 
@@ -36,17 +34,10 @@ public class ServerConnectionEditor : Editor
 
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        if(GUILayout.Button("Connect", _connectStyle, GUILayout.MaxWidth(100)))
-        {
-            connection.Connect();
-        }
-        if (GUILayout.Button("Disconnect", _disconnectStyle, GUILayout.MaxWidth(100)))
-        {
-            connection.Disconnect();
-        }
+        if (GUILayout.Button("Connect", _connectStyle, GUILayout.MaxWidth(100))) connection.Connect();
+        if (GUILayout.Button("Disconnect", _disconnectStyle, GUILayout.MaxWidth(100))) connection.Disconnect();
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
-
     }
 }
 #endif

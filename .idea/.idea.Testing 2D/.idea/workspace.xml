@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="cff586c2-912e-4bc0-9c4a-d35297d7cadb" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/Assets/AssetProcessor.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/AssetProcessor.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Chunk.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Chunk.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Network/ServerConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Network/ServerConnection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Network/ServerCreateGame.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Network/ServerCreateGame.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Network/ServerStatusMessage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Network/ServerStatusMessage.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/NetworkPrefabRegister.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/NetworkPrefabRegister.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Player/Player Object.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Player/Player Object.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Player/PlayerController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Player/PlayerController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Player/PlayerMovement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Player/PlayerMovement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Plugins/PhotonWebGL/SocketWebTcp.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/PhotonWebGL/SocketWebTcp.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Tile.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Tile.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TileController.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TileController.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TileSpawner.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TileSpawner.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/TerrainTileset.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/World/TerrainTileset.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/Tile Prefab.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/Tile Prefab.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/World.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/World/World.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/WorldController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/World/WorldController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/WorldGeneration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/World/WorldGeneration.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/WorldGenerationTesting.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/World/WorldGenerationTesting.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="-1984987379">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="3" />
+          <entry key="project.open.time.12" value="1" />
+          <entry key="project.open.time.16" value="2" />
+          <entry key="project.opened" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="cs" value="7" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="C#" value="7" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="cs" value="58" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="C#" value="58" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/World/TerrainTileSet.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1440">
+              <caret line="98" column="45" selection-start-line="98" selection-start-column="45" selection-end-line="98" selection-end-column="45" />
+              <folding>
+                <marker date="1539796753584" expanded="false" signature="6:66" ph="..." />
+                <marker date="1539796753584" expanded="true" signature="68:244" ph="///     A TerrainTileSet contains all the variations of tile textures as well ... " />
+                <marker date="1539796753584" expanded="true" signature="287:3613" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="1071:1659" ph="///     A default TileSet has 6 tiles in each row and 6 tiles in each column, however the final row only has ONE  ... " />
+                <marker date="1539796753584" expanded="true" signature="1768:2567" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="2193:2518" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="2690:2848" ph="///     The precedence decides the z position of the tile, the higher the precedence, the closer to the screen it ... " />
+                <marker date="1539796753584" expanded="true" signature="2930:3053" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="3124:3519" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="3561:3611" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="3650:3702" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="3973:4210" ph="///     Checks to see if each edge is enabled and then disables the corners attached to that edge eg. Northern Ed ... " />
+                <marker date="1539796753584" expanded="true" signature="4240:4587" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="4261:4329" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="4345:4413" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="4429:4497" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="4513:4581" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="4637:6182" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="4668:6176" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="4752:5159" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="5259:5638" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="5735:6142" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="6216:7068" ph="{...}" />
+                <marker date="1539796753584" expanded="true" signature="7104:7950" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/World/Chunk/Chunk.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="435">
+              <caret line="30" column="25" selection-start-line="30" selection-start-column="25" selection-end-line="30" selection-end-column="25" />
+              <folding>
+                <marker date="1539796773183" expanded="false" signature="6:52" ph="..." />
+                <marker date="1539796773183" expanded="true" signature="79:180" ph="///     The width and height of each Chunk (in number of tiles). ... " />
+                <marker date="1539796773183" expanded="true" signature="217:313" ph="///     The area of each Chunk (number of tiles per chunk). ... " />
+                <marker date="1539796773183" expanded="true" signature="360:563" ph="///     The default number of Chunks to keep loaded in both the x and y direction, ... " />
+                <marker date="1539796773183" expanded="true" signature="607:748" ph="///     The position of the Chunk in the chunk grid, not to be confused with world ... " />
+                <marker date="1539796773183" expanded="true" signature="783:858" ph="///     The tiles stored in the chunk. ... " />
+                <marker date="1539796773183" expanded="true" signature="890:1188" ph="///     Initialises a new instance of the &lt;see cref=&quot;Chunk&quot; /&gt; class. Allocates memory ... " />
+                <marker date="1539796773183" expanded="true" signature="1223:1330" ph="{...}" />
+                <marker date="1539796773183" expanded="true" signature="1336:1590" ph="///     Reconstructs Chunk from a NetworkChunk object, this constructor is used for ... " />
+                <marker date="1539796773183" expanded="true" signature="1664:1814" ph="{...}" />
+                <marker date="1539796773183" expanded="true" signature="1820:2068" ph="///     Gets a value indicating whether the chunk should stay loaded regardless of ... " />
+                <marker date="1539796773183" expanded="true" signature="2110:2395" ph="///     Calculates the World Position of the Chunk, the returned World Position ... " />
+                <marker date="1539796773183" expanded="true" signature="2430:2474" ph="{...}" />
+                <marker date="1539796773183" expanded="true" signature="2481:2727" ph="///     Calculates the Chunk that the given `worldPosition` resides in. ... " />
+                <marker date="1539796773183" expanded="true" signature="2799:3073" ph="{...}" />
+                <marker date="1539796773183" expanded="true" signature="3079:3448" ph="///     Calculates the World Position from a given Chunk position, the returned World ... " />
+                <marker date="1539796773183" expanded="true" signature="3520:3569" ph="{...}" />
+                <marker date="1539796773183" expanded="true" signature="3575:3763" ph="///     Unpacks NetworkChunks into regular Chunks. ... " />
+                <marker date="1539796773183" expanded="true" signature="3843:4033" ph="{...}" />
+                <marker date="1539796773183" expanded="true" signature="4039:4389" ph="///     Calculates the chunks that surround a position in the world (including the ... " />
+                <marker date="1539796773183" expanded="true" signature="4473:4923" ph="{...}" />
+                <marker date="1539796773183" expanded="true" signature="5018:5486" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Assets/Player/PlayerController.cs">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/World/WorldGeneration.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="27" column="30" selection-start-line="27" selection-start-column="30" selection-end-line="27" selection-end-column="30" />
+              <folding>
+                <marker date="1539796732816" expanded="false" signature="6:52" ph="..." />
+                <marker date="1539796732816" expanded="true" signature="142:154" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="227:514" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="596:1350" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="713:1320" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="900:1310" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="1150:1295" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="1392:2049" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="1527:1714" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="1644:1704" ph="/* xModifier *= xModifier; ... */" />
+                <marker date="1539796732816" expanded="true" signature="1762:1949" ph="{...}" />
+                <marker date="1539796732816" expanded="true" signature="1879:1939" ph="/* yModifier *= yModifier; ... */" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/World/WorldController.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <marker date="1539718664723" expanded="false" signature="6:127" ph="..." />
+                <marker date="1539718664723" expanded="true" signature="622:1578" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="822:1572" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="845:1367" ph="/* 1. Create a brand new world with a completely random seed ... */" />
+                <marker date="1539718664723" expanded="true" signature="1651:2042" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="2104:4231" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="2119:2923" ph="/* What happens when a player moves to a new chunk? ... */" />
+                <marker date="1539718664723" expanded="true" signature="3173:3310" ph="/* Find the chunks that need to be loaded, which are all the generated chunks, ... */" />
+                <marker date="1539718664723" expanded="true" signature="3423:3614" ph="/* Find the chunks that are no longer in the vicinity of the player, ... */" />
+                <marker date="1539718664723" expanded="true" signature="4273:4798" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="4336:4374" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="4557:4792" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="4905:5581" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="4920:5256" ph="/* 1. Get a collection of the chunks needed displaying ... */" />
+                <marker date="1539718664723" expanded="true" signature="5675:6221" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="5877:5985" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="6002:6180" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="6317:7011" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="6528:6961" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="6623:6803" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="6824:6947" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="7170:7783" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="7866:7966" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="8047:8729" ph="{...}" />
+                <marker date="1539718664723" expanded="true" signature="8735:9724" ph="/* [Command] ... */" />
+                <marker date="1539718664723" expanded="true" signature="9783:9823" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Static Classes/GameFileIO.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/World/Chunk/Chunk.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/World/TerrainTileSet.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/World/WorldController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/World/WorldGeneration.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Static Classes/AssetProcessor.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Assets/World/TerrainTileset.cs" />
+        <option value="$PROJECT_DIR$/Assets/World/TerrainTileSet.cs" />
+        <option value="$PROJECT_DIR$/Assets/Static Classes/AssetProcessor.cs" />
+        <option value="$PROJECT_DIR$/Assets/World/WorldGeneration.cs" />
+        <option value="$PROJECT_DIR$/Assets/World/Chunk/Chunk.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="260" />
+    <option name="y" value="20" />
+    <option name="width" value="1400" />
+    <option name="height" value="994" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="UnityExplorer" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="FileSystemExplorer" />
+      <pane id="UnityExplorer">
+        <subPane>
+          <expand>
+            <path>
+              <item name="Project" type="e068e287:UnityExplorerRootNode" />
+              <item name="Assets" type="48f920db:UnityExplorerNode$AssetsRoot" />
+            </path>
+            <path>
+              <item name="Project" type="e068e287:UnityExplorerRootNode" />
+              <item name="Assets" type="48f920db:UnityExplorerNode$AssetsRoot" />
+              <item name="Static Classes" type="1045f7f1:UnityExplorerNode" />
+            </path>
+            <path>
+              <item name="Project" type="e068e287:UnityExplorerRootNode" />
+              <item name="Assets" type="48f920db:UnityExplorerNode$AssetsRoot" />
+              <item name="World" type="1045f7f1:UnityExplorerNode" />
+            </path>
+            <path>
+              <item name="Project" type="e068e287:UnityExplorerRootNode" />
+              <item name="Assets" type="48f920db:UnityExplorerNode$AssetsRoot" />
+              <item name="World" type="1045f7f1:UnityExplorerNode" />
+              <item name="Chunk" type="1045f7f1:UnityExplorerNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+        <option name="show-hidden-items" value="false" />
+      </pane>
+      <pane id="SolutionExplorer">
+        <option name="show-all-files" value="false" />
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
+    <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.C#" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Attach to Unity Editor.Attach to Unity Editor" />
+      <item itemvalue="Attach to Unity Editor.Attach to Unity Editor &amp; Play" />
+    </list>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cff586c2-912e-4bc0-9c4a-d35297d7cadb" name="Default Changelist" comment="" />
+      <created>1539717300225</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1539717300225</updated>
+      <workItem from="1539717307011" duration="1711000" />
+      <workItem from="1539795903471" duration="879000" />
+      <workItem from="1539796886147" duration="7000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="2597000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1050" extended-state="6" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.09808102" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="NuGet" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Unit Tests" order="11" />
+      <window_info anchor="bottom" id="Terminal" order="12" />
+      <window_info anchor="bottom" id="Event Log" order="13" side_tool="true" />
+      <window_info anchor="bottom" id="Unity" order="14" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Errors In Solution" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
+      <window_info anchor="right" id="Unit Tests Coverage" order="5" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" suspend="NONE" type="DotNet Exception Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Assets/Static Classes/GameFileIO.cs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/Static Classes/AssetProcessor.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="8" column="5" lean-forward="true" selection-start-line="8" selection-start-column="5" selection-end-line="8" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/World/TerrainTileSet.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1440">
+          <caret line="98" column="45" selection-start-line="98" selection-start-column="45" selection-end-line="98" selection-end-column="45" />
+          <folding>
+            <marker date="1539796753584" expanded="false" signature="6:66" ph="..." />
+            <marker date="1539796753584" expanded="true" signature="68:244" ph="///     A TerrainTileSet contains all the variations of tile textures as well ... " />
+            <marker date="1539796753584" expanded="true" signature="287:3613" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="1071:1659" ph="///     A default TileSet has 6 tiles in each row and 6 tiles in each column, however the final row only has ONE  ... " />
+            <marker date="1539796753584" expanded="true" signature="1768:2567" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="2193:2518" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="2690:2848" ph="///     The precedence decides the z position of the tile, the higher the precedence, the closer to the screen it ... " />
+            <marker date="1539796753584" expanded="true" signature="2930:3053" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="3124:3519" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="3561:3611" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="3650:3702" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="3973:4210" ph="///     Checks to see if each edge is enabled and then disables the corners attached to that edge eg. Northern Ed ... " />
+            <marker date="1539796753584" expanded="true" signature="4240:4587" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="4261:4329" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="4345:4413" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="4429:4497" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="4513:4581" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="4637:6182" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="4668:6176" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="4752:5159" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="5259:5638" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="5735:6142" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="6216:7068" ph="{...}" />
+            <marker date="1539796753584" expanded="true" signature="7104:7950" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/World/WorldGeneration.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="27" column="30" selection-start-line="27" selection-start-column="30" selection-end-line="27" selection-end-column="30" />
+          <folding>
+            <marker date="1539796732816" expanded="false" signature="6:52" ph="..." />
+            <marker date="1539796732816" expanded="true" signature="142:154" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="227:514" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="596:1350" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="713:1320" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="900:1310" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="1150:1295" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="1392:2049" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="1527:1714" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="1644:1704" ph="/* xModifier *= xModifier; ... */" />
+            <marker date="1539796732816" expanded="true" signature="1762:1949" ph="{...}" />
+            <marker date="1539796732816" expanded="true" signature="1879:1939" ph="/* yModifier *= yModifier; ... */" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/World/WorldController.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <marker date="1539718664723" expanded="false" signature="6:127" ph="..." />
+            <marker date="1539718664723" expanded="true" signature="622:1578" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="822:1572" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="845:1367" ph="/* 1. Create a brand new world with a completely random seed ... */" />
+            <marker date="1539718664723" expanded="true" signature="1651:2042" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="2104:4231" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="2119:2923" ph="/* What happens when a player moves to a new chunk? ... */" />
+            <marker date="1539718664723" expanded="true" signature="3173:3310" ph="/* Find the chunks that need to be loaded, which are all the generated chunks, ... */" />
+            <marker date="1539718664723" expanded="true" signature="3423:3614" ph="/* Find the chunks that are no longer in the vicinity of the player, ... */" />
+            <marker date="1539718664723" expanded="true" signature="4273:4798" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="4336:4374" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="4557:4792" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="4905:5581" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="4920:5256" ph="/* 1. Get a collection of the chunks needed displaying ... */" />
+            <marker date="1539718664723" expanded="true" signature="5675:6221" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="5877:5985" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="6002:6180" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="6317:7011" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="6528:6961" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="6623:6803" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="6824:6947" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="7170:7783" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="7866:7966" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="8047:8729" ph="{...}" />
+            <marker date="1539718664723" expanded="true" signature="8735:9724" ph="/* [Command] ... */" />
+            <marker date="1539718664723" expanded="true" signature="9783:9823" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/World/Chunk/Chunk.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="30" column="25" selection-start-line="30" selection-start-column="25" selection-end-line="30" selection-end-column="25" />
+          <folding>
+            <marker date="1539796773183" expanded="false" signature="6:52" ph="..." />
+            <marker date="1539796773183" expanded="true" signature="79:180" ph="///     The width and height of each Chunk (in number of tiles). ... " />
+            <marker date="1539796773183" expanded="true" signature="217:313" ph="///     The area of each Chunk (number of tiles per chunk). ... " />
+            <marker date="1539796773183" expanded="true" signature="360:563" ph="///     The default number of Chunks to keep loaded in both the x and y direction, ... " />
+            <marker date="1539796773183" expanded="true" signature="607:748" ph="///     The position of the Chunk in the chunk grid, not to be confused with world ... " />
+            <marker date="1539796773183" expanded="true" signature="783:858" ph="///     The tiles stored in the chunk. ... " />
+            <marker date="1539796773183" expanded="true" signature="890:1188" ph="///     Initialises a new instance of the &lt;see cref=&quot;Chunk&quot; /&gt; class. Allocates memory ... " />
+            <marker date="1539796773183" expanded="true" signature="1223:1330" ph="{...}" />
+            <marker date="1539796773183" expanded="true" signature="1336:1590" ph="///     Reconstructs Chunk from a NetworkChunk object, this constructor is used for ... " />
+            <marker date="1539796773183" expanded="true" signature="1664:1814" ph="{...}" />
+            <marker date="1539796773183" expanded="true" signature="1820:2068" ph="///     Gets a value indicating whether the chunk should stay loaded regardless of ... " />
+            <marker date="1539796773183" expanded="true" signature="2110:2395" ph="///     Calculates the World Position of the Chunk, the returned World Position ... " />
+            <marker date="1539796773183" expanded="true" signature="2430:2474" ph="{...}" />
+            <marker date="1539796773183" expanded="true" signature="2481:2727" ph="///     Calculates the Chunk that the given `worldPosition` resides in. ... " />
+            <marker date="1539796773183" expanded="true" signature="2799:3073" ph="{...}" />
+            <marker date="1539796773183" expanded="true" signature="3079:3448" ph="///     Calculates the World Position from a given Chunk position, the returned World ... " />
+            <marker date="1539796773183" expanded="true" signature="3520:3569" ph="{...}" />
+            <marker date="1539796773183" expanded="true" signature="3575:3763" ph="///     Unpacks NetworkChunks into regular Chunks. ... " />
+            <marker date="1539796773183" expanded="true" signature="3843:4033" ph="{...}" />
+            <marker date="1539796773183" expanded="true" signature="4039:4389" ph="///     Calculates the chunks that surround a position in the world (including the ... " />
+            <marker date="1539796773183" expanded="true" signature="4473:4923" ph="{...}" />
+            <marker date="1539796773183" expanded="true" signature="5018:5486" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/Player/PlayerController.cs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+  </component>
+</project>
