@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 public class PlayerController : NetworkBehaviour
 {
     public GameObject CameraPrefab;
+
     public int ID = 1;
     public WorldController WorldController;
 
@@ -23,7 +24,10 @@ public class PlayerController : NetworkBehaviour
 
     private void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!isLocalPlayer)
+        {
+            return;
+        }
 
         Vector2 currentChunkPosition = Chunk.CalculateResidingChunk(transform.position);
 

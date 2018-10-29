@@ -10,6 +10,10 @@ using Random = System.Random;
 [Serializable]
 public class World
 {
+    public int Seed { get; }
+    public int NegativeXSeed { get; }
+    public int NegativeYSeed { get; }
+
     public readonly HashSet<Vector2> ChunksGenerated;
     public readonly Dictionary<Vector2, Chunk> LoadedChunks;
 
@@ -39,39 +43,52 @@ public class World
         ChunksGenerated = new HashSet<Vector2>();
     }
 
-    public int Seed { get; }
-    public int NegativeXSeed { get; }
-    public int NegativeYSeed { get; }
 
     public void UpdateChunksSurroundingPlayer(List<Vector2> chunksSurroundingPlayer)
     {
         ChunksSurroundingPlayer.Clear();
         foreach (var chunk in chunksSurroundingPlayer)
+        {
             ChunksSurroundingPlayer.Add(chunk);
+        }
     }
 
     public void AddLoadedChunks(Chunk[] chunks)
     {
-        foreach (var chunk in chunks) LoadedChunks.Add(chunk.Position, chunk);
+        foreach (var chunk in chunks)
+        {
+            LoadedChunks.Add(chunk.Position, chunk);
+        }
     }
 
     public Vector2[] FilterChunksThatAreLoaded(Vector2[] chunksToLoad)
     {
-        if (LoadedChunks.Count == 0) return chunksToLoad;
+        if (LoadedChunks.Count == 0)
+        {
+            return chunksToLoad;
+        }
 
         List<Vector2> notLoaded = new List<Vector2>();
 
         foreach (var chunk in chunksToLoad)
+        {
             if (!LoadedChunks.ContainsKey(chunk))
+            {
                 notLoaded.Add(chunk);
+            }
+        }
         return notLoaded.ToArray();
     }
 
     public void FilterChunkPositionsThatAreLoaded(List<Vector2> chunkPositions)
     {
         for (int i = chunkPositions.Count - 1; i >= 0; i--)
+        {
             if (LoadedChunks.ContainsKey(chunkPositions[i]))
+            {
                 chunkPositions.RemoveAt(i);
+            }
+        }
     }
 
     public virtual List<Chunk> GetChunks(List<Vector2> chunkPositions)
@@ -87,7 +104,9 @@ public class World
 
         LookupLoadedChunks(chunkPositions, retrievedChunks);
         if (chunkPositions.Count == 0)
+        {
             return retrievedChunks;
+        }
 
         retrievedChunks.AddRange(GameFileIO.LoadChunks(chunkPositions));
 
@@ -107,47 +126,49 @@ public class World
 
         // top to bottom
         for (int yOffset = 1; yOffset >= -1; yOffset--)
-            // go from left to right
-        for (int xOffset = -1; xOffset <= 1; xOffset++)
         {
-            Tile neighbourTile = new Tile();
-
-            // Check if the neighbour tile we are interested in is located in a different chunk
-            // If the tile position + offset is less than zero or equal to the size of a chunk then it means that the 
-            // tile is in a different chunk (negative when less than zero and positive when equal to chunk size in the axis that
-            // is being checked).
-            Vector2 neighbourChunkDirection = Vector2.zero;
-            if (tile.Position.x + xOffset < 0)
-                neighbourChunkDirection.x = xOffset;
-            else if (tile.Position.x + xOffset == Chunk.SIZE)
-                neighbourChunkDirection.x = xOffset;
-            if (tile.Position.y + yOffset < 0)
-                neighbourChunkDirection.y = yOffset;
-            else if (tile.Position.y + yOffset == Chunk.SIZE)
-                neighbourChunkDirection.y = yOffset;
-
-            // The tile we want to inspect is in a different chunk if the direction has changed from zero, so we must check if the 
-            // chunk that we need (given by the direction) is actively loaded. If it is loaded then we get the value of that tile
-            // otherwise we continue looping through the surrounding tiles
-            if (neighbourChunkDirection != Vector2.zero)
+            // go from left to right
+            for (int xOffset = -1; xOffset <= 1; xOffset++)
             {
-                //return new Dictionary<int, TilePadding>();
-                if (!GetNeighbouringChunkTile(chunk.Position, neighbourChunkDirection,
-                    tile.Position + new Vector2(xOffset, yOffset), ref neighbourTile)) continue;
-            }
-            // The tile we are interested in is located in the current chunk, get the value of it
-            else
-            {
-                neighbourTile = chunk.Tiles[(int) tile.Position.x + xOffset, (int) tile.Position.y + yOffset];
-            }
+                Tile neighbourTile = new Tile();
 
-            TerrainTileSet neighbour = TerrainTileSet.LoadedTileSets[neighbourTile.TilesetID];
+                // Check if the neighbour tile we are interested in is located in a different chunk
+                // If the tile position + offset is less than zero or equal to the size of a chunk then it means that the 
+                // tile is in a different chunk (negative when less than zero and positive when equal to chunk size in the axis that
+                // is being checked).
+                Vector2 neighbourChunkDirection = Vector2.zero;
+                if (tile.Position.x + xOffset < 0)
+                    neighbourChunkDirection.x = xOffset;
+                else if (tile.Position.x + xOffset == Chunk.SIZE)
+                    neighbourChunkDirection.x = xOffset;
+                if (tile.Position.y + yOffset < 0)
+                    neighbourChunkDirection.y = yOffset;
+                else if (tile.Position.y + yOffset == Chunk.SIZE)
+                    neighbourChunkDirection.y = yOffset;
+
+                // The tile we want to inspect is in a different chunk if the direction has changed from zero, so we must check if the 
+                // chunk that we need (given by the direction) is actively loaded. If it is loaded then we get the value of that tile
+                // otherwise we continue looping through the surrounding tiles
+                if (neighbourChunkDirection != Vector2.zero)
+                {
+                    //return new Dictionary<int, TilePadding>();
+                    if (!GetNeighbouringChunkTile(chunk.Position, neighbourChunkDirection,
+                        tile.Position + new Vector2(xOffset, yOffset), ref neighbourTile)) continue;
+                }
+                // The tile we are interested in is located in the current chunk, get the value of it
+                else
+                {
+                    neighbourTile = chunk.Tiles[(int) tile.Position.x + xOffset, (int) tile.Position.y + yOffset];
+                }
+
+                TerrainTileSet neighbour = TerrainTileSet.LoadedTileSets[neighbourTile.TilesetID];
 
 
-            if (neighbour != current && neighbour.Precedence > current.Precedence)
-            {
-                if (!tilePadding.ContainsKey(neighbour.ID)) tilePadding.Add(neighbour.ID, new TilePadding());
-                tilePadding[neighbour.ID].Enable(xOffset, yOffset);
+                if (neighbour != current && neighbour.Precedence > current.Precedence)
+                {
+                    if (!tilePadding.ContainsKey(neighbour.ID)) tilePadding.Add(neighbour.ID, new TilePadding());
+                    tilePadding[neighbour.ID].Enable(xOffset, yOffset);
+                }
             }
         }
 
@@ -219,10 +240,16 @@ public class World
         List<Vector2> nonExistantChunks = new List<Vector2>();
 
         foreach (var chunkPosition in chunkPositions)
+        {
             if (ChunksGenerated.Contains(chunkPosition))
+            {
                 existingChunks.Add(chunkPosition);
+            }
             else
+            {
                 nonExistantChunks.Add(chunkPosition);
+            }
+        }
 
         loadResult.AddRange(GameFileIO.LoadChunks(existingChunks));
         chunkPositions = nonExistantChunks;

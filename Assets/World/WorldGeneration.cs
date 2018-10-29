@@ -37,6 +37,7 @@ public class WorldGeneration : World
                 chunk.Tiles[x, y] = new Tile
                 {
                     Position = new Vector2(x, y),
+                    Elevation = noise, 
                     TilesetID = noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2
                 };
             }
@@ -66,9 +67,7 @@ public class WorldGeneration : World
             //yModifier *= yModifier;
             //yModifier *= 0.666f;
         }
-
         yModifier *= 0.5f;
-
 
         return Mathf.PerlinNoise(x * xModifier, y * yModifier);
     }

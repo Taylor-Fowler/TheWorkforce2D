@@ -6,10 +6,11 @@ using UnityEngine.Networking;
 
 public class WorldController : NetworkBehaviour
 {
+    private static WorldController LocalWorldController;
+
     // The Client-Local player controller
     public PlayerController LocalPlayerController;
 
-    private static WorldController LocalWorldController;
 
     private readonly List<ChunkController> _chunkControllers = new List<ChunkController>();
     private Dictionary<Vector2, List<int>> _allChunksLoadedByPlayerPositions;
@@ -150,6 +151,7 @@ public class WorldController : NetworkBehaviour
         List<Vector2> chunksSuccessfullyUnloaded = new List<Vector2>();
 
         foreach (var chunkPosition in chunkPositions)
+        {
             if (_allChunksLoadedByPlayerPositions.ContainsKey(chunkPosition))
             {
                 if (_allChunksLoadedByPlayerPositions[chunkPosition].Count == 1)
@@ -162,13 +164,13 @@ public class WorldController : NetworkBehaviour
                     _allChunksLoadedByPlayerPositions[chunkPosition].Remove(playerID);
                 }
             }
+        }
 
         return chunksSuccessfullyUnloaded;
     }
 
     [Command]
-    private void CmdPlayerChunkUpdate(Vector2[] chunksNoLongerNeeded, Vector2[] chunksLoaded,
-        Vector2[] chunksToGenerate, int playerID)
+    private void CmdPlayerChunkUpdate(Vector2[] chunksNoLongerNeeded, Vector2[] chunksLoaded, Vector2[] chunksToGenerate, int playerID)
     {
         Vector2[] allChunksToLoad = chunksLoaded.Concat(chunksToGenerate).Distinct().ToArray();
         var loaded = LocalWorldController.UpdateChunksLoadedByPlayer(allChunksToLoad, playerID);
@@ -176,16 +178,23 @@ public class WorldController : NetworkBehaviour
         var generated = LocalWorldController._world.GetChunks(new List<Vector2>(chunksToGenerate));
 
         if (unloaded.Count != 0)
+        {
             RpcUnloadChunks(unloaded.ToArray());
+        }
 
         if (generated.Count != 0)
+        {
             RpcReceiveChunks(NetworkChunk.ChunkListToNetworkChunkArray(generated));
+        }
     }
 
     [ClientRpc]
     private void RpcUnloadChunks(Vector2[] chunksOrderedToUnload)
     {
-        foreach (var chunk in chunksOrderedToUnload) _world.LoadedChunks.Remove(chunk);
+        foreach (var chunk in chunksOrderedToUnload)
+        {
+            _world.LoadedChunks.Remove(chunk);
+        }
     }
 
     [ClientRpc]
@@ -203,7 +212,10 @@ public class WorldController : NetworkBehaviour
             .Where(value => _world.ChunksSurroundingPlayer.Contains(value.Position))
             .ToList();
 
-        for (int i = 0; i < chunksToDisplay.Count; i++) chunkControllersToSet[i].SetChunk(chunksToDisplay[i], _world);
+        for (int i = 0; i < chunksToDisplay.Count; i++)
+        {
+            chunkControllersToSet[i].SetChunk(chunksToDisplay[i], _world);
+        }
     }
 
     //[Command]

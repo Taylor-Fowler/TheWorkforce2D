@@ -24,12 +24,15 @@ public class ChunkController : MonoBehaviour
         transform.position += transform.parent.position;
         name = "Chunk Controller: " + Chunk.Position.x + ", " + Chunk.Position.y;
 
-        if (_tileControllers.Count == 0) SpawnTileControllers();
+        if (_tileControllers.Count == 0)
+        {
+            SpawnTileControllers();
+        }
 
         int i = 0;
         foreach (var tile in Chunk.Tiles)
         {
-            _tileControllers[i].SetTile(tile, world.GetTilePadding(Chunk, tile));
+            _tileControllers[i].SetTile(tile, this, world.GetTilePadding(Chunk, tile));
             i++;
         }
     }

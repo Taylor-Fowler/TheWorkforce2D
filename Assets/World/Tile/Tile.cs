@@ -7,6 +7,8 @@ public struct Tile
     public const int PX_SIZE = 32;
 
     public int TilesetID;
+    public float Moisture;
+    public float Elevation;
     public Vector2 Position;
 
     public Vector3 GetWorldPosition(Vector2 chunkPosition)
