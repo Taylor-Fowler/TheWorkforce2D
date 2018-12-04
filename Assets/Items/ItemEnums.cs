@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TheWorkforce
+namespace TheWorkforce.Items
 {
     public enum EItemType
     {
-        Resource,
+        RawMaterial,
         CraftingComponent,
         Equipment,
         Machinery

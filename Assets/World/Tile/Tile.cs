@@ -1,27 +1,31 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-[Serializable]
-public struct Tile
+namespace TheWorkforce.World
 {
-    public const int PX_SIZE = 32;
-
-    public int TilesetID;
-    public float Moisture;
-    public float Elevation;
-    public Vector2 Position;
-
-    public Vector3 GetWorldPosition(Vector2 chunkPosition)
+    [Serializable]
+    public struct Tile
     {
-        chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
-        return new Vector3(chunkPosition.x + Position.x, chunkPosition.y + Position.y, 1f);
-    }
+        public const int PX_SIZE = 32;
 
-    public Vector3 GetWorldPositionPrecedence(Vector2 chunkPosition, int paddingTilesetID)
-    {
-        Vector3 position = GetWorldPosition(chunkPosition);
-        position.z -= TerrainTileSet.LoadedTileSets[paddingTilesetID].Precedence;
+        public int TileSetId;
+        public float Moisture;
+        public float Elevation;
+        public Vector2 Position;
 
-        return position;
-    }
+        public Vector3 GetWorldPosition(Vector2 chunkPosition)
+        {
+            chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
+            return new Vector3(chunkPosition.x + Position.x, chunkPosition.y + Position.y, 1f);
+        }
+
+        public Vector3 GetWorldPositionPrecedence(Vector2 chunkPosition, int paddingTileSetId)
+        {
+            Vector3 position = GetWorldPosition(chunkPosition);
+            position.z -= TerrainTileSet.LoadedTileSets[paddingTileSetId].Precedence;
+
+            return position;
+        }
+    }    
 }

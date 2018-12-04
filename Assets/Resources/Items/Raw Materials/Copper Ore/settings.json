@@ -1,0 +1,10 @@
+{
+  "Id" : 3,
+  "Name" : "Copper Ore",
+  "Description" : "Naturally occurring copper.",
+  "MaxStackSize" : 32,
+
+  "HarvestTool" : 2,
+  "HarvestSpeed" : 1,
+  "HarvestAmount" : 1
+}

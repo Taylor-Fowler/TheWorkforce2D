@@ -1,0 +1,10 @@
+{
+  "Id" : 2,
+  "Name" : "Iron Ore",
+  "Description" : "Naturally occurring iron.",
+  "MaxStackSize" : 32,
+
+  "HarvestTool" : 2,
+  "HarvestSpeed" : 1,
+  "HarvestAmount" : 1
+}

@@ -1,0 +1,10 @@
+{
+  "Id" : 6,
+  "Name" : "Coal",
+  "Description" : "Naturally occurring coal.",
+  "MaxStackSize" : 32,
+
+  "HarvestTool" : 2,
+  "HarvestSpeed" : 1,
+  "HarvestAmount" : 1
+}

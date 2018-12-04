@@ -1,38 +1,44 @@
 ﻿using UnityEngine;
-using UnityEngine.Networking;
+using NetworkBehaviour = UnityEngine.Networking.NetworkBehaviour;
+using TheWorkforce.World;
 
-public class PlayerController : NetworkBehaviour
+namespace TheWorkforce.Player
 {
-    public GameObject CameraPrefab;
-
-    public int ID = 1;
-    public WorldController WorldController;
-
-    private Vector2 _lastGeneratedChunkPosition;
-    private Vector2 _lastGeneratedChunkWorldPosition;
-
-    public override void OnStartLocalPlayer()
+    public class PlayerController : NetworkBehaviour
     {
-        Instantiate(CameraPrefab, transform);
-        WorldController = GetComponent<WorldController>();
-        WorldController.LocalPlayerController = this;
-        CaptureLastGeneratedChunks();
+        public GameObject CameraPrefab;
 
-        StartCoroutine(WorldController.SetInitialPlayerPosition(transform.position));
-    }
+        public int Id = 1;
+        public WorldController WorldController;
 
+        private Vector2 _lastGeneratedChunkPosition;
+        private Vector2 _lastGeneratedChunkWorldPosition;
 
-    private void Update()
-    {
-        if (!isLocalPlayer)
+        public override void OnStartLocalPlayer()
         {
-            return;
+            Instantiate(CameraPrefab, transform);
+            WorldController = GetComponent<WorldController>();
+            WorldController.LocalPlayerController = this;
+            CaptureLastGeneratedChunks();
+
+            StartCoroutine(WorldController.SetInitialPlayerPosition(transform.position));
         }
 
-        Vector2 currentChunkPosition = Chunk.CalculateResidingChunk(transform.position);
 
-        if (_lastGeneratedChunkPosition != currentChunkPosition)
+        private void Update()
         {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
+            Vector2 currentChunkPosition = Chunk.CalculateResidingChunk(transform.position);
+            // Not moved enough to update the world controller
+            if (_lastGeneratedChunkPosition == currentChunkPosition)
+            {
+                return;
+            }
+
             Vector2 difference = _lastGeneratedChunkWorldPosition - (Vector2) transform.position;
             if (Mathf.Abs(difference.x) >= Chunk.SIZE || Mathf.Abs(difference.y) >= Chunk.SIZE)
             {
@@ -40,14 +46,14 @@ public class PlayerController : NetworkBehaviour
                 CaptureLastGeneratedChunks();
             }
         }
-    }
 
-    private void CaptureLastGeneratedChunks()
-    {
-        _lastGeneratedChunkPosition = Chunk.CalculateResidingChunk(transform.position);
-        _lastGeneratedChunkWorldPosition = Chunk.CalculateWorldPosition(_lastGeneratedChunkPosition) +
-                                           new Vector2(Chunk.SIZE * 0.5f, Chunk.SIZE * 0.5f);
-        Debug.Log("Generated Chunk: " + _lastGeneratedChunkPosition);
-        Debug.Log("Generated Chunk World Position: " + _lastGeneratedChunkWorldPosition);
+        private void CaptureLastGeneratedChunks()
+        {
+            _lastGeneratedChunkPosition = Chunk.CalculateResidingChunk(transform.position);
+            _lastGeneratedChunkWorldPosition = Chunk.CalculateWorldPosition(_lastGeneratedChunkPosition) +
+                                               new Vector2(Chunk.SIZE * 0.5f, Chunk.SIZE * 0.5f);
+            Debug.Log("Generated Chunk: " + _lastGeneratedChunkPosition);
+            Debug.Log("Generated Chunk World Position: " + _lastGeneratedChunkWorldPosition);
+        }
     }
 }

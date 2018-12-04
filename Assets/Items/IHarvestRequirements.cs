@@ -1,5 +1,4 @@
-﻿
-namespace TheWorkforce
+﻿namespace TheWorkforce.Items
 {
     public interface IHarvestRequirements
     {

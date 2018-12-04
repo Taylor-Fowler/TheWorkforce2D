@@ -1,16 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TheWorkforce.Items;
 
-namespace TheWorkforce
+namespace TheWorkforce.World
 {
     public struct ResourceGenerationConditions
     {
-        public Resource Resource { get; private set; }
+        public RawMaterial RawMaterial { get; private set; }
 
-        public ResourceGenerationConditions(Resource resource)
+        public ResourceGenerationConditions(RawMaterial rawMaterial)
         {
-            Resource = resource;
+            RawMaterial = rawMaterial;
         }
     }
 }

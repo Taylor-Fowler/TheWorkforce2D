@@ -1,0 +1,9 @@
+{
+  "Id" : 2,
+  "ItemsRequired" : [
+    [2, 1]
+  ],
+  "ItemsProduced" : [
+    [102, 1]
+  ]
+}

@@ -2,58 +2,62 @@
 using UnityEngine;
 using UnityEngine.Networking;
 
-[RequireComponent(typeof(SpriteRenderer))]
-public class TileController : NetworkBehaviour
+namespace TheWorkforce.World
 {
-    public Vector2 TilePosition { get; private set; }
-    public ChunkController ChunkController { get; private set; }
-
-    private List<GameObject> _paddingObjects;
-    private SpriteRenderer _spriteRenderer;
-
-    private void Awake()
+    [RequireComponent(typeof(SpriteRenderer))]
+    public class TileController : NetworkBehaviour
     {
-        _paddingObjects = new List<GameObject>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-    }
+        public Vector2 TilePosition { get; private set; }
+        public ChunkController ChunkController { get; private set; }
 
-    public void SetTile(Tile tile, ChunkController chunkController, Dictionary<int, TilePadding> paddingTiles)
-    {
-        TilePosition = tile.Position;
-        ChunkController = chunkController;
+        private List<GameObject> _paddingObjects;
+        private SpriteRenderer _spriteRenderer;
 
-        _spriteRenderer.sprite = TerrainTileSet.LoadedTileSets[tile.TilesetID].Tiles[TerrainTileSet.CENTRAL];
-        DestroyPadding();
-
-        foreach (var padding in paddingTiles)
+        #region Unity API
+        private void Awake()
         {
-            SpawnPadding(padding.Key, padding.Value);
+            _paddingObjects = new List<GameObject>();
+            _spriteRenderer = GetComponent<SpriteRenderer>();
         }
-    }
+        #endregion
 
-    private void SpawnPadding(int tilesetID, TilePadding padding)
-    {
-        Sprite[] sprites = TerrainTileSet.LoadedTileSets[tilesetID].GetPaddingSprites(padding);
-
-        foreach (var sprite in sprites)
+        public void SetTile(Tile tile, ChunkController chunkController, Dictionary<int, TilePadding> paddingTiles)
         {
-            GameObject paddingObject = new GameObject();
-            paddingObject.transform.SetParent(transform);
-            paddingObject.AddComponent<SpriteRenderer>().sprite = sprite;
-            paddingObject.transform.position = transform.position -
-                                               new Vector3(0f, 0f, TerrainTileSet.LoadedTileSets[tilesetID].Precedence);
+            TilePosition = tile.Position;
+            ChunkController = chunkController;
 
-            _paddingObjects.Add(paddingObject);
+            _spriteRenderer.sprite = TerrainTileSet.LoadedTileSets[tile.TileSetId].Tiles[TerrainTileSet.CENTRAL];
+            DestroyPadding();
+
+            foreach (var padding in paddingTiles)
+            {
+                SpawnPadding(padding.Key, padding.Value);
+            }
         }
-    }
 
-
-    private void DestroyPadding()
-    {
-        foreach (var paddingObject in _paddingObjects)
+        private void SpawnPadding(int tileSetId, TilePadding padding)
         {
-            Destroy(paddingObject);
+            Sprite[] sprites = TerrainTileSet.LoadedTileSets[tileSetId].GetPaddingSprites(padding);
+
+            foreach (var sprite in sprites)
+            {
+                GameObject paddingObject = new GameObject();
+                paddingObject.transform.SetParent(transform);
+                paddingObject.AddComponent<SpriteRenderer>().sprite = sprite;
+                paddingObject.transform.position = transform.position -
+                                                   new Vector3(0f, 0f, TerrainTileSet.LoadedTileSets[tileSetId].Precedence);
+
+                _paddingObjects.Add(paddingObject);
+            }
         }
-        _paddingObjects.Clear();
-    }
+
+        private void DestroyPadding()
+        {
+            foreach (var paddingObject in _paddingObjects)
+            {
+                Destroy(paddingObject);
+            }
+            _paddingObjects.Clear();
+        }
+    }   
 }

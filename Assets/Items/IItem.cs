@@ -1,17 +1,17 @@
 ﻿using UnityEngine;
 
-namespace TheWorkforce
-{
-    // Types of Item:
-    //  - Equipment
-    //  - Consumable
-    //  - Resource
-    //  - Machinery
-    //
+// Types of Item:
+//  - Equipment
+//  - Consumable
+//  - RawMaterial
+//  - Machinery
+//
 
+namespace TheWorkforce.Items
+{
     public interface IItem
     {
-        int ID { get; }
+        int Id { get; }
         string Name { get; }
         string Description { get; }
         EItemType ItemType { get; }

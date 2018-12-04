@@ -1,0 +1,10 @@
+{
+  "Id" : 1,
+  "Name" : "Stone",
+  "Description" : "Naturally occurring stone.",
+  "MaxStackSize" : 32,
+  
+  "HarvestTool" : 2,
+  "HarvestSpeed" : 1,
+  "HarvestAmount" : 1
+}

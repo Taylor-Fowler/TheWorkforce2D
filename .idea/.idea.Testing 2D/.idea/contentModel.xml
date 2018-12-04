@@ -7,17 +7,41 @@
       <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
+        <e p="Crafting" t="Include">
+          <e p="CraftingManager.cs" t="Include" />
+          <e p="CraftingRecipe.cs" t="Include" />
+          <e p="CraftingRecipeCollection.cs" t="Include" />
+          <e p="CraftingRecipeSettings.cs" t="Include" />
+        </e>
+        <e p="Game State" t="Include">
+          <e p="ApplicationStateArgs.cs" t="Include" />
+          <e p="EApplicationState.cs" t="Include" />
+          <e p="EGameState.cs" t="Include" />
+          <e p="GameManager.cs" t="Include" />
+          <e p="GameStateArgs.cs" t="Include" />
+        </e>
+        <e p="Items" t="Include">
+          <e p="CraftingComponent.cs" t="Include" />
+          <e p="IHarvestRequirements.cs" t="Include" />
+          <e p="IItem.cs" t="Include" />
+          <e p="ItemEnums.cs" t="Include" />
+          <e p="ItemSettings.cs" t="Include" />
+          <e p="Machine.cs" t="Include" />
+          <e p="RawMaterial.cs" t="Include" />
+          <e p="RawMaterialSettings.cs" t="Include" />
+        </e>
         <e p="JsonDotNet" t="Include">
           <e p="link.xml" t="Include" />
         </e>
         <e p="Network" t="Include">
+          <e p="CustomNetworkManager.cs" t="Include" />
           <e p="ServerConnection.cs" t="Include" />
           <e p="ServerCreateGame.cs" t="Include" />
           <e p="ServerStatusMessage.cs" t="Include" />
         </e>
         <e p="Player" t="Include">
-          <e p="Player.cs" t="Include" />
           <e p="PlayerController.cs" t="Include" />
+          <e p="PlayerDetails.cs" t="Include" />
           <e p="PlayerMovement.cs" t="Include" />
           <e p="User.cs" t="Include" />
         </e>
@@ -33,19 +57,27 @@
           <e p="AssetProcessor.cs" t="Include" />
           <e p="GameFileIO.cs" t="Include" />
         </e>
+        <e p="Testing" t="Include">
+          <e p="DebugController.cs" t="Include" />
+          <e p="DebugItemsLoaded.cs" t="Include" />
+          <e p="SpawnRawMaterials.cs" t="Include" />
+        </e>
         <e p="World" t="Include">
           <e p="Chunk" t="Include">
             <e p="Chunk.cs" t="Include" />
             <e p="ChunkController.cs" t="Include" />
             <e p="NetworkChunk.cs" t="Include" />
           </e>
-          <e p="TerrainTileset.cs" t="Include" />
+          <e p="ResourceGenerationConditions.cs" t="Include" />
+          <e p="TerrainTileSet.cs" t="Include" />
+          <e p="TerrainTileSetSettings.cs" t="Include" />
           <e p="Tile" t="Include">
             <e p="Tile.cs" t="Include" />
             <e p="TileController.cs" t="Include" />
           </e>
-          <e p="World.cs" t="Include" />
+          <e p="TilePadding.cs" t="Include" />
           <e p="WorldController.cs" t="Include" />
+          <e p="WorldDetails.cs" t="Include" />
           <e p="WorldGeneration.cs" t="Include" />
         </e>
       </e>
