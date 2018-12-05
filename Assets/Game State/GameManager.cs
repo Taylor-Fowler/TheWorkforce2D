@@ -24,6 +24,7 @@ namespace TheWorkforce.Game_State
         [SerializeField] private EGameState _currentGameState;
 
         [SerializeField] private CraftingManager _craftingManager;
+        //[SerializeField] private CustomNetworkManager _networkManager;
         #endregion
 
         #region Custom Event Declarations
