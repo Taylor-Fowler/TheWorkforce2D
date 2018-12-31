@@ -1,14 +1,19 @@
 using UnityEngine;
+using TheWorkforce.Items;
+using TheWorkforce.Crafting;
+using TheWorkforce.World;
 
 namespace TheWorkforce.Testing
 {
-    public class SpawnRawMaterials : MonoBehaviour
+    public class SpawnRawMaterials
     {
-        #region Unity API
-        private void Start()
+        public void Spawn(ItemManager itemManager, WorldController worldController)
         {
-            
+            if(worldController != null)
+            {
+                worldController.ChunkControllers[12]._tileControllers[30].SetItem(itemManager.RandomItem());
+                Debug.Log("[SpawnRawMaterials] - Spawn(CraftingManager, WorldController");
+            }
         }
-        #endregion
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TheWorkforce.Items
+﻿namespace TheWorkforce.Items
 {
     public enum EItemType
     {

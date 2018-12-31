@@ -17,9 +17,49 @@ namespace TheWorkforce.Network
         }
         #endregion
 
-        public override void OnClientConnect(NetworkConnection connection)
+        private short _currentPlayerId = 0;
+        private Action _loadGame;
+
+        public void SetLoadGameAction(Action loadGame)
         {
-            base.OnClientConnect(connection);
+            _loadGame = loadGame;
         }
+
+        #region Network Manager Overrides
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStartServer()");
+        }
+
+        public override void OnServerConnect(NetworkConnection conn)
+        {
+            base.OnServerConnect(conn);
+
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnServerConnect(NetworkConnection)");
+        }
+
+        public override void OnStartClient(NetworkClient client)
+        {
+            base.OnStartClient(client);
+            
+            if(_loadGame != null)
+            {
+                _loadGame.Invoke();
+            }
+
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStartClient(NetworkClient)");
+        }
+
+        public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
+        {
+            var player = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            NetworkServer.AddPlayerForConnection(conn, player, ++_currentPlayerId);
+
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnServerAddPlayer(NetworkConnection, short) \n"
+                    + "_currentPlayerId: " + _currentPlayerId.ToString());
+        }
+        #endregion
     }
 }

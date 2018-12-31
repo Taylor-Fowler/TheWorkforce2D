@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 using TheWorkforce.World;
 
-namespace TheWorkforce.StaticClasses
+namespace TheWorkforce.Static_Classes
 {
     public static class GameFileIO
     {
@@ -27,7 +27,7 @@ namespace TheWorkforce.StaticClasses
 
         public static bool SaveChunks(ICollection chunksToSave)
         {
-            return true;
+            return false;
         }
 
         public static List<Chunk> LoadChunks(List<Vector2> chunksToLoad)

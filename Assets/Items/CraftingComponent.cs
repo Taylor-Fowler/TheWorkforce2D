@@ -26,5 +26,16 @@ namespace TheWorkforce.Items
             Icon = icon;
             MaxStackSize = maxStackSize;
         }
+
+        public ItemController SpawnObject(Transform parent)
+        {
+            GameObject spawned = new GameObject(Name);
+            spawned.transform.SetParent(parent);
+            spawned.AddComponent<SpriteRenderer>().sprite = Icon;
+
+            ItemController itemController = spawned.AddComponent<ItemController>();
+            itemController.SetItem(this);
+            return itemController;
+        }
     }
 }

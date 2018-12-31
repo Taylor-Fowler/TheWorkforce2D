@@ -21,10 +21,11 @@ GameObject:
   - component: {fileID: 4892506415082902}
   - component: {fileID: 212778733170385946}
   - component: {fileID: 95637977103694052}
-  - component: {fileID: 114121710898639092}
   - component: {fileID: 114229103205176108}
   - component: {fileID: 114286505129648538}
   - component: {fileID: 114287458830173330}
+  - component: {fileID: 61789029422206108}
+  - component: {fileID: 50744225262150418}
   m_Layer: 0
   m_Name: Player Object
   m_TagString: Untagged
@@ -45,6 +46,51 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &50744225262150418
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1704434750061360}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!61 &61789029422206108
+BoxCollider2D:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1704434750061360}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.3}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 0.32, y: 0.32}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.4, y: 0.4}
+  m_EdgeRadius: 0
 --- !u!95 &95637977103694052
 Animator:
   serializedVersion: 3
@@ -63,19 +109,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &114121710898639092
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1704434750061360}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51d1118e3c6d26a418ebad1f6b26c6ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Animator: {fileID: 95637977103694052}
-  Speed: 3
 --- !u!114 &114229103205176108
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -119,10 +152,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c140ca8eaa35ca6449da3bcb37b5ce2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CameraPrefab: {fileID: 1840921609967512, guid: 252cfe03d1a455c47b7cd7afc4424982,
+  _cameraPrefab: {fileID: 1840921609967512, guid: 252cfe03d1a455c47b7cd7afc4424982,
     type: 2}
-  ID: 1
-  WorldController: {fileID: 0}
+  _inventoryPrefab: {fileID: 1416692558039966, guid: 530584b41748b2b488f0589e3873153e,
+    type: 2}
+  _toolbeltPrefab: {fileID: 1851790007243814, guid: c1cfc62ce303bfd469f6ced066f8849e,
+    type: 2}
+  _itemInspectorPrefab: {fileID: 1781787668765998, guid: d0a3f8bd0c68cca4ba8c8963457e4138,
+    type: 2}
+  _hudOptionsPrefab: {fileID: 1405982550697130, guid: 44fa4c67123922b4faee953e3f51549b,
+    type: 2}
 --- !u!114 &114287458830173330
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -134,7 +173,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12aac34bcf3d2824eb13086a3313fca6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalPlayerController: {fileID: 0}
 --- !u!212 &212778733170385946
 SpriteRenderer:
   m_ObjectHideFlags: 1

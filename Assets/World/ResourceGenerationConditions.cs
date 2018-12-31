@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TheWorkforce.Items;
+﻿using TheWorkforce.Items;
 
 namespace TheWorkforce.World
 {

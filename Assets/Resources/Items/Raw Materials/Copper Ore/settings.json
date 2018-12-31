@@ -1,10 +1,15 @@
 {
-  "Id" : 3,
-  "Name" : "Copper Ore",
-  "Description" : "Naturally occurring copper.",
-  "MaxStackSize" : 32,
+  "Id": 3,
+  "Name": "Copper Ore",
+  "Description": "Naturally occurring copper.",
+  "MaxStackSize": 32,
 
-  "HarvestTool" : 2,
-  "HarvestSpeed" : 1,
-  "HarvestAmount" : 1
+  "HarvestTool": 2,
+  "HarvestSpeed": 1,
+  "HarvestAmount": 1,
+
+  "MaximumMoisture": 0.5,
+  "MinimumMoisture": 0.3,
+  "MaximumElevation": 0.6,
+  "MinimumElevation": 0.3
 }

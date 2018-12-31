@@ -1,21 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using TheWorkforce.Crafting;
 using UnityEngine;
 using TheWorkforce.World;
 using TheWorkforce.Items;
-using UnityEngine.Experimental.UIElements;
 
-namespace TheWorkforce.StaticClasses
+namespace TheWorkforce.Static_Classes
 {
     public static class AssetProcessor
     {
+        // TODO: Add a method that returns the directoryInfo requested only if the directory exists
+        //       More error checking and handling!
+
         #region Private Members
-        private static Vector2 _texturePivot = new Vector2(0.5f, 0.5f);
+        private static readonly Vector2 _texturePivot = new Vector2(0.5f, 0.5f);
         private const string BasePath = "Assets/Resources/";
         #endregion
-        
+
+        #region TileSet Loading
         public static TerrainTileSet[] LoadTerrainTileSets()
         {
             const string path = BasePath + "Terrain/TileSets";
@@ -33,25 +37,25 @@ namespace TheWorkforce.StaticClasses
 
                 tileSets.Add(new TerrainTileSet(texture, Tile.PX_SIZE, Tile.PX_SIZE, tileSetSettings));
                 
-                Debug.Log(tileSetSettings.Id + " Precedence: " + tileSetSettings.Precedence);
+                // NOTE: Commented logging of Tile Precedence
+                // Debug.Log(tileSetSettings.Id + " Precedence: " + tileSetSettings.Precedence);
             }
 
             return tileSets.ToArray();
         }
-
+        #endregion
 
         #region Item Loading
-        public static IEnumerable<IItem> LoadItems()
+        /// <summary>
+        /// Loads all of the different item types into the item manager
+        /// </summary>
+        public static void LoadItems(ItemManager itemManager)
         {
-            List<IItem> items = new List<IItem>();
-            
-            LoadCraftingComponents(items);
-            LoadRawMaterials(items);
-
-            return items;
+            LoadCraftingComponents(itemManager);
+            LoadRawMaterials(itemManager);
         }
 
-        private static void LoadCraftingComponents(ICollection<IItem> items)
+        private static void LoadCraftingComponents(ItemManager itemManager)
         {
             DirectoryInfo[] itemDirectories = new DirectoryInfo(BasePath + "Items/Crafting Components").GetDirectories();
             
@@ -65,11 +69,11 @@ namespace TheWorkforce.StaticClasses
                 CraftingComponent craftingComponent = new CraftingComponent();
                 craftingComponent.InitialiseItem(itemSettings.Id, itemSettings.Name, itemSettings.Description, LoadSpriteFromTexture(LoadTexture(textureFile)), itemSettings.MaxStackSize);
                 
-                items.Add(craftingComponent);
+                itemManager.Add(craftingComponent);
             }
         }
 
-        private static void LoadRawMaterials(ICollection<IItem> items)
+        private static void LoadRawMaterials(ItemManager itemManager)
         {
             DirectoryInfo[] itemDirectories = new DirectoryInfo(BasePath + "Items/Raw Materials").GetDirectories();
             
@@ -81,10 +85,13 @@ namespace TheWorkforce.StaticClasses
                 FileInfo textureFile = directory.GetFiles("*.png")[0];
                 
                 RawMaterial rawMaterial = new RawMaterial();
-                rawMaterial.InitialiseItem(rawMaterialSettings.Id, rawMaterialSettings.Name, rawMaterialSettings.Description, LoadSpriteFromTexture(LoadTexture(textureFile)), rawMaterialSettings.MaxStackSize);
+                Sprite sprite = LoadSpriteFromTexture(LoadTexture(textureFile), Tile.PX_SIZE * 2, Tile.PX_SIZE * 2, Tile.PX_SIZE * 2);
+
+                rawMaterial.InitialiseItem(rawMaterialSettings.Id, rawMaterialSettings.Name, rawMaterialSettings.Description, sprite, rawMaterialSettings.MaxStackSize);
                 rawMaterial.InitialiseHarvestRequirements((EToolType)rawMaterialSettings.HarvestTool, rawMaterialSettings.HarvestSpeed, rawMaterialSettings.HarvestAmount);
-                
-                items.Add(rawMaterial);
+                rawMaterial.InitialiseGeneratable(rawMaterialSettings.MaximumMoisture, rawMaterialSettings.MinimumMoisture, rawMaterialSettings.MaximumElevation, rawMaterialSettings.MinimumElevation);
+
+                itemManager.Add(rawMaterial);
             }
         }
         
@@ -120,9 +127,29 @@ namespace TheWorkforce.StaticClasses
         }
         #endregion
 
-        private static Sprite LoadSpriteFromTexture(Texture2D texture, int width = Tile.PX_SIZE, int height = Tile.PX_SIZE, int x = 0, int y = 0)
+        #region EToolTypeSprite Loading
+        public static void LoadEToolTypeSprites()
         {
-            return Sprite.Create(texture, new Rect(x, y, width, height), _texturePivot);
+            const string path = BasePath + "UI/ToolType";
+            DirectoryInfo directory = new DirectoryInfo(path);
+
+            List<Sprite> sprites = new List<Sprite>();
+
+            foreach(var spriteName in Enum.GetNames(typeof(EToolType)))
+            {
+                FileInfo textureFile = directory.GetFiles(spriteName + ".png")[0];
+                Sprite sprite = LoadSpriteFromTexture(LoadTexture(textureFile), Tile.PX_SIZE * 2, Tile.PX_SIZE * 2, Tile.PX_SIZE * 2);
+                sprites.Add(sprite);
+            }
+
+            AssetProvider.InitialiseEToolTypeSprites(sprites.ToArray());
+        }
+        #endregion
+
+        #region Sprite & Texture Utility Functions
+        private static Sprite LoadSpriteFromTexture(Texture2D texture, int width = Tile.PX_SIZE, int height = Tile.PX_SIZE, int pixelsPerUnit = Tile.PX_SIZE, int x = 0, int y = 0)
+        {
+            return Sprite.Create(texture, new Rect(x, y, width, height), _texturePivot, pixelsPerUnit, 0, SpriteMeshType.FullRect);
         }
 
         private static Texture2D LoadTexture(FileInfo textureFile, int width = Tile.PX_SIZE, int height = Tile.PX_SIZE)
@@ -134,6 +161,8 @@ namespace TheWorkforce.StaticClasses
 
             return texture;
         }
+        #endregion
+
 
         private static string GetJsonFile(DirectoryInfo directory, string fileName = "settings")
         {

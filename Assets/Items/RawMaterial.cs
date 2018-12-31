@@ -2,7 +2,7 @@
 
 namespace TheWorkforce.Items
 {
-    public class RawMaterial : IItem, IHarvestRequirements
+    public class RawMaterial : IItem, IHarvestRequirements, IGeneratable
     {
         #region IItem Members
         public int Id { get; private set; }
@@ -17,6 +17,13 @@ namespace TheWorkforce.Items
         public EToolType HarvestTool { get; private set; }
         public float HarvestSpeed { get; private set; }
         public int HarvestAmount { get; private set; }
+        #endregion
+
+        #region IGeneratable Members
+        public float MaximumMoisture { get; private set; }
+        public float MinimumMoisture { get; private set; }
+        public float MaximumElevation { get; private set; }
+        public float MinimumElevation { get; private set; }
         #endregion
 
         public RawMaterial()
@@ -39,5 +46,37 @@ namespace TheWorkforce.Items
             HarvestSpeed = harvestSpeed;
             HarvestAmount = harvestAmount;
         }
+
+        public void InitialiseGeneratable(float maxMoisture, float minMoisture, float maxElevation, float minElevation)
+        {
+            MaximumMoisture = maxMoisture;
+            MinimumMoisture = minMoisture;
+            MaximumElevation = maxElevation;
+            MinimumElevation = minElevation;
+        }
+
+        public bool CanGenerate(float moisture, float elevation)
+        {
+            return moisture >= MinimumMoisture 
+                && moisture <= MaximumMoisture 
+                && elevation >= MinimumElevation
+                && elevation <= MaximumElevation;
+        }
+
+        public ItemController SpawnObject(Transform parent)
+        {
+            GameObject spawned = new GameObject(Name);
+            spawned.transform.SetParent(parent);
+            spawned.transform.position = parent.position;
+
+            spawned.transform.Translate(Vector3.forward * Static_Classes.AssetProvider.TILE_ITEM_Z_INDEX);
+            spawned.AddComponent<SpriteRenderer>().sprite = Icon;
+            spawned.AddComponent<BoxCollider2D>();
+
+            ItemController itemController = spawned.AddComponent<ItemController>();
+            itemController.SetItem(this);
+            return itemController;
+        }
+
     }
 }

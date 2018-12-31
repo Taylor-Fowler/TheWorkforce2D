@@ -19,6 +19,7 @@ namespace TheWorkforce.Items
         int MaxStackSize { get; }
 
         void InitialiseItem(int id, string name, string description, Sprite icon, int maxStackSize = 1);
+        ItemController SpawnObject(Transform parent);
         //void Display();
         //void Drop();
     }

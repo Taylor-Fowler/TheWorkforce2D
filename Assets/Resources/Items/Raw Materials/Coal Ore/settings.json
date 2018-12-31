@@ -1,10 +1,15 @@
 {
-  "Id" : 6,
-  "Name" : "Coal",
-  "Description" : "Naturally occurring coal.",
-  "MaxStackSize" : 32,
+  "Id": 6,
+  "Name": "Coal",
+  "Description": "Naturally occurring coal.",
+  "MaxStackSize": 32,
 
-  "HarvestTool" : 2,
-  "HarvestSpeed" : 1,
-  "HarvestAmount" : 1
+  "HarvestTool": 2,
+  "HarvestSpeed": 1,
+  "HarvestAmount": 1,
+
+  "MaximumMoisture": 0.3,
+  "MinimumMoisture": 0.0,
+  "MaximumElevation": 0.3,
+  "MinimumElevation": 0.0
 }

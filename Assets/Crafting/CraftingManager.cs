@@ -1,24 +1,29 @@
 using System.Collections.Generic;
-using TheWorkforce.Items;
 using UnityEngine;
+using TheWorkforce.Game_State;
 
 namespace TheWorkforce.Crafting
 {
-    public class CraftingManager
+    public class CraftingManager : IManager
     {
-        private readonly List<IItem> _items;
+        #region IManager Implementation
+        public GameManager GameManager { get; private set; }
+
+        public void Startup(GameManager gameManager)
+        {
+            GameManager = gameManager;
+        }
+        #endregion
+
+        #region Private Members
         private readonly CraftingRecipeCollection _craftingRecipes;
+        #endregion
 
         public CraftingManager()
         {
-            _items = new List<IItem>();
             _craftingRecipes = new CraftingRecipeCollection();
         }
 
-        public void RegisterItems(IEnumerable<IItem> items)
-        {
-            _items.AddRange(items);
-        }
 
         public void RegisterRecipes(IEnumerable<CraftingRecipe> recipes)
         {
@@ -27,5 +32,6 @@ namespace TheWorkforce.Crafting
                 _craftingRecipes.AddRecipe(recipe);
             }
         }
+
     }
 }

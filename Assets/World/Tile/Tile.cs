@@ -1,19 +1,64 @@
 ﻿using System;
+using TheWorkforce.Items;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace TheWorkforce.World
 {
     [Serializable]
-    public struct Tile
+    public class Tile
     {
-        public const int PX_SIZE = 32;
+        #region Public Static Methods
+        public static Vector2 TilePosition(Vector2 worldPosition)
+        {
+            worldPosition.x %= Chunk.SIZE;
+            worldPosition.y %= Chunk.SIZE;
 
+            worldPosition.x = Mathf.Floor(worldPosition.x);
+            worldPosition.y = Mathf.Floor(worldPosition.y);
+
+            if(worldPosition.x < 0)
+            {
+                worldPosition.x = Chunk.SIZE + worldPosition.x;
+            }
+
+            if(worldPosition.y < 0)
+            {
+                worldPosition.y = Chunk.SIZE + worldPosition.y;
+            }
+
+            return worldPosition;
+        }
+        #endregion
+
+        #region Public Constant Members
+        public const int PX_SIZE = 32;
+        #endregion
+
+        #region Public Members
         public int TileSetId;
+        public IItem ItemOnTile;
+
         public float Moisture;
         public float Elevation;
         public Vector2 Position;
+        #endregion
 
+        public Tile() {}
+
+        public Tile(NetworkTile networkTile, ItemManager itemManager)
+        {
+            TileSetId = networkTile.TileSetId;
+            if(networkTile.ItemOnTile != -1)
+            {
+                ItemOnTile = itemManager[networkTile.ItemOnTile];
+            }
+            Moisture = networkTile.Moisture;
+            Elevation = networkTile.Elevation;
+            Position = networkTile.Position;
+        }
+
+        #region Public Methods
         public Vector3 GetWorldPosition(Vector2 chunkPosition)
         {
             chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
@@ -27,5 +72,6 @@ namespace TheWorkforce.World
 
             return position;
         }
-    }    
+        #endregion
+    }
 }

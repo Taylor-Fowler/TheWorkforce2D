@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using TheWorkforce.StaticClasses;
+using TheWorkforce.Static_Classes;
 
 namespace TheWorkforce.World
 {

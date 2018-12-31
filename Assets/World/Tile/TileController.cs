@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using TheWorkforce.Items;
 
 namespace TheWorkforce.World
 {
@@ -9,7 +10,9 @@ namespace TheWorkforce.World
     {
         public Vector2 TilePosition { get; private set; }
         public ChunkController ChunkController { get; private set; }
+        public ItemController ItemController { get; private set; }
 
+        private GameObject _paddingAnchor;
         private List<GameObject> _paddingObjects;
         private SpriteRenderer _spriteRenderer;
 
@@ -18,6 +21,9 @@ namespace TheWorkforce.World
         {
             _paddingObjects = new List<GameObject>();
             _spriteRenderer = GetComponent<SpriteRenderer>();
+
+            _paddingAnchor = new GameObject();
+            _paddingAnchor.transform.SetParent(transform);
         }
         #endregion
 
@@ -29,10 +35,43 @@ namespace TheWorkforce.World
             _spriteRenderer.sprite = TerrainTileSet.LoadedTileSets[tile.TileSetId].Tiles[TerrainTileSet.CENTRAL];
             DestroyPadding();
 
+            if(ItemController != null)
+            {
+                Destroy(ItemController.gameObject);
+                ItemController = null;
+            }
+
             foreach (var padding in paddingTiles)
             {
                 SpawnPadding(padding.Key, padding.Value);
             }
+
+            if(tile.ItemOnTile != null)
+            {
+                SetItem(tile.ItemOnTile);
+            }
+        }
+
+        public void SetItem(IItem item)
+        {
+            //Debug.Log("[TileController] - SetItem(IItem) \n"
+            //        + "Item Name: " + item.Name);
+            ItemController = item.SpawnObject(transform);
+        }
+
+        public GameObject ObjectOnTile()
+        {
+            if(ItemController == null)
+            {
+                return null;
+            }
+
+            return ItemController.gameObject;
+        }
+
+        public bool CanPlace()
+        {
+            return ItemController == null;
         }
 
         private void SpawnPadding(int tileSetId, TilePadding padding)

@@ -1,10 +1,15 @@
 {
-  "Id" : 1,
-  "Name" : "Stone",
-  "Description" : "Naturally occurring stone.",
-  "MaxStackSize" : 32,
-  
-  "HarvestTool" : 2,
-  "HarvestSpeed" : 1,
-  "HarvestAmount" : 1
+  "Id": 1,
+  "Name": "Stone",
+  "Description": "Naturally occurring stone.",
+  "MaxStackSize": 32,
+
+  "HarvestTool": 2,
+  "HarvestSpeed": 1,
+  "HarvestAmount": 1,
+
+  "MaximumMoisture": 0.7,
+  "MinimumMoisture": 0.3,
+  "MaximumElevation": 0.9,
+  "MinimumElevation": 0.5
 }

@@ -1,5 +1,4 @@
-﻿
-namespace TheWorkforce.Game_State
+﻿namespace TheWorkforce.Game_State
 {
     interface IManager
     {
