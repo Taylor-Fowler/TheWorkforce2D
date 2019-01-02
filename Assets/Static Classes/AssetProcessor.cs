@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TheWorkforce.Crafting;
 using UnityEngine;
 using TheWorkforce.World;
@@ -15,8 +16,8 @@ namespace TheWorkforce.Static_Classes
         //       More error checking and handling!
 
         #region Private Members
-        private static readonly Vector2 _texturePivot = new Vector2(0.5f, 0.5f);
         private const string BasePath = "Assets/Resources/";
+        private static readonly Vector2 _texturePivot = new Vector2(0.5f, 0.5f);
         #endregion
 
         #region TileSet Loading
@@ -51,26 +52,26 @@ namespace TheWorkforce.Static_Classes
         /// </summary>
         public static void LoadItems(ItemManager itemManager)
         {
-            LoadCraftingComponents(itemManager);
+            //LoadCraftingComponents(itemManager);
             LoadRawMaterials(itemManager);
         }
 
         private static void LoadCraftingComponents(ItemManager itemManager)
         {
-            DirectoryInfo[] itemDirectories = new DirectoryInfo(BasePath + "Items/Crafting Components").GetDirectories();
+            //DirectoryInfo[] itemDirectories = new DirectoryInfo(BasePath + "Items/Crafting Components").GetDirectories();
             
-            foreach (var directory in itemDirectories)
-            {
-                var settingsFileContents = GetJsonFile(directory);
+            //foreach (var directory in itemDirectories)
+            //{
+            //    var settingsFileContents = GetJsonFile(directory);
 
-                ItemSettings itemSettings = JsonConvert.DeserializeObject<ItemSettings>(settingsFileContents);
-                FileInfo textureFile = directory.GetFiles("*.png")[0];
+            //    ItemSettings itemSettings = JsonConvert.DeserializeObject<ItemSettings>(settingsFileContents);
+            //    FileInfo textureFile = directory.GetFiles("*.png")[0];
                 
-                CraftingComponent craftingComponent = new CraftingComponent();
-                craftingComponent.InitialiseItem(itemSettings.Id, itemSettings.Name, itemSettings.Description, LoadSpriteFromTexture(LoadTexture(textureFile)), itemSettings.MaxStackSize);
+            //    CraftingComponent craftingComponent = new CraftingComponent();
+            //    craftingComponent.InitialiseItem(itemSettings.Id, itemSettings.Name, itemSettings.Description, LoadSpriteFromTexture(LoadTexture(textureFile)), itemSettings.MaxStackSize);
                 
-                itemManager.Add(craftingComponent);
-            }
+            //    itemManager.Add(craftingComponent);
+            //}
         }
 
         private static void LoadRawMaterials(ItemManager itemManager)
@@ -80,19 +81,107 @@ namespace TheWorkforce.Static_Classes
             foreach (var directory in itemDirectories)
             {
                 var settingsFileContents = GetJsonFile(directory);
-
-                RawMaterialSettings rawMaterialSettings = JsonConvert.DeserializeObject<RawMaterialSettings>(settingsFileContents);
-                FileInfo textureFile = directory.GetFiles("*.png")[0];
-                
+                JObject jObject = JObject.Parse(settingsFileContents);
                 RawMaterial rawMaterial = new RawMaterial();
-                Sprite sprite = LoadSpriteFromTexture(LoadTexture(textureFile), Tile.PX_SIZE * 2, Tile.PX_SIZE * 2, Tile.PX_SIZE * 2);
 
-                rawMaterial.InitialiseItem(rawMaterialSettings.Id, rawMaterialSettings.Name, rawMaterialSettings.Description, sprite, rawMaterialSettings.MaxStackSize);
-                rawMaterial.InitialiseHarvestRequirements((EToolType)rawMaterialSettings.HarvestTool, rawMaterialSettings.HarvestSpeed, rawMaterialSettings.HarvestAmount);
-                rawMaterial.InitialiseGeneratable(rawMaterialSettings.MaximumMoisture, rawMaterialSettings.MinimumMoisture, rawMaterialSettings.MaximumElevation, rawMaterialSettings.MinimumElevation);
+                bool success = true;
 
-                itemManager.Add(rawMaterial);
+                foreach(var entityProperty in jObject.Properties())
+                {
+                    if (entityProperty.Name == typeof(Item).Name)
+                    {
+                        InitialiseItem(rawMaterial, entityProperty, directory.GetFiles("*.png")[0]);
+                    }
+                    else
+                    {
+                        success = InitialiseProperty(entityProperty, rawMaterial);
+                        if(!success)
+                        {
+                            Debug.Log("[AssetProcessor] - LoadRawMaterials(ItemManager) \n"
+                                    + "Error Loading Item Property: " + entityProperty.Name);
+                            break;
+                        }
+                    }
+                }
+
+                if(success)
+                {
+                    itemManager.Add(rawMaterial);
+                }
             }
+        }
+
+        private static void InitialiseItem(Item item, JProperty itemData, FileInfo textureFile)
+        {
+            Sprite sprite = LoadSpriteFromTexture(LoadTexture(textureFile), Tile.PX_SIZE * 2, Tile.PX_SIZE * 2, Tile.PX_SIZE * 2);
+            item.InitialiseItem
+                (
+                    (int)itemData.Value["Id"],
+                    (string)itemData.Value["Name"],
+                    (string)itemData.Value["Description"],
+                    (int)itemData.Value["ItemType"],
+                    sprite,
+                    (int)itemData.Value["MaxStackSize"]
+                );
+        }
+
+        //private static T CreateProperty<T>() where T : class
+        //{
+        //    return Activator.CreateInstance(typeof(T)) as T;
+        //}
+
+        private static bool InitialiseProperty(JProperty propertyData, RawMaterial rawMaterial)
+        {
+            if(propertyData.Name == typeof(BaseGenerationSettings).Name)
+            {
+                InitialiseProperty(new BaseGenerationSettings(), propertyData, rawMaterial);
+            }
+            else if (propertyData.Name == typeof(BaseHarvestSettings).Name)
+            {
+                InitialiseProperty(new BaseHarvestSettings(), propertyData, rawMaterial);
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static void InitialiseProperty(BaseGenerationSettings type, JProperty propertyData, IGeneratable generatable)
+        {
+            type.InitialiseGenerationSettings
+                (
+                    (float)propertyData.Value["MaximumMoisture"],
+                    (float)propertyData.Value["MinimumMoisture"],
+                    (float)propertyData.Value["MaximumElevation"],
+                    (float)propertyData.Value["MinimumElevation"]
+                );
+
+            generatable.SetGenerationSettings(type);
+        }
+
+        private static void InitialiseProperty(BaseHarvestSettings type, JProperty propertyData, IHarvestable harvestable)
+        {
+            type.InitialiseHarvestSettings
+                (
+                    (EToolType)(int)propertyData.Value["HarvestTool"],
+                    (float)propertyData.Value["Strength"],
+                    (float)propertyData.Value["BaseCapacity"],
+                    (float)propertyData.Value["CapacityModifier"]
+                );
+
+            harvestable.SetHarvestSettings(type);
+        }
+
+        //private static void InitialiseProperty<BaseGenerationSettings>(JProperty propertyData, IGeneratable generatable) 
+        //{
+
+        //}
+
+        private static RawMaterial InitialiseRawMaterial()
+        {
+            return null;
         }
         
         #endregion

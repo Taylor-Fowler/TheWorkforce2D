@@ -12,18 +12,18 @@ namespace TheWorkforce.World
         public ChunkController ChunkController { get; private set; }
         public ItemController ItemController { get; private set; }
 
+        private SpriteRenderer _spriteRenderer;
         private GameObject _paddingAnchor;
         private List<GameObject> _paddingObjects;
-        private SpriteRenderer _spriteRenderer;
 
         #region Unity API
         private void Awake()
         {
-            _paddingObjects = new List<GameObject>();
             _spriteRenderer = GetComponent<SpriteRenderer>();
 
             _paddingAnchor = new GameObject();
             _paddingAnchor.transform.SetParent(transform);
+            _paddingObjects = new List<GameObject>();
         }
         #endregion
 
@@ -52,11 +52,11 @@ namespace TheWorkforce.World
             }
         }
 
-        public void SetItem(IItem item)
+        public void SetItem(ItemObject item)
         {
-            //Debug.Log("[TileController] - SetItem(IItem) \n"
-            //        + "Item Name: " + item.Name);
-            ItemController = item.SpawnObject(transform);
+            Debug.Log("[TileController] - SetItem(IItem) \n"
+                    + "Item Name: " + item.Item.Name);
+            ItemController = item.GetGameObject(transform);
         }
 
         public GameObject ObjectOnTile()

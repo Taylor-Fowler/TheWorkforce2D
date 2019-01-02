@@ -31,6 +31,7 @@ namespace TheWorkforce.Game_State
         public PlayerController PlayerController { get; private set; }
         public WorldController WorldController { get; private set; }
         public CustomNetworkManager NetworkManager { get { return _networkManager; } }
+        public GameTime GameTime { get; private set; }
         #endregion
 
         #region Private Members
@@ -95,6 +96,7 @@ namespace TheWorkforce.Game_State
             {
                 WorldController.Startup(this);
                 PlayerController.Startup(this);
+                GameTime = new GameTime(Time.time);
                 ApplicationStateChange(EApplicationState.Ingame);
             }
         }

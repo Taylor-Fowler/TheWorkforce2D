@@ -37,7 +37,7 @@ namespace TheWorkforce.World
 
         #region Public Members
         public int TileSetId;
-        public IItem ItemOnTile;
+        public ItemObject ItemOnTile;
 
         public float Moisture;
         public float Elevation;
@@ -49,9 +49,10 @@ namespace TheWorkforce.World
         public Tile(NetworkTile networkTile, ItemManager itemManager)
         {
             TileSetId = networkTile.TileSetId;
-            if(networkTile.ItemOnTile != -1)
+            int itemId = (int)networkTile.ItemOnTile[0];
+            if (itemId != -1)
             {
-                ItemOnTile = itemManager[networkTile.ItemOnTile];
+                ItemOnTile = itemManager[itemId].Load(networkTile.ItemOnTile);
             }
             Moisture = networkTile.Moisture;
             Elevation = networkTile.Elevation;

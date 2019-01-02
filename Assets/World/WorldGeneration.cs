@@ -12,16 +12,19 @@ namespace TheWorkforce.World
 
         public WorldGeneration(int seed, List<IGeneratable> generatables) : base(seed)
         {
+            Debug.Log("[WorldGeneration] - WorldGeneration(int, List<IGeneratable>) \n"
+                    + "generatables.Count: " + generatables.Count);
+
             _ascendingElevationRequirements = new List<IGeneratable>(generatables);
             _ascendingMoistureRequirements = new List<IGeneratable>(generatables);
 
             _ascendingElevationRequirements.Sort((generatable1, generatable2) =>
             {
-                if(generatable1.MinimumElevation < generatable2.MinimumElevation)
+                if(generatable1.GenerationSettings.MinimumElevation < generatable2.GenerationSettings.MinimumElevation)
                 {
                     return -1;
                 }
-                if(generatable1.MinimumElevation == generatable2.MinimumElevation && generatable1.MaximumElevation < generatable2.MaximumElevation)
+                if(generatable1.GenerationSettings.MinimumElevation == generatable2.GenerationSettings.MinimumElevation && generatable1.GenerationSettings.MaximumElevation < generatable2.GenerationSettings.MaximumElevation)
                 {
                     return -1;
                 }
@@ -31,11 +34,11 @@ namespace TheWorkforce.World
 
             _ascendingMoistureRequirements.Sort((generatable1, generatable2) =>
             {
-                if (generatable1.MinimumMoisture < generatable2.MinimumMoisture)
+                if (generatable1.GenerationSettings.MinimumMoisture < generatable2.GenerationSettings.MinimumMoisture)
                 {
                     return -1;
                 }
-                if (generatable1.MinimumMoisture == generatable2.MinimumMoisture && generatable1.MaximumMoisture < generatable2.MaximumMoisture)
+                if (generatable1.GenerationSettings.MinimumMoisture == generatable2.GenerationSettings.MinimumMoisture && generatable1.GenerationSettings.MaximumMoisture < generatable2.GenerationSettings.MaximumMoisture)
                 {
                     return -1;
                 }
@@ -98,7 +101,7 @@ namespace TheWorkforce.World
 
                 foreach(var generatable in _ascendingElevationRequirements)
                 {
-                    if(generatable.CanGenerate(tile.Moisture, tile.Elevation))
+                    if(generatable.GenerationSettings.CanGenerate(tile.Moisture, tile.Elevation))
                     {
                         generatables.Add(generatable);
                     }
@@ -116,7 +119,7 @@ namespace TheWorkforce.World
                     int index = Mathf.FloorToInt(noise / weightPerItem);
 
 
-                    tile.ItemOnTile = generatables[index] as IItem;
+                    tile.ItemOnTile = generatables[index].Generate(tile.Moisture, tile.Elevation);
                 }
 
             }

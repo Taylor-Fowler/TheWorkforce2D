@@ -1,10 +1,11 @@
 namespace TheWorkforce.Items
 {
-    public class ItemSettings
+    public class ItemJson
     {
         public int Id;
         public string Name;
         public string Description;
+        public int ItemType;
         public int MaxStackSize;
     }
 }

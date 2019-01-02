@@ -1,15 +1,23 @@
 {
-  "Id": 2,
-  "Name": "Iron Ore",
-  "Description": "Naturally occurring iron.",
-  "MaxStackSize": 32,
+  "Item": {
+    "Id": 2,
+    "Name": "Iron Ore",
+    "Description": "Naturally occurring iron.",
+    "ItemType": 0,
+    "MaxStackSize": 32
+  },
 
-  "HarvestTool": 2,
-  "HarvestSpeed": 1,
-  "HarvestAmount": 1,
+  "BaseHarvestSettings": {
+    "HarvestTool": 2,
+    "Strength": 1.0,
+    "BaseCapacity": 1.0,
+    "CapacityModifier": 1.0
+  },
 
-  "MaximumMoisture": 0.5,
-  "MinimumMoisture": 0.1,
-  "MaximumElevation": 0.7,
-  "MinimumElevation": 0.4
+  "BaseGenerationSettings": {
+    "MaximumMoisture": 0.5,
+    "MinimumMoisture": 0.1,
+    "MaximumElevation": 0.7,
+    "MinimumElevation": 0.4
+  }
 }

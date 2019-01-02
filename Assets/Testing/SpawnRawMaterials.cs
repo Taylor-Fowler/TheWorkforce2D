@@ -11,7 +11,7 @@ namespace TheWorkforce.Testing
         {
             if(worldController != null)
             {
-                worldController.ChunkControllers[12]._tileControllers[30].SetItem(itemManager.RandomItem());
+                //worldController.ChunkControllers[12]._tileControllers[30].SetItem(itemManager.RandomItem().);
                 Debug.Log("[SpawnRawMaterials] - Spawn(CraftingManager, WorldController");
             }
         }

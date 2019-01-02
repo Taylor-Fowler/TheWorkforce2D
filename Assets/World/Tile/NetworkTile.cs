@@ -8,7 +8,7 @@ namespace TheWorkforce.World
     {
         #region Public Members
         public int TileSetId;
-        public int ItemOnTile;
+        public object[] ItemOnTile;
 
         public float Moisture;
         public float Elevation;
@@ -20,11 +20,11 @@ namespace TheWorkforce.World
             TileSetId = tile.TileSetId;
             if(tile.ItemOnTile != null)
             {
-                ItemOnTile = tile.ItemOnTile.Id;
+                ItemOnTile = tile.ItemOnTile.Pack();
             }
             else
             {
-                ItemOnTile = -1;
+                ItemOnTile = new object[1] { -1 };
             }
             Moisture = tile.Moisture;
             Elevation = tile.Elevation;

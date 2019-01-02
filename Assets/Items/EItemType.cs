@@ -7,12 +7,4 @@
         Equipment,
         Machinery
     }
-
-    public enum EToolType
-    {
-        Hand,
-        Hatchet,
-        Pickaxe,
-        Shovel
-    }
 }
