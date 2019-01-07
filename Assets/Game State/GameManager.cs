@@ -76,7 +76,7 @@ namespace TheWorkforce.Game_State
             });
             
             #if (DEBUG)
-            _debugController.DebugItemsLoaded.UpdateItems(ItemManager.Items);
+            _debugController.DebugItemsLoaded.UpdateItems(ItemManager.ItemConfigurationInstances);
             _debugController.Startup(this);
             #endif
 

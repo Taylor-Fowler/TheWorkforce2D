@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TheWorkforce.Items
 {
-    public interface ITool : IItem
+    public interface ITool
     {
         EToolType ToolType { get; }
         int Level { get; }

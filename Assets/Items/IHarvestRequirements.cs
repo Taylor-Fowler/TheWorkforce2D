@@ -2,12 +2,13 @@
 {
     public interface IHarvestRequirements
     {
-        EToolType HarvestTool { get; }
-        float HarvestSpeed { get; }
-        int HarvestAmount { get; }
+        BasicHarvestRequirements BasicHarvestRequirements { get; }        
+    }
 
-
-        void InitialiseHarvestRequirements(EToolType harvestTool, float harvestSpeed, int harvestAmount);
-        //void Harvest(EToolType tool);        
+    public class BasicHarvestRequirements
+    {
+        private float _harvestSpeed;
+        private int _harvestAmount;
+        private EToolType _harvestTool;
     }
 }

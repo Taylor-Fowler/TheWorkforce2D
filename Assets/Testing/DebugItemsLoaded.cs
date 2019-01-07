@@ -12,14 +12,14 @@ namespace TheWorkforce.Testing
         public Transform NameAnchor;
         public Font TextFont;
         
-        public void UpdateItems(IEnumerable<IItem> items)
+        public void UpdateItems(IEnumerable<ItemInstance> items)
         {
             foreach (var item in items)
             {
                 {
                     GameObject gameObject = new GameObject();
                     Text text = gameObject.AddComponent<Text>();
-                    text.text = item.Id.ToString();
+                    text.text = item.ItemDetails.Id.ToString();
                     text.font = TextFont;
                     text.fontSize = 18;
                     text.alignment = TextAnchor.MiddleRight;
@@ -31,7 +31,7 @@ namespace TheWorkforce.Testing
                 {
                     GameObject gameObject = new GameObject();
                     Text text = gameObject.AddComponent<Text>(); 
-                    text.text = item.Name;
+                    text.text = item.ItemDetails.Name;
                     text.font = TextFont;
                     text.fontSize = 18;
                     text.alignment = TextAnchor.MiddleCenter;
