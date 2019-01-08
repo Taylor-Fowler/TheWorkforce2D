@@ -46,18 +46,18 @@ namespace TheWorkforce.World
                 SpawnPadding(padding.Key, padding.Value);
             }
 
-            if(tile.ItemOnTile != null)
-            {
-                SetItem(tile.ItemOnTile);
-            }
+            //if(tile.ItemOnTile != null)
+            //{
+            //    SetItem(tile.ItemOnTile);
+            //}
         }
 
-        public void SetItem(IItem item)
-        {
-            //Debug.Log("[TileController] - SetItem(IItem) \n"
-            //        + "Item Name: " + item.Name);
-            ItemController = item.SpawnObject(transform);
-        }
+        //public void SetItem(IItem item)
+        //{
+        //    //Debug.Log("[TileController] - SetItem(IItem) \n"
+        //    //        + "Item Name: " + item.Name);
+        //    ItemController = item.SpawnObject(transform);
+        //}
 
         public GameObject ObjectOnTile()
         {

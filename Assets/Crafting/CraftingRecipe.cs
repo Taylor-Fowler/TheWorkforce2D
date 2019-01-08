@@ -5,18 +5,21 @@ namespace TheWorkforce.Crafting
 {
     public class CraftingRecipe
     {
-        public int Id { get; }
-        public Dictionary<int, int> ItemsRequired { get; }
-        public Dictionary<int, int> ItemsProduced { get; }
+        private static ushort CurrentId = 0;
 
-        public CraftingRecipe(int id)
+        public ushort Id { get; }
+        public float CraftingTime { get; }
+        public List<ushort> ItemsRequired { get; }
+        public List<ushort> ItemsProduced { get; }
+
+        private CraftingRecipe()
         {
-            Id = id;
-            ItemsRequired = new Dictionary<int, int>();
-            ItemsProduced = new Dictionary<int, int>();
+            Id = ++CurrentId;
+            ItemsRequired = new List<ushort>();
+            ItemsProduced = new List<ushort>();
         }
 
-        public CraftingRecipe(int id, int[][] required, int[][] produced) : this(id)
+        public CraftingRecipe(ushort[][] required, ushort[][] produced, float craftingTime) : this()
         {
             foreach (var requirement in required)
             {
@@ -27,16 +30,33 @@ namespace TheWorkforce.Crafting
             {
                 RegisterProduce(produce[0], produce[1]);
             }
+
+            CraftingTime = craftingTime;
         }
 
-        public void RegisterRequirement(int itemRequiredId, int required)
+        public void RegisterRequirement(ushort itemRequiredId, ushort required)
         {
-            ItemsRequired.Add(itemRequiredId, required);
+            ItemsRequired.Add(itemRequiredId);
+            ItemsRequired.Add(required);
         }
 
-        public void RegisterProduce(int itemProducedId, int produced)
+        public void RegisterProduce(ushort itemProducedId, ushort produced)
         {
-            ItemsProduced.Add(itemProducedId, produced);
+            ItemsProduced.Add(itemProducedId);
+            ItemsProduced.Add(produced);
+        }
+    }
+
+    public class CraftingRecipeComparer : IEqualityComparer<CraftingRecipe>
+    {
+        public bool Equals(CraftingRecipe a, CraftingRecipe b)
+        {
+            return a.Id == b.Id;
+        }
+
+        public int GetHashCode(CraftingRecipe obj)
+        {
+            return obj.Id.GetHashCode();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace TheWorkforce.World
     public struct NetworkTile
     {
         #region Public Members
-        public int TileSetId;
+        public byte TileSetId;
         public int ItemOnTile;
 
         public float Moisture;
@@ -18,14 +18,8 @@ namespace TheWorkforce.World
         public NetworkTile(Tile tile)
         {
             TileSetId = tile.TileSetId;
-            if(tile.ItemOnTile != null)
-            {
-                ItemOnTile = tile.ItemOnTile.Id;
-            }
-            else
-            {
-                ItemOnTile = -1;
-            }
+            ItemOnTile = tile.ItemOnTileId;
+
             Moisture = tile.Moisture;
             Elevation = tile.Elevation;
             Position = tile.Position;

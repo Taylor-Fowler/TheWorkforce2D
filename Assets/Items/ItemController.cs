@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using TheWorkforce.Items.Read_Only_Data;
 using UnityEngine;
 
 namespace TheWorkforce.Items
@@ -8,9 +7,9 @@ namespace TheWorkforce.Items
     //       they will need a reference to the tile controller/s needed
     public class ItemController : MonoBehaviour
     {
-        public IItem Item { get; private set; }
+        public ItemData Item { get; private set; }
 
-        public virtual void SetItem(IItem item)
+        public virtual void SetItem(ItemData item)
         {
             Item = item;
         }
@@ -18,7 +17,7 @@ namespace TheWorkforce.Items
         public virtual void DisplayItem(ItemInspector itemInspector)
         {
             itemInspector.Display();
-            itemInspector.ItemImage.sprite = Item.Icon;
+            itemInspector.ItemImage.sprite = Item.Sprite;
             itemInspector.ItemName.text = Item.Name;
             itemInspector.ItemDescription.text = Item.Description;
         }

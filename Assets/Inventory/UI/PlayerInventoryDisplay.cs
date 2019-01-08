@@ -1,18 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using TheWorkforce.Inventory;
 using UnityEngine;
 
 namespace TheWorkforce
 {
-    public class PlayerInventoryDisplay : InventoryDisplay
+    public class PlayerInventoryDisplay : SlotCollectionDisplay
     {
         [SerializeField] private GameObject _inventoryPanel;
         [SerializeField] private GameObject _quickBarPanel;
         [SerializeField] private GameObject _craftingPanel;
 
-        public override void SetInventory(Inventory inventory)
+        public override void SetInventory(SlotCollection slots)
         {
-            base.SetInventory(inventory);
+            base.SetInventory(slots);
             _inventoryPanel.SetActive(false);
             _craftingPanel.SetActive(false);
         }

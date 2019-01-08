@@ -78,7 +78,7 @@ namespace TheWorkforce.World
                             Position = new Vector2(x, y),
                             Elevation = noise,
                             Moisture = GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y, noise),
-                            TileSetId = noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2
+                            TileSetId = (byte)(noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2)
                         };
 
                         GenerateGeneratableItems(tile, worldChunkPosition);
@@ -116,7 +116,7 @@ namespace TheWorkforce.World
                     int index = Mathf.FloorToInt(noise / weightPerItem);
 
 
-                    tile.ItemOnTile = generatables[index] as IItem;
+                    //tile.ItemOnTileId = generatables[index] as IItem;
                 }
 
             }

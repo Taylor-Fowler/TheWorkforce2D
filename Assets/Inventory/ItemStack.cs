@@ -1,26 +1,27 @@
 ﻿using TheWorkforce.Items;
+using TheWorkforce.Items.Read_Only_Data;
 
 namespace TheWorkforce
 {
     [System.Serializable]
-    public class ItemStack
+    public sealed class ItemStack
     {
         /// <summary>
         /// The item contained within the stack
         /// </summary>
-        public IItem Item { get; protected set; }
+        public ItemData Item { get; private set; }
 
         /// <summary>
         /// The number of items in the stack
         /// </summary>
-        public uint Count { get; protected set; }
+        public uint Count { get; private set; }
 
         /// <summary>
         /// Constructor that initialises the number of items in the stack and the item contained in the stack
         /// </summary>
         /// <param name="item">The item that is stacked</param>
         /// <param name="count">The count of items in the stack</param>
-        public ItemStack(IItem item, uint count)
+        public ItemStack(ItemData item, uint count)
         {
             Item = item;
             Count = count;

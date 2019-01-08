@@ -1,15 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿//using System.Collections;
+//using System.Collections.Generic;
+//using UnityEngine;
 
-namespace TheWorkforce.Items
-{
-    public interface ITool : IItem
-    {
-        EToolType ToolType { get; }
-        int Level { get; }
-        int UsesLeft { get; }
+//namespace TheWorkforce.Items
+//{
+//    public interface ITool : IItem
+//    {
+//        EToolType ToolType { get; }
+//        int Level { get; }
+//        int UsesLeft { get; }
 
-        void InitialiseTool(EToolType toolType, int level, int usesLeft);
-    }
-}
+//        void InitialiseTool(EToolType toolType, int level, int usesLeft);
+//    }
+//}

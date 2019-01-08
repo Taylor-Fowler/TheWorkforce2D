@@ -26,8 +26,6 @@ namespace TheWorkforce.Game_State
         //       - MainMenu
         //       - PlayerController
         #region Properties
-        public ItemManager ItemManager { get; private set; }
-        public CraftingManager CraftingManager { get; private set; }
         public PlayerController PlayerController { get; private set; }
         public WorldController WorldController { get; private set; }
         public CustomNetworkManager NetworkManager { get { return _networkManager; } }
@@ -46,8 +44,6 @@ namespace TheWorkforce.Game_State
             _currentApplicationState = EApplicationState.Launching;
             _currentGameState = EGameState.NotLoaded;
 
-            ItemManager = new ItemManager();
-            CraftingManager = new CraftingManager();
             WorldController.OnWorldControllerStartup += WorldController_OnWorldControllerStartup;
             PlayerController.OnPlayerControllerStartup += PlayerController_OnPlayerControllerStartup;
 
@@ -60,13 +56,9 @@ namespace TheWorkforce.Game_State
 
         private IEnumerator InitialiseAssets(Action callback)
         {
-            ItemManager.Startup(this);
-            CraftingManager.Startup(this);
-
             TerrainTileSet.InitialiseTileSets();
-
-            AssetProcessor.LoadItems(ItemManager);
-            CraftingManager.RegisterRecipes(AssetProcessor.LoadCraftingRecipes());
+            ItemFactory.Initialise();
+            Recipes.Initialise();
             AssetProcessor.LoadEToolTypeSprites();
 
             _networkManager.Startup(this);
@@ -76,7 +68,6 @@ namespace TheWorkforce.Game_State
             });
             
             #if (DEBUG)
-            _debugController.DebugItemsLoaded.UpdateItems(ItemManager.Items);
             _debugController.Startup(this);
             #endif
 

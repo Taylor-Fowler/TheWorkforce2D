@@ -1,28 +1,27 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using TheWorkforce.UI;
+using TheWorkforce.Inventory;
 
 namespace TheWorkforce
 {
-    public class InventoryDisplay : MonoBehaviour, IDisplay
+    public class SlotCollectionDisplay : MonoBehaviour, IDisplay
     {
-        protected Inventory _inventory;
-        protected InventoryButton[] _inventoryButtons;
+        protected SlotCollection _slots;
+        protected SlotButton[] _inventoryButtons;
 
         #region Unity API
         private void Start()
         {
-            _inventoryButtons = GetComponentsInChildren<InventoryButton>();
+            _inventoryButtons = GetComponentsInChildren<SlotButton>();
 
             Debug.Log("[InventoryDisplay] - Start() \n" 
                     + gameObject.name + " - _inventoryButtons.Length - " + _inventoryButtons.Length);
         }
         #endregion
 
-        public virtual void SetInventory(Inventory inventory)
+        public virtual void SetInventory(SlotCollection slots)
         {
-            _inventory = inventory;
+            _slots = slots;
         }
 
         #region IDisplay Implementation

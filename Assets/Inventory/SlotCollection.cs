@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using TheWorkforce.Game_State;
 
-namespace TheWorkforce
+namespace TheWorkforce.Inventory
 {
-    public class Inventory
+    public class SlotCollection
     {
         #region Custom Event Declaratations
         public event DirtyHandler OnDirty;
@@ -17,7 +17,7 @@ namespace TheWorkforce
         protected Dictionary<int, List<int>> _itemIdFoundInSlots = new Dictionary<int, List<int>>();
 
 
-        public Inventory(uint size)
+        public SlotCollection(uint size)
         {
             Size = size;
         }

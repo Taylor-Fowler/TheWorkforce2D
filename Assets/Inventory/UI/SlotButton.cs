@@ -2,26 +2,27 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
+using TheWorkforce.Inventory;
 
 namespace TheWorkforce
 {
     /// <summary>
-    /// The InventoryButton is a UI element that provides the user with an interface with the inventory currently
+    /// The SlotButton is a UI element that provides the user with an interface with the inventory currently
     /// associated with the button. An inventory button always exists as part of a `UI_Inventory` object; which
     /// is responsible for updating this buttons associated InventorySlot. The button allows the player to
     /// place and remove items in the slot and to display the details of the current slot to the player.
     /// </summary>
     [RequireComponent(typeof(Image))]
-    public class InventoryButton : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
+    public class SlotButton : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
     {
         //public SingleTextTooltipLinker TooltipView;
         //public ItemDescriptionLinker Linker;
 
         /// <summary>
-        /// The InventorySlot that is attached to this button, this button interfaces with the slot to
+        /// The Slot that is attached to this button, this button interfaces with the slot to
         /// update the contents of the slot
         /// </summary>
-        public InventorySlot CorrespondingSlot { get; protected set; }
+        public ISlot CorrespondingSlot { get; protected set; }
 
         /// <summary>
         /// The image component that displays to the user as the item held in the associated InventorySlot
@@ -62,18 +63,18 @@ namespace TheWorkforce
         }
         #endregion
 
-        public void LinkSlot(InventorySlot slot)
+        public void LinkSlot(ISlot slot)
         {
             if (CorrespondingSlot != null)
             {
-                CorrespondingSlot.OnDirty -= UpdateDisplay;
+                CorrespondingSlot.SubscribeToDirty(UpdateDisplay);
             }
 
             CorrespondingSlot = slot;
 
             if (CorrespondingSlot != null)
             {
-                CorrespondingSlot.OnDirty += UpdateDisplay;
+                CorrespondingSlot.UnsubscribeToDirty(UpdateDisplay);
             }
 
             UpdateDisplay(this);
@@ -131,7 +132,7 @@ namespace TheWorkforce
         protected virtual void ItemInSlot()
         {
             _itemImage.enabled = true;
-            _itemImage.sprite = CorrespondingSlot.ItemStack.Item.Icon;
+            //_itemImage.sprite = CorrespondingSlot.ItemStack.Item.Icon;
 
             _itemCountBackgroundImage.enabled = true;
             _itemCount.text = CorrespondingSlot.ItemStack.Count.ToString();
