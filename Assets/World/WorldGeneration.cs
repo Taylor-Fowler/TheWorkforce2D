@@ -7,40 +7,8 @@ namespace TheWorkforce.World
 {
     public class WorldGeneration : WorldDetails
     {
-        private readonly List<IGeneratable> _ascendingElevationRequirements;
-        private readonly List<IGeneratable> _ascendingMoistureRequirements;
-
-        public WorldGeneration(int seed, List<IGeneratable> generatables) : base(seed)
+        public WorldGeneration(int seed) : base(seed)
         {
-            _ascendingElevationRequirements = new List<IGeneratable>(generatables);
-            _ascendingMoistureRequirements = new List<IGeneratable>(generatables);
-
-            _ascendingElevationRequirements.Sort((generatable1, generatable2) =>
-            {
-                if(generatable1.MinimumElevation < generatable2.MinimumElevation)
-                {
-                    return -1;
-                }
-                if(generatable1.MinimumElevation == generatable2.MinimumElevation && generatable1.MaximumElevation < generatable2.MaximumElevation)
-                {
-                    return -1;
-                }
-                return 1;
-            });
-
-
-            _ascendingMoistureRequirements.Sort((generatable1, generatable2) =>
-            {
-                if (generatable1.MinimumMoisture < generatable2.MinimumMoisture)
-                {
-                    return -1;
-                }
-                if (generatable1.MinimumMoisture == generatable2.MinimumMoisture && generatable1.MaximumMoisture < generatable2.MaximumMoisture)
-                {
-                    return -1;
-                }
-                return 1;
-            });
         }
     
         public override List<Chunk> GetChunks(List<Vector2> chunkPositions)
@@ -94,15 +62,7 @@ namespace TheWorkforce.World
             float noise = GetNoise((int)(chunkWorldPosition.x + tile.Position.x), (int)(chunkWorldPosition.y + tile.Position.y), tile.Elevation + tile.Moisture);
             if(noise >= 0.666f)
             {
-                List<IGeneratable> generatables = new List<IGeneratable>();
-
-                foreach(var generatable in _ascendingElevationRequirements)
-                {
-                    if(generatable.CanGenerate(tile.Moisture, tile.Elevation))
-                    {
-                        generatables.Add(generatable);
-                    }
-                }
+                List<Generatable> generatables = Generation.GetGeneratables(tile.Moisture, tile.Elevation);
 
                 if(generatables.Count != 0)
                 {
@@ -116,7 +76,7 @@ namespace TheWorkforce.World
                     int index = Mathf.FloorToInt(noise / weightPerItem);
 
 
-                    //tile.ItemOnTileId = generatables[index] as IItem;
+                    tile.ItemOnTileId = generatables[index].ItemId;
                 }
 
             }

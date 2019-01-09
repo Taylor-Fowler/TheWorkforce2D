@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
+using TheWorkforce.Items.Read_Only_Data;
 
 namespace TheWorkforce.Items
 {
@@ -25,7 +24,7 @@ namespace TheWorkforce.Items
                     fixedWidth = 200
                 };
 
-                IItem item = itemController.Item;
+                ItemData item = itemController.Item;
                 EditorGUILayout.BeginHorizontal();
                 {
                     EditorGUILayout.BeginVertical(width);
@@ -46,7 +45,7 @@ namespace TheWorkforce.Items
 
                     EditorGUILayout.BeginVertical();
                     {   
-                        GUILayout.Box(item.Icon.texture);
+                        GUILayout.Box(item.Sprite.texture);
                     }
                     EditorGUILayout.EndVertical();
                 }

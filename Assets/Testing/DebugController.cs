@@ -60,16 +60,6 @@ namespace TheWorkforce.Testing
         }
         #endregion
 
-        #region Temporary
-        private IEnumerator WaitToSpawn()
-        {
-            yield return new WaitForSeconds(10f);
-            SpawnRawMaterials spawnRawMaterials = new SpawnRawMaterials();
-            spawnRawMaterials.Spawn(GameManager.ItemManager, GameManager.WorldController);
-        }
-
-        #endregion
-
         #region Button Events
 
         #endregion

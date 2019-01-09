@@ -3,12 +3,21 @@ using TheWorkforce.Crafting;
 using TheWorkforce.Game_State;
 using TheWorkforce.Inventory;
 using TheWorkforce.Items.Read_Only_Data;
+using UnityEngine;
 
 namespace TheWorkforce.Items.Furnaces
 {
     public class Furnace : IProcessTick
     {
         public static ItemData ItemData;
+
+        public static ItemData Initialise(Sprite sprite)
+        {
+            ItemData = new ItemData("Furnace", "Furnace", sprite);
+            return ItemData;
+        }
+
+
         public readonly ConstrainedSlot<IFuel> FuelSlot;
         public readonly Slot Input;
         public readonly OutputSlot Output;
@@ -103,7 +112,7 @@ namespace TheWorkforce.Items.Furnaces
 
         private void OutputRecipeProduce()
         {
-            ItemData itemData = ItemFactory.Get(CurrentlyProcessing.ItemsProduced[0]);
+            ItemData itemData = ItemFactory.Instance.Get(CurrentlyProcessing.ItemsProduced[0]);
             _outputSlot.Add(new ItemStack(itemData, CurrentlyProcessing.ItemsProduced[1]));
         }
 

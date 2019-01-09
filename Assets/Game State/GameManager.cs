@@ -57,9 +57,8 @@ namespace TheWorkforce.Game_State
         private IEnumerator InitialiseAssets(Action callback)
         {
             TerrainTileSet.InitialiseTileSets();
-            ItemFactory.Initialise();
+            ItemFactory.Instance.Initialise();
             Recipes.Initialise();
-            AssetProcessor.LoadEToolTypeSprites();
 
             _networkManager.Startup(this);
             _networkManager.SetLoadGameAction(delegate 

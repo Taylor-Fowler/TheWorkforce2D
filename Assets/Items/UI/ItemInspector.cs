@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using TheWorkforce.UI;
+using TheWorkforce.Items.Read_Only_Data;
 
 namespace TheWorkforce
 {
@@ -14,6 +15,11 @@ namespace TheWorkforce
         public void Display()
         {
             gameObject.SetActive(true);
+        }
+
+        public void Display(ItemData itemData)
+        {
+
         }
 
         public void Hide()

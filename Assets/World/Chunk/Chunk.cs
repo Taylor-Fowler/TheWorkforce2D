@@ -39,13 +39,13 @@ namespace TheWorkforce.World
         /// </summary>
         /// <param name="networkChunks">The NetworkChunks to unpack.</param>
         /// <returns></returns>
-        public static List<Chunk> UnpackNetworkChunks(NetworkChunk[] networkChunks, ItemManager itemManager)
+        public static List<Chunk> UnpackNetworkChunks(NetworkChunk[] networkChunks)
         {
             List<Chunk> unloadedChunks = new List<Chunk>();
 
             foreach (var netChunk in networkChunks)
             {
-                unloadedChunks.Add(new Chunk(netChunk, itemManager));
+                unloadedChunks.Add(new Chunk(netChunk));
             }
 
             return unloadedChunks;
@@ -151,12 +151,12 @@ namespace TheWorkforce.World
         ///     initialising Chunks that have been sent across the Network.
         /// </summary>
         /// <param name="networkChunk">The network chunk.</param>
-        public Chunk(NetworkChunk networkChunk, ItemManager itemManager) : this(networkChunk.Position)
+        public Chunk(NetworkChunk networkChunk) : this(networkChunk.Position)
         {
             for (int x = 0; x < SIZE; x++)
             for (int y = 0; y < SIZE; y++)
             {
-                Tiles[x, y] = new Tile(networkChunk.NetworkTiles[x * SIZE + y], itemManager);
+                Tiles[x, y] = new Tile(networkChunk.NetworkTiles[x * SIZE + y]);
             }
         }
         #endregion

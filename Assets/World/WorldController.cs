@@ -35,7 +35,7 @@ namespace TheWorkforce.World
 
             if (isServer)
             {
-                _worldDetails = new WorldGeneration(784893570, GameManager.ItemManager.GeneratableItems);
+                _worldDetails = new WorldGeneration(784893570);
                 _allChunksLoadedByPlayerPositions = new Dictionary<Vector2, List<int>>();
             }
             else
@@ -297,7 +297,7 @@ namespace TheWorkforce.World
         [ClientRpc]
         private void RpcReceiveChunks(NetworkChunk[] networkChunks)
         {
-            Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks, GameManager.ItemManager).ToArray();
+            Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
             _localWorldController._worldDetails.AddLoadedChunks(unpackedChunks);
     
             List<ChunkController> chunkControllersToSet = ChunkControllers

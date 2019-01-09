@@ -1,31 +1,42 @@
-﻿using System.Collections.Generic;
-using TheWorkforce.Crafting;
+﻿using UnityEngine;
+using System.Collections.Generic;
 using TheWorkforce.Items.Furnaces;
 using TheWorkforce.Items.Read_Only_Data;
 
 namespace TheWorkforce.Items
 {
-    public static class ItemFactory
+    public class ItemFactory : MonoBehaviour
     {
-        private static List<ItemData> _itemData;
+        private List<ItemData> _itemData;
+        public static ItemFactory Instance;
 
-        public static void Initialise()
+        public Sprite FurnaceSprite;
+        public Sprite StoneSprite;
+        public Sprite IronOreSprite;
+        public Sprite CopperOreSprite;
+        public Sprite CoalSprite;
+
+        private void Start()
         {
-            _itemData = new List<ItemData>();
-
-            Furnace.ItemData = new ItemData("Furnace", "Furnace", null);
-            Stone.ItemData = new ItemData("Stone", "Stone", null);
-            IronOre.ItemData = new ItemData("Iron Ore", "Iron Ore", null);
-            CopperOre.ItemData = new ItemData("Copper Ore", "Copper Ore", null);
-            Coal.ItemData = new FuelData("Coal", "Coal", null, new Fuel(5.0f, 5.0f));
+            Instance = this;
         }
 
-        public static Furnace CreateFurnace()
+        public void Initialise()
+        {
+            _itemData = new List<ItemData>();
+            _itemData.Add(Furnace.Initialise(FurnaceSprite));
+            _itemData.Add(Stone.Initialise(StoneSprite));
+            _itemData.Add(IronOre.Initialise(IronOreSprite));
+            _itemData.Add(CopperOre.Initialise(CopperOreSprite));
+            _itemData.Add(Coal.Initialise(CoalSprite));
+        }
+
+        public Furnace CreateFurnace()
         {
             return new Furnace();
         }
 
-        public static ItemData Get(ushort id)
+        public ItemData Get(ushort id)
         {
             return _itemData[id];
         }

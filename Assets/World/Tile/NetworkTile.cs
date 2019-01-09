@@ -8,7 +8,7 @@ namespace TheWorkforce.World
     {
         #region Public Members
         public byte TileSetId;
-        public int ItemOnTile;
+        public ushort ItemOnTile;
 
         public float Moisture;
         public float Elevation;

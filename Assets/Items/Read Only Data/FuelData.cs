@@ -16,5 +16,10 @@ namespace TheWorkforce.Items.Read_Only_Data
         {
             return _fuel;
         }
+
+        public override void Display(ItemDataView dataView)
+        {
+            dataView.Display(this);
+        }
     }
 }

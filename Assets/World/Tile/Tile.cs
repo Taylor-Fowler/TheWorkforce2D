@@ -37,7 +37,7 @@ namespace TheWorkforce.World
 
         #region Public Members
         public byte TileSetId;
-        public int ItemOnTileId;
+        public ushort ItemOnTileId;
 
         public float Moisture;
         public float Elevation;
@@ -71,5 +71,59 @@ namespace TheWorkforce.World
             return position;
         }
         #endregion
+    }
+}
+
+
+
+
+
+
+
+public interface IView
+{
+    void view(SomeMonoUI ui);
+}
+
+public class A : IView
+{
+    public void view(SomeMonoUI ui)
+    {
+        ui.DisplayText();
+        ui.DisplayImage();
+    }
+}
+
+public class B : IView
+{
+    public void view(SomeMonoUI ui)
+    {
+        ui.DisplayText();
+    }
+}
+
+public class SomeMonoUI
+{
+    public void DisplayText()
+    {
+
+    }
+
+    public void DisplayImage()
+    {
+
+    }
+}
+
+
+public class someplayer
+{
+    IView[] allTheViews;
+    SomeMonoUI referenceUI;
+
+    public void Update()
+    {
+        // find view where mouse is
+        allTheViews[0].view(referenceUI);
     }
 }

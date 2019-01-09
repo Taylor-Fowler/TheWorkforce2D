@@ -6,6 +6,7 @@ using TheWorkforce.World;
 using UnityEngine.EventSystems;
 using TheWorkforce.Items;
 using TheWorkforce.Game_State;
+using TheWorkforce.Inventory;
 
 namespace TheWorkforce
 {
@@ -27,12 +28,12 @@ namespace TheWorkforce
             Player = new Player
                 (
                     this, 
-                    new Inventory(36),
-                    new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
+                    new SlotCollection(36),
+                    //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
                     new PlayerMovement(3f, GetComponent<Animator>(), GameManager.WorldController.UpdatePlayerPosition, transform)
                 );
             _inventoryDisplay.SetInventory(Player.Inventory);
-            _toolbeltDisplay.SetToolbelt(Player.Toolbelt);
+            //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
         }
         #endregion
 
@@ -53,7 +54,7 @@ namespace TheWorkforce
 
         private Camera _personalCamera;
         private PlayerInventoryDisplay _inventoryDisplay;
-        private ToolbeltDisplay _toolbeltDisplay;
+        //private ToolbeltDisplay _toolbeltDisplay;
         private ItemInspector _itemInspector;
         #endregion
 
@@ -68,7 +69,7 @@ namespace TheWorkforce
 
             _inventoryDisplay = Instantiate(_inventoryPrefab, canvas).GetComponent<PlayerInventoryDisplay>();
 
-            _toolbeltDisplay = Instantiate(_toolbeltPrefab, canvas).GetComponentInChildren<ToolbeltDisplay>();
+            //_toolbeltDisplay = Instantiate(_toolbeltPrefab, canvas).GetComponentInChildren<ToolbeltDisplay>();
 
             _itemInspector = Instantiate(_itemInspectorPrefab, canvas).GetComponent<ItemInspector>();
             _itemInspector.gameObject.SetActive(false);
@@ -76,7 +77,7 @@ namespace TheWorkforce
             {
                 var hud = Instantiate(_hudOptionsPrefab, canvas).GetComponent<HudMenuOptions>();
                 hud.InventoryHudOption.SetDisplay(_inventoryDisplay);    
-                hud.ToolbeltHudOption.SetDisplay(_toolbeltDisplay);
+                //hud.ToolbeltHudOption.SetDisplay(_toolbeltDisplay);
             }
             
             PlayerControllerStartup();
@@ -91,8 +92,8 @@ namespace TheWorkforce
                 Player = new Player
                     (
                         this,
-                        new Inventory(36),
-                        new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
+                        new SlotCollection(36),
+                        //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
                         new AnimatedMovement(3f, GetComponent<Animator>())
                     );
             }
