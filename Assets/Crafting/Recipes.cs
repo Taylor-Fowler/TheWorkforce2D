@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using TheWorkforce.Items;
-using TheWorkforce.Items.Furnaces;
 
 namespace TheWorkforce.Crafting
 {
@@ -18,34 +17,34 @@ namespace TheWorkforce.Crafting
             _producedItemRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
             _requiredItemRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
 
-            AddRecipe(new CraftingRecipe
-                (
-                    new ushort[][]
-                    {
-                        new ushort[] { Stone.ItemData.Id, 5 }
-                    },
-                    new ushort[][]
-                    {
-                        new ushort[] { Furnace.ItemData.Id, 1 }
-                    },
-                    2.0f
-                )
-            );
+            //AddRecipe(new CraftingRecipe
+            //    (
+            //        new ushort[][]
+            //        {
+            //            new ushort[] { Stone.ItemData.Id, 5 }
+            //        },
+            //        new ushort[][]
+            //        {
+            //            new ushort[] { Furnace.ItemData.Id, 1 }
+            //        },
+            //        2.0f
+            //    )
+            //);
 
-            AddRecipe(new CraftingRecipe
-                (
-                    new ushort[][]
-                    {
-                        new ushort[] { IronOre.ItemData.Id, 1 }
-                    },
-                    new ushort[][]
-                    {
-                        new ushort[] { IronIngot.ItemData.Id, 1 }
-                    },
-                    5.0f
-                ),
-                Furnace.ItemData.Id
-            );
+            //AddRecipe(new CraftingRecipe
+            //    (
+            //        new ushort[][]
+            //        {
+            //            new ushort[] { IronOre.ItemData.Id, 1 }
+            //        },
+            //        new ushort[][]
+            //        {
+            //            new ushort[] { IronIngot.ItemData.Id, 1 }
+            //        },
+            //        5.0f
+            //    ),
+            //    Furnace.ItemData.Id
+            //);
         }
 
         public static CraftingRecipe Get(ushort ingredientId, ushort insideId)

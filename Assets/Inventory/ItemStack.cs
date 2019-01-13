@@ -1,5 +1,4 @@
-﻿using TheWorkforce.Items;
-using TheWorkforce.Items.Read_Only_Data;
+﻿using TheWorkforce.Entities;
 
 namespace TheWorkforce
 {
@@ -9,7 +8,7 @@ namespace TheWorkforce
         /// <summary>
         /// The item contained within the stack
         /// </summary>
-        public ItemData Item { get; private set; }
+        public EntityData Item { get; private set; }
 
         /// <summary>
         /// The number of items in the stack
@@ -21,7 +20,7 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="item">The item that is stacked</param>
         /// <param name="count">The count of items in the stack</param>
-        public ItemStack(ItemData item, uint count)
+        public ItemStack(EntityData item, uint count)
         {
             Item = item;
             Count = count;

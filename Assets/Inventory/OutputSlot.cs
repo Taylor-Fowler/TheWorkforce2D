@@ -1,4 +1,6 @@
-﻿namespace TheWorkforce.Inventory
+﻿using TheWorkforce.Interfaces;
+
+namespace TheWorkforce.Inventory
 {
     public class OutputSlot : SlotStrategy
     {

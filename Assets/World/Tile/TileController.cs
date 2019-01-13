@@ -10,7 +10,7 @@ namespace TheWorkforce.World
     {
         public Vector2 TilePosition { get; private set; }
         public ChunkController ChunkController { get; private set; }
-        public ItemController ItemController { get; private set; }
+        //public ItemController ItemController { get; private set; }
 
         private GameObject _paddingAnchor;
         private List<GameObject> _paddingObjects;
@@ -35,11 +35,11 @@ namespace TheWorkforce.World
             _spriteRenderer.sprite = TerrainTileSet.LoadedTileSets[tile.TileSetId].Tiles[TerrainTileSet.CENTRAL];
             DestroyPadding();
 
-            if(ItemController != null)
-            {
-                Destroy(ItemController.gameObject);
-                ItemController = null;
-            }
+            //if(ItemController != null)
+            //{
+            //    Destroy(ItemController.gameObject);
+            //    ItemController = null;
+            //}
 
             foreach (var padding in paddingTiles)
             {
@@ -52,11 +52,17 @@ namespace TheWorkforce.World
             }
         }
 
+        /// <summary>
+        /// Used when the local player creates an entity locally
+        /// </summary>
+        /// <param name="itemId"></param>
         public void SetItem(ushort itemId)
         {
             var go = new GameObject();
+            //var item = ItemFactory.Instance.GetById(itemId);
 
-            go.AddComponent(ItemFactory.Instance.Get(itemId).MonoType);
+            //go.transform.SetParent(transform);
+            //go.AddComponent<SpriteRenderer>().sprite = item.Sprite;
             //Debug.Log("[TileController] - SetItem(IItem) \n"
             //        + "Item Name: " + item.Name);
 
@@ -65,19 +71,26 @@ namespace TheWorkforce.World
             //ItemController = item.SpawnObject(transform);
         }
 
+        public void SetItem(uint entityId)
+        {
+
+        }
+
         public GameObject ObjectOnTile()
         {
-            if(ItemController == null)
-            {
-                return null;
-            }
+            return null;
+            //if(ItemController == null)
+            //{
+            //    return null;
+            //}
 
-            return ItemController.gameObject;
+            //return ItemController.gameObject;
         }
 
         public bool CanPlace()
         {
-            return ItemController == null;
+            return false;
+            //return ItemController == null;
         }
 
         private void SpawnPadding(int tileSetId, TilePadding padding)

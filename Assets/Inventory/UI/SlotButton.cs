@@ -2,7 +2,7 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
-using TheWorkforce.Inventory;
+using TheWorkforce.Interfaces;
 
 namespace TheWorkforce
 {

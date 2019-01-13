@@ -55,7 +55,6 @@ namespace TheWorkforce
         private Camera _personalCamera;
         private PlayerInventoryDisplay _inventoryDisplay;
         //private ToolbeltDisplay _toolbeltDisplay;
-        private ItemInspector _itemInspector;
         #endregion
 
         #region NetworkBehaviour Overrides
@@ -70,9 +69,6 @@ namespace TheWorkforce
             _inventoryDisplay = Instantiate(_inventoryPrefab, canvas).GetComponent<PlayerInventoryDisplay>();
 
             //_toolbeltDisplay = Instantiate(_toolbeltPrefab, canvas).GetComponentInChildren<ToolbeltDisplay>();
-
-            _itemInspector = Instantiate(_itemInspectorPrefab, canvas).GetComponent<ItemInspector>();
-            _itemInspector.gameObject.SetActive(false);
 
             {
                 var hud = Instantiate(_hudOptionsPrefab, canvas).GetComponent<HudMenuOptions>();
@@ -157,15 +153,15 @@ namespace TheWorkforce
                     //    Debug.Log("[PlayerController] - HandleMouse() \n"
                     //        + "Hovering Over TileObject: " + objectOnTile.name);
                     //}
-                    ItemController itemController = tileController.ItemController;
-                    if(itemController)
-                    {
-                        itemController.DisplayItem(_itemInspector);
-                    }
-                    else
-                    {
-                        _itemInspector.Hide();
-                    }
+                    //ItemController itemController = tileController.ItemController;
+                    //if(itemController)
+                    //{
+                    //    itemController.DisplayItem(_itemInspector);
+                    //}
+                    //else
+                    //{
+                    //    _itemInspector.Hide();
+                    //}
                 }
             }
         }

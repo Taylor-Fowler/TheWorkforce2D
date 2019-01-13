@@ -1,4 +1,5 @@
 ﻿using TheWorkforce.Game_State;
+using TheWorkforce.Interfaces;
 
 namespace TheWorkforce.Inventory
 {
