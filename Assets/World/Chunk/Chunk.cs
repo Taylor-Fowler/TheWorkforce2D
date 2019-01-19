@@ -127,13 +127,14 @@ namespace TheWorkforce
 
         #region Public Members
         /// <summary>
-        /// The position of the Chunk in the chunk grid, not to be confused with world
-        /// position.
+        /// The position of the Chunk in the chunk grid, not to be confused with world position.
+        /// E.G. Chunk.Position(1, 1) = World.Position(1 * Chunk.SIZE, 1 * Chunk.SIZE)
         /// </summary>
         public Vector2 Position;
     
         /// <summary>
-        /// The tiles stored in the chunk.
+        /// The tiles stored in the chunk, the first dimension being the x axis position and the
+        /// second position being the y axis position.
         /// </summary>
         public Tile[,] Tiles;
         #endregion

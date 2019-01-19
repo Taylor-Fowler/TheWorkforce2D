@@ -19,6 +19,7 @@ namespace TheWorkforce.Entities
 
         public override void Display()
         {
+            ViewLink.View.Display();
             ViewLink.View.SetTitle(Name);
             ViewLink.View.SetDescription(Description);
             ViewLink.View.SetImage(Sprite);

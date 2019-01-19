@@ -21,29 +21,11 @@ namespace TheWorkforce
         public static event PlayerControllerStartup OnPlayerControllerStartup;
         #endregion
 
-        #region IManager Implementation
-        public GameManager GameManager { get; private set; }
-
-        public void Startup(GameManager gameManager)
-        {
-            GameManager = gameManager;
-
-            Player = new Player
-                (
-                    this, 
-                    new SlotCollection(36),
-                    //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
-                    new PlayerMovement(3f, GetComponent<Animator>(), GameManager.WorldController.RequestPlayerChunkUpdate, transform)
-                );
-            _inventoryDisplay.SetInventory(Player.Inventory);
-            //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
-        }
-        #endregion
-
         #region Public Properties
         // TODO: Id will be required to identify the player across save files
         public int Id { get; private set; }
         public Player Player { get; protected set; }
+        public GameManager GameManager { get; private set; }
         public Vector2 MouseWorldPosition { get; protected set; }
         #endregion
 
@@ -55,7 +37,7 @@ namespace TheWorkforce
         [SerializeField] private GameObject _itemInspectorPrefab;
         [SerializeField] private GameObject _hudOptionsPrefab;
 
-        private Camera _personalCamera;
+        private MouseController _mouseController;
         private PlayerInventoryDisplay _inventoryDisplay;
         private EntityInstance _mouseOverInstance;
         //private ToolbeltDisplay _toolbeltDisplay;
@@ -65,13 +47,10 @@ namespace TheWorkforce
         public override void OnStartLocalPlayer()
         {
             Id = playerControllerId;
-            _personalCamera = Instantiate(_cameraPrefab, transform).GetComponent<Camera>();
-
             var canvas = new GameObject("Player Canvases").transform;
             canvas.SetParent(transform);
 
             _inventoryDisplay = Instantiate(_inventoryPrefab, canvas).GetComponent<PlayerInventoryDisplay>();
-
             //_toolbeltDisplay = Instantiate(_toolbeltPrefab, canvas).GetComponentInChildren<ToolbeltDisplay>();
 
             {
@@ -84,15 +63,30 @@ namespace TheWorkforce
         }
         #endregion
 
+        public void Startup(GameManager gameManager)
+        {
+            GameManager = gameManager;
+
+            Player = new Player(this, new SlotCollection(36),
+                    //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
+                    new PlayerMovement(3f, GetComponent<Animator>(), GameManager.WorldController.RequestPlayerChunkUpdate, transform)
+                );
+            _inventoryDisplay.SetInventory(Player.Inventory);
+            _mouseController = gameObject.AddComponent<MouseController>();
+            _mouseController.SetCamera(Instantiate(_cameraPrefab, transform).GetComponent<Camera>());
+            _mouseController.SetEntityCollection(GameManager.EntityCollection);
+            _mouseController.SetWorldController(GameManager.WorldController);
+            //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
+        }
+
         #region Unity API
         private void Start()
         {
+            MouseWorldPosition = Vector2.zero;
+
             if(!isLocalPlayer)
             {
-                Player = new Player
-                    (
-                        this,
-                        new SlotCollection(36),
+                Player = new Player(this, new SlotCollection(36),
                         //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
                         new AnimatedMovement(3f, GetComponent<Animator>())
                     );
@@ -137,25 +131,8 @@ namespace TheWorkforce
 
         private void HandleMouse()
         {
-            if(!EventSystem.current.IsPointerOverGameObject())
-            {
-                Vector3 mousePosition = Input.mousePosition;
-                mousePosition.z = 10f;
-
-                MouseWorldPosition = _personalCamera.ScreenToWorldPoint(mousePosition);
-                Vector2 chunkPosition = Chunk.CalculateResidingChunk(MouseWorldPosition);
-                Vector2 tilePosition = Tile.TilePosition(MouseWorldPosition);
-
-                var tile = GameManager.WorldController.RequestTile(chunkPosition, tilePosition);
-                if(tile != null)
-                {
-                    uint entity = tile.StaticEntityInstanceId;
-                    if(entity != 0)
-                    {
-                        GameManager.EntityCollection.GetEntity(entity).Display();
-                    }
-                }
-            }
+            MouseWorldPosition = _mouseController.CalculateWorldPosition();
+            _mouseController.UpdateMouseOver();
         }
 
         #region Custom Event Invoking
