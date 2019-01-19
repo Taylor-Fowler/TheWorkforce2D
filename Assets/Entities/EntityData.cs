@@ -38,12 +38,9 @@ namespace TheWorkforce.Entities
         /// <param name="arr"></param>
         public abstract EntityInstance CreateInstance(uint id, byte[] arr);
 
-
-        public abstract GameObject SpawnObject(EntityInstance instance);
-
-        protected GameObject Template()
+        public virtual GameObject Template()
         {
-            GameObject gameObject = new GameObject();
+            GameObject gameObject = new GameObject(Name);
             gameObject.transform.localScale = new Vector3(Width, Height, 1.0f);
             gameObject.AddComponent<BoxCollider2D>();
 

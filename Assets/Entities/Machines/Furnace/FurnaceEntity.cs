@@ -3,6 +3,7 @@ using TheWorkforce.Crafting;
 using TheWorkforce.Inventory;
 using TheWorkforce.Interfaces;
 using TheWorkforce.Scalars;
+using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
@@ -36,9 +37,19 @@ namespace TheWorkforce.Entities
             Output = new OutputSlot(_outputSlot);
         }
 
+        public FurnaceEntity(uint id, FurnaceData data, byte[] arr) : this(id, data)
+        {
+
+        }
+
+        public override GameObject Spawn()
+        {
+            return _data.Template();
+        }
+
         public override void Display()
         {
-            _data.Display(this);
+            _data.Display();
         }
 
         public override void Hide()

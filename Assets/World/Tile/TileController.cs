@@ -1,17 +1,14 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using TheWorkforce.Items;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
     [RequireComponent(typeof(SpriteRenderer))]
     public class TileController : NetworkBehaviour
     {
-        public Vector2 TilePosition { get; private set; }
-        public ChunkController ChunkController { get; private set; }
-        //public ItemController ItemController { get; private set; }
-
+        private Tile _tile;
+        private GameObject _entityOnTile;
         private GameObject _paddingAnchor;
         private List<GameObject> _paddingObjects;
         private SpriteRenderer _spriteRenderer;
@@ -27,70 +24,37 @@ namespace TheWorkforce.World
         }
         #endregion
 
-        public void SetTile(Tile tile, ChunkController chunkController, Dictionary<int, TilePadding> paddingTiles)
+        public Tile GetTile()
         {
-            TilePosition = tile.Position;
-            ChunkController = chunkController;
+            return _tile;
+        }
 
+        public void SetTile(Tile tile, Dictionary<int, TilePadding> paddingTiles)
+        {
             _spriteRenderer.sprite = TerrainTileSet.LoadedTileSets[tile.TileSetId].Tiles[TerrainTileSet.CENTRAL];
             DestroyPadding();
-
-            //if(ItemController != null)
-            //{
-            //    Destroy(ItemController.gameObject);
-            //    ItemController = null;
-            //}
 
             foreach (var padding in paddingTiles)
             {
                 SpawnPadding(padding.Key, padding.Value);
             }
 
-            if(tile.ItemOnTileId != 0)
+            if(_entityOnTile != null)
             {
-                SetItem(tile.ItemOnTileId);
+                Destroy(_entityOnTile);
             }
-        }
 
-        /// <summary>
-        /// Used when the local player creates an entity locally
-        /// </summary>
-        /// <param name="itemId"></param>
-        public void SetItem(ushort itemId)
-        {
-            var go = new GameObject();
-            //var item = ItemFactory.Instance.GetById(itemId);
-
-            //go.transform.SetParent(transform);
-            //go.AddComponent<SpriteRenderer>().sprite = item.Sprite;
-            //Debug.Log("[TileController] - SetItem(IItem) \n"
-            //        + "Item Name: " + item.Name);
-
-            // spawn monobehaviour for the item
-            // monobehaviour 
-            //ItemController = item.SpawnObject(transform);
+            if(tile.StaticEntityInstanceId != 0)
+            {
+                SetItem(tile.StaticEntityInstanceId);
+            }
         }
 
         public void SetItem(uint entityId)
         {
-
-        }
-
-        public GameObject ObjectOnTile()
-        {
-            return null;
-            //if(ItemController == null)
-            //{
-            //    return null;
-            //}
-
-            //return ItemController.gameObject;
-        }
-
-        public bool CanPlace()
-        {
-            return false;
-            //return ItemController == null;
+            _entityOnTile = Entities.EntityCollection.Instance().GetEntity(entityId).Spawn();
+            _entityOnTile.transform.SetParent(transform, false);
+            _entityOnTile.transform.Translate(0f, 0f, -0.6f);
         }
 
         private void SpawnPadding(int tileSetId, TilePadding padding)

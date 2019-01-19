@@ -4,9 +4,9 @@ using UnityEngine;
 using TheWorkforce.Crafting;
 using TheWorkforce.Static_Classes;
 using TheWorkforce.Testing;
-using TheWorkforce.World;
 using TheWorkforce.Network;
 using TheWorkforce.Items;
+using TheWorkforce.Entities;
 
 namespace TheWorkforce.Game_State
 {
@@ -29,9 +29,11 @@ namespace TheWorkforce.Game_State
         public PlayerController PlayerController { get; private set; }
         public WorldController WorldController { get; private set; }
         public CustomNetworkManager NetworkManager { get { return _networkManager; } }
+        public EntityCollection EntityCollection { get { return _entityCollection; } }
         #endregion
 
         #region Private Members
+        [SerializeField] private EntityCollection _entityCollection;
         [SerializeField] private EApplicationState _currentApplicationState;
         [SerializeField] private EGameState _currentGameState;
         [SerializeField] private CustomNetworkManager _networkManager;
@@ -56,8 +58,8 @@ namespace TheWorkforce.Game_State
 
         private IEnumerator InitialiseAssets(Action callback)
         {
+            _entityCollection.Initialise();
             TerrainTileSet.InitialiseTileSets();
-            ItemFactory.Instance.Initialise();
             Recipes.Initialise();
 
             _networkManager.Startup(this);

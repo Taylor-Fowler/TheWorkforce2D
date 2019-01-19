@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TheWorkforce.Static_Classes;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
     /// <summary>
     ///     A TerrainTileSet contains all the variations of tile textures as well

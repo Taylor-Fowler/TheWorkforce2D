@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
 
 namespace TheWorkforce.World
 {
@@ -13,13 +10,13 @@ namespace TheWorkforce.World
         {
             TileController tileController = target as TileController;
 
-            if(tileController.ItemController)
-            {
-                GUILayout.BeginVertical("Box");
-                Editor editor = CreateEditor(tileController.ItemController);
-                editor.OnInspectorGUI();
-                GUILayout.EndVertical();
-            }
+            //if(tileController.ItemController)
+            //{
+            //    GUILayout.BeginVertical("Box");
+            //    Editor editor = CreateEditor(tileController.ItemController);
+            //    editor.OnInspectorGUI();
+            //    GUILayout.EndVertical();
+            //}
 
             serializedObject.ApplyModifiedProperties();
         }

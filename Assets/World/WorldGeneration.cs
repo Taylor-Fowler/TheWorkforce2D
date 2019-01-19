@@ -1,28 +1,21 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using TheWorkforce.Items;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
-    public class WorldGeneration : WorldDetails
+    public class WorldGeneration
     {
-        public WorldGeneration(int seed) : base(seed)
+        #region Public Properties
+        public readonly int Seed;
+        public readonly int NegativeXSeed;
+        public readonly int NegativeYSeed;
+        #endregion
+
+        public WorldGeneration(int seed, int negativeXSeed, int negativeYSeed)
         {
-        }
-    
-        public override List<Chunk> GetChunks(List<Vector2> chunkPositions)
-        {
-            List<Chunk> chunksFound = base.GetChunks(chunkPositions);
-    
-            if (chunkPositions.Count == 0)
-            {
-                return chunksFound;
-            }
-    
-            LoadGeneratedChunks(chunkPositions, chunksFound);
-            chunksFound.AddRange(GenerateChunks(chunkPositions));
-            return chunksFound;
+            Seed = seed;
+            NegativeXSeed = negativeXSeed;
+            NegativeYSeed = negativeYSeed;
         }
     
         public List<Chunk> GenerateChunks(IEnumerable<Vector2> positionsOfChunksToGenerate)
@@ -76,7 +69,7 @@ namespace TheWorkforce.World
                     int index = Mathf.FloorToInt(noise / weightPerItem);
 
 
-                    tile.ItemOnTileId = generatables[index].ItemId;
+                    tile.PlaceEntity(Entities.EntityCollection.Instance().CreateEntity(generatables[index].ItemId));
                 }
 
             }

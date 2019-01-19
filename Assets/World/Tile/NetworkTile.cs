@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Networking;
+﻿using UnityEngine;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
     public struct NetworkTile
     {
         #region Public Members
         public byte TileSetId;
-        public ushort ItemOnTile;
+        public uint StaticEntityInstanceId;
 
         public float Moisture;
         public float Elevation;
@@ -18,7 +16,7 @@ namespace TheWorkforce.World
         public NetworkTile(Tile tile)
         {
             TileSetId = tile.TileSetId;
-            ItemOnTile = tile.ItemOnTileId;
+            StaticEntityInstanceId = tile.StaticEntityInstanceId;
 
             Moisture = tile.Moisture;
             Elevation = tile.Elevation;

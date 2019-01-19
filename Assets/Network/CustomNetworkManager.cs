@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using UnityEngine.Networking;
 using TheWorkforce.Game_State;
-using TheWorkforce.Testing;
 
 namespace TheWorkforce.Network
 {

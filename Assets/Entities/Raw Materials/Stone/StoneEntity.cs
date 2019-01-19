@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
@@ -13,14 +14,19 @@ namespace TheWorkforce.Entities
             _data = data;
         }
 
+        public override GameObject Spawn()
+        {
+            return _data.Template();
+        }
+
         public override void Display()
         {
-            throw new NotImplementedException();
+            _data.Display();
         }
 
         public override void Hide()
         {
-            throw new NotImplementedException();
+            _data.Hide();
         }
     }
 }

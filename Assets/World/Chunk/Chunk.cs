@@ -1,13 +1,19 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using TheWorkforce.Items;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
     [System.Serializable]
     public class Chunk
     {
         #region Static Methods
+        public static bool ValidTileOffset(Vector2 tileOffset)
+        {
+            return tileOffset.x < SIZE && tileOffset.x >= 0 
+                && tileOffset.y < SIZE && tileOffset.y >= 0;
+        }
+
+
         /// <summary>
         ///     Calculates the Chunk that the given `worldPosition` resides in.
         /// </summary>
@@ -162,6 +168,18 @@ namespace TheWorkforce.World
         #endregion
 
         #region Public Methods
+        public Tile GetTile(Vector2 tileOffset)
+        {
+            Tile tile = null;
+            if(ValidTileOffset(tileOffset))
+            {
+                tile = Tiles[(int)tileOffset.x, (int)tileOffset.y];
+            }
+
+            return tile;
+        }
+
+
         /// <summary>
         ///     Calculates the World Position of the Chunk, the returned World Position
         ///     represents where the Chunk starts in the World (i.e bottom left corner of the

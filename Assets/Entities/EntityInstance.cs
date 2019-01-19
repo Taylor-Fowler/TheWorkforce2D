@@ -1,10 +1,11 @@
 ﻿using TheWorkforce.UI;
+using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
     public abstract class EntityInstance : IDisplay
     {
-        private uint _id;
+        private readonly uint _id;
 
         public EntityInstance(uint id)
         {
@@ -16,6 +17,7 @@ namespace TheWorkforce.Entities
             return _id;
         }
 
+        public abstract GameObject Spawn();
         public abstract void Display();
         public abstract void Hide();
     }

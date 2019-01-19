@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Networking;
-using TheWorkforce.World;
 using UnityEngine.EventSystems;
-using TheWorkforce.Items;
 using TheWorkforce.Game_State;
 using TheWorkforce.Inventory;
+using TheWorkforce.Entities;
 
 namespace TheWorkforce
 {
     public delegate void PlayerControllerStartup(object source, PlayerController playerController);
 
+    /// <summary>
+    /// The PlayerController is the bridge between user input and player interaction in the world.
+    /// </summary>
     public class PlayerController : NetworkBehaviour, IManager
     {
         #region Custom Event Declarations
+        /// <summary>
+        /// Called when the local PlayerController starts
+        /// </summary>
         public static event PlayerControllerStartup OnPlayerControllerStartup;
         #endregion
 
@@ -30,7 +33,7 @@ namespace TheWorkforce
                     this, 
                     new SlotCollection(36),
                     //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
-                    new PlayerMovement(3f, GetComponent<Animator>(), GameManager.WorldController.UpdatePlayerPosition, transform)
+                    new PlayerMovement(3f, GetComponent<Animator>(), GameManager.WorldController.RequestPlayerChunkUpdate, transform)
                 );
             _inventoryDisplay.SetInventory(Player.Inventory);
             //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
@@ -45,8 +48,8 @@ namespace TheWorkforce
         #endregion
 
         #region Private Members
-        [SerializeField] private GameObject _cameraPrefab;
         // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
+        [SerializeField] private GameObject _cameraPrefab;
         [SerializeField] private GameObject _inventoryPrefab;
         [SerializeField] private GameObject _toolbeltPrefab;
         [SerializeField] private GameObject _itemInspectorPrefab;
@@ -54,6 +57,7 @@ namespace TheWorkforce
 
         private Camera _personalCamera;
         private PlayerInventoryDisplay _inventoryDisplay;
+        private EntityInstance _mouseOverInstance;
         //private ToolbeltDisplay _toolbeltDisplay;
         #endregion
 
@@ -138,30 +142,18 @@ namespace TheWorkforce
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = 10f;
 
-                // ADKAFHKKAGKHGDFLKAGGK AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
-                // Vector2 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
                 MouseWorldPosition = _personalCamera.ScreenToWorldPoint(mousePosition);
                 Vector2 chunkPosition = Chunk.CalculateResidingChunk(MouseWorldPosition);
                 Vector2 tilePosition = Tile.TilePosition(MouseWorldPosition);
 
-                TileController tileController = GameManager.WorldController[chunkPosition, tilePosition];
-                if(tileController != null)
+                var tile = GameManager.WorldController.RequestTile(chunkPosition, tilePosition);
+                if(tile != null)
                 {
-                    //GameObject objectOnTile = tileController.ObjectOnTile();
-                    //if(objectOnTile != null)
-                    //{
-                    //    Debug.Log("[PlayerController] - HandleMouse() \n"
-                    //        + "Hovering Over TileObject: " + objectOnTile.name);
-                    //}
-                    //ItemController itemController = tileController.ItemController;
-                    //if(itemController)
-                    //{
-                    //    itemController.DisplayItem(_itemInspector);
-                    //}
-                    //else
-                    //{
-                    //    _itemInspector.Hide();
-                    //}
+                    uint entity = tile.StaticEntityInstanceId;
+                    if(entity != 0)
+                    {
+                        GameManager.EntityCollection.GetEntity(entity).Display();
+                    }
                 }
             }
         }

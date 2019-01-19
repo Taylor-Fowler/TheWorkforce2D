@@ -1,4 +1,4 @@
-﻿namespace TheWorkforce.World
+﻿namespace TheWorkforce
 {
     public class TerrainTileSetSettings
     {

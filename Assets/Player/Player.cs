@@ -22,19 +22,5 @@ namespace TheWorkforce
             //Toolbelt = toolbelt;
             Movement = movement;
         }
-
-        // Player IS A: Entity
-        // Entity HAS: 
-        //              Equipment
-        //              Movement Speed
-        //
-        //
-
-        // Player HAS:
-        //              Inventory
-        //              Health
-        //              Equipment
-        //              Movement Speed
-        //
     }    
 }

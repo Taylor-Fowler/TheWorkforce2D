@@ -5,28 +5,33 @@ namespace TheWorkforce.Entities
     [CreateAssetMenu(fileName = "Stone Data", menuName = "Entity Data/Raw Materials/Stone")]
     public class StoneData : EntityData
     {
+        public EntityViewLink ViewLink;
         public Sprite Sprite;
         // Generation reference that stores how much stone would be generated in a single vein
+        public Generatable Generatable;
 
         public override void Initialise(ushort id)
         {
             base.Initialise(id);
             // Register as a generatable object
+            Generatable = new Generatable(0.7f, 0.3f, 0.9f, 0.5f, id);
         }
 
         public override void Display()
         {
-            throw new System.NotImplementedException();
+            ViewLink.View.SetTitle(Name);
+            ViewLink.View.SetDescription(Description);
+            ViewLink.View.SetImage(Sprite);
         }
 
         public override void Hide()
         {
-            throw new System.NotImplementedException();
+            ViewLink.View.Hide();
         }
 
-        public override GameObject SpawnObject(EntityInstance instance)
+        public override GameObject Template()
         {
-            GameObject gameObject = Template();
+            GameObject gameObject = base.Template();
             gameObject.AddComponent<SpriteRenderer>().sprite = Sprite;
 
             return gameObject;

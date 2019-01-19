@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TheWorkforce.World
+﻿namespace TheWorkforce
 {
     public class Generatable
     {
@@ -23,6 +17,8 @@ namespace TheWorkforce.World
             MaximumElevation = maximumElevation;
             MinimumElevation = minimumElevation;
             ItemId = itemId;
+
+            Generation.Register(this);
         }
 
         public bool CanGenerate(float moisture, float elevation)

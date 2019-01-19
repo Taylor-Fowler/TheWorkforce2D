@@ -1,57 +1,55 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using TheWorkforce.Items.Read_Only_Data;
 
 namespace TheWorkforce.Items
 {
-    [CustomEditor(typeof(ItemController))]
-    public class ItemControllerEditor : Editor
-    {
-        public override void OnInspectorGUI()
-        {
-            ItemController itemController = target as ItemController;
+    //[CustomEditor(typeof(ItemController))]
+    //public class ItemControllerEditor : Editor
+    //{
+    //    public override void OnInspectorGUI()
+    //    {
+    //        ItemController itemController = target as ItemController;
 
-            if(itemController.Item != null)
-            {
+    //        if(itemController.Item != null)
+    //        {
 
-                GUIStyle width = new GUIStyle(GUI.skin.label)
-                {
-                    fixedWidth = 100
-                };
+    //            GUIStyle width = new GUIStyle(GUI.skin.label)
+    //            {
+    //                fixedWidth = 100
+    //            };
 
-                GUIStyle secondWidth = new GUIStyle(GUI.skin.label)
-                {
-                    fixedWidth = 200
-                };
+    //            GUIStyle secondWidth = new GUIStyle(GUI.skin.label)
+    //            {
+    //                fixedWidth = 200
+    //            };
 
-                ItemData item = itemController.Item;
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.BeginVertical(width);
-                    {
-                        EditorGUILayout.LabelField("Id");
-                        EditorGUILayout.LabelField("Name");
-                        EditorGUILayout.LabelField("Description");
-                    }
-                    EditorGUILayout.EndVertical();
+    //            ItemData item = itemController.Item;
+    //            EditorGUILayout.BeginHorizontal();
+    //            {
+    //                EditorGUILayout.BeginVertical(width);
+    //                {
+    //                    EditorGUILayout.LabelField("Id");
+    //                    EditorGUILayout.LabelField("Name");
+    //                    EditorGUILayout.LabelField("Description");
+    //                }
+    //                EditorGUILayout.EndVertical();
 
-                    EditorGUILayout.BeginVertical(secondWidth);
-                    {
-                        EditorGUILayout.LabelField(item.Id.ToString());
-                        EditorGUILayout.LabelField(item.Name);
-                        EditorGUILayout.LabelField(item.Description);
-                    }
-                    EditorGUILayout.EndVertical();
+    //                EditorGUILayout.BeginVertical(secondWidth);
+    //                {
+    //                    EditorGUILayout.LabelField(item.Id.ToString());
+    //                    EditorGUILayout.LabelField(item.Name);
+    //                    EditorGUILayout.LabelField(item.Description);
+    //                }
+    //                EditorGUILayout.EndVertical();
 
-                    EditorGUILayout.BeginVertical();
-                    {   
-                        GUILayout.Box(item.Sprite.texture);
-                    }
-                    EditorGUILayout.EndVertical();
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-        }
-    }
-
+    //                EditorGUILayout.BeginVertical();
+    //                {   
+    //                    GUILayout.Box(item.Sprite.texture);
+    //                }
+    //                EditorGUILayout.EndVertical();
+    //            }
+    //            EditorGUILayout.EndHorizontal();
+    //        }
+    //    }
+    //}
 }

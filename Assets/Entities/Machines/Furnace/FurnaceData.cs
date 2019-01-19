@@ -8,7 +8,7 @@ namespace TheWorkforce.Entities
     [CreateAssetMenu(fileName = "Furnace Data", menuName = "Entity Data/Machines/Furnace")]
     public class FurnaceData : EntityData
     {
-        public FurnaceView View;
+        public EntityViewLink ViewLink;
         public Sprite Sprite;
 
         public float HeatRequired = 10.0f;
@@ -21,22 +21,19 @@ namespace TheWorkforce.Entities
 
         public override void Display()
         {
-            throw new NotImplementedException();
-        }
-
-        public void Display(FurnaceEntity data)
-        {
-            throw new NotImplementedException();
+            ViewLink.View.SetTitle(Name);
+            ViewLink.View.SetDescription(Description);
+            ViewLink.View.SetImage(Sprite);
         }
 
         public override void Hide()
         {
-            throw new NotImplementedException();
+            ViewLink.View.Hide();
         }
 
-        public override GameObject SpawnObject(EntityInstance instance)
+        public override GameObject Template()
         {
-            GameObject gameObject = Template();
+            GameObject gameObject = base.Template();
             gameObject.AddComponent<SpriteRenderer>().sprite = Sprite;
 
             return gameObject;
@@ -49,7 +46,7 @@ namespace TheWorkforce.Entities
 
         public override EntityInstance CreateInstance(uint id, byte[] arr)
         {
-            throw new NotImplementedException();
+            return new FurnaceEntity(id, this, arr);
         }
     }
 }

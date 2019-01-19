@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
     public class ChunkController : MonoBehaviour
     {
@@ -73,7 +73,7 @@ namespace TheWorkforce.World
         }
         #endregion
 
-        public void SetChunk(Chunk chunk, WorldDetails worldDetails)
+        public void SetChunk(Chunk chunk, World worldDetails)
         {
             #if DEBUG
             _chunk = chunk;
@@ -92,7 +92,7 @@ namespace TheWorkforce.World
             int i = 0;
             foreach (var tile in Chunk.Tiles)
             {
-                _tileControllers[i].SetTile(tile, this, worldDetails.GetTilePadding(Chunk, tile));
+                _tileControllers[i].SetTile(tile, worldDetails.GetTilePadding(Chunk, tile));
                 i++;
             }
         }

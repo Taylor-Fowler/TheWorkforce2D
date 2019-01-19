@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
     public struct NetworkChunk
     {

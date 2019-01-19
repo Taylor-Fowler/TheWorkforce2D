@@ -122,9 +122,9 @@ GameObject:
   - component: {fileID: 223283801934559382}
   - component: {fileID: 114224599773136848}
   - component: {fileID: 114320482399204188}
-  - component: {fileID: 114567919987555176}
+  - component: {fileID: 114869963451258710}
   m_Layer: 0
-  m_Name: Item Inspect Canvas
+  m_Name: Entity Inspect Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -352,20 +352,6 @@ MonoBehaviour:
   - {fileID: 0}
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &114567919987555176
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1781787668765998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ac062d7b15205d4ca4a73a17ba26b7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ItemImage: {fileID: 114359782028370286}
-  ItemName: {fileID: 114513146956983116}
-  ItemDescription: {fileID: 114790215692710074}
 --- !u!114 &114790215692710074
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -506,6 +492,17 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114869963451258710
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1781787668765998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb92437280bfa3409a5746a8db43dea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114901773758614228
 MonoBehaviour:
   m_ObjectHideFlags: 1

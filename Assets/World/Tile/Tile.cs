@@ -1,9 +1,7 @@
 ﻿using System;
-using TheWorkforce.Items;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace TheWorkforce.World
+namespace TheWorkforce
 {
     [Serializable]
     public class Tile
@@ -37,7 +35,7 @@ namespace TheWorkforce.World
 
         #region Public Members
         public byte TileSetId;
-        public ushort ItemOnTileId;
+        public uint StaticEntityInstanceId;
 
         public float Moisture;
         public float Elevation;
@@ -49,14 +47,19 @@ namespace TheWorkforce.World
         public Tile(NetworkTile networkTile)
         {
             TileSetId = networkTile.TileSetId;
-            
-            ItemOnTileId = networkTile.ItemOnTile;
+
+            StaticEntityInstanceId = networkTile.StaticEntityInstanceId;
             Moisture = networkTile.Moisture;
             Elevation = networkTile.Elevation;
             Position = networkTile.Position;
         }
 
         #region Public Methods
+        public void PlaceEntity(uint entityInstanceId)
+        {
+            StaticEntityInstanceId = entityInstanceId;
+        }
+
         public Vector3 GetWorldPosition(Vector2 chunkPosition)
         {
             chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
@@ -71,59 +74,5 @@ namespace TheWorkforce.World
             return position;
         }
         #endregion
-    }
-}
-
-
-
-
-
-
-
-public interface IView
-{
-    void view(SomeMonoUI ui);
-}
-
-public class A : IView
-{
-    public void view(SomeMonoUI ui)
-    {
-        ui.DisplayText();
-        ui.DisplayImage();
-    }
-}
-
-public class B : IView
-{
-    public void view(SomeMonoUI ui)
-    {
-        ui.DisplayText();
-    }
-}
-
-public class SomeMonoUI
-{
-    public void DisplayText()
-    {
-
-    }
-
-    public void DisplayImage()
-    {
-
-    }
-}
-
-
-public class someplayer
-{
-    IView[] allTheViews;
-    SomeMonoUI referenceUI;
-
-    public void Update()
-    {
-        // find view where mouse is
-        allTheViews[0].view(referenceUI);
     }
 }
