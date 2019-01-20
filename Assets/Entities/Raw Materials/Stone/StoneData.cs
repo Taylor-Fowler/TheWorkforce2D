@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using TheWorkforce.Interfaces;
+using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
     [CreateAssetMenu(fileName = "Stone Data", menuName = "Entity Data/Raw Materials/Stone")]
-    public class StoneData : EntityData
+    public class StoneData : EntityData, ISlotDisplay
     {
         public EntityViewLink ViewLink;
         public Sprite Sprite;
@@ -38,14 +40,19 @@ namespace TheWorkforce.Entities
             return gameObject;
         }
 
-        public override EntityInstance CreateInstance(uint id)
+        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy)
         {
-            return new StoneEntity(id, this);
+            return new StoneEntity(id, onDestroy, this);
         }
 
-        public override EntityInstance CreateInstance(uint id, byte[] arr)
+        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy, byte[] arr)
         {
             throw new System.NotImplementedException();
+        }
+
+        public void Display(SlotButton slotButton)
+        {
+            slotButton.SetItemImage(Sprite);
         }
     }
 }

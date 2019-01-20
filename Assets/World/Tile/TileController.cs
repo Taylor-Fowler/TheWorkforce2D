@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using TheWorkforce.Entities;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -8,7 +10,7 @@ namespace TheWorkforce
     public class TileController : NetworkBehaviour
     {
         private Tile _tile;
-        private GameObject _entityOnTile;
+        private Tuple<GameObject, EntityInstance> _entityOnTile;
         private GameObject _paddingAnchor;
         private List<GameObject> _paddingObjects;
         private SpriteRenderer _spriteRenderer;
@@ -31,18 +33,19 @@ namespace TheWorkforce
 
         public void SetTile(Tile tile, Dictionary<int, TilePadding> paddingTiles)
         {
+            _tile = tile;
             _spriteRenderer.sprite = TerrainTileSet.LoadedTileSets[tile.TileSetId].Tiles[TerrainTileSet.CENTRAL];
             DestroyPadding();
+
+            if(_entityOnTile != null)
+            {
+                ResetEntityOnTile();
+            }
 
             foreach (var padding in paddingTiles)
             {
                 SpawnPadding(padding.Key, padding.Value);
-            }
-
-            if(_entityOnTile != null)
-            {
-                Destroy(_entityOnTile);
-            }
+            }            
 
             if(tile.StaticEntityInstanceId != 0)
             {
@@ -52,9 +55,14 @@ namespace TheWorkforce
 
         public void SetItem(uint entityId)
         {
-            _entityOnTile = Entities.EntityCollection.Instance().GetEntity(entityId).Spawn();
-            _entityOnTile.transform.SetParent(transform, false);
-            _entityOnTile.transform.Translate(0f, 0f, -0.6f);
+            var entity = EntityCollection.Instance().GetEntity(entityId);
+            entity.OnEntityDestroy += DestroyEntityOnTile;
+
+            var entityObject = entity.Spawn();
+            entityObject.transform.SetParent(transform, false);
+            entityObject.transform.Translate(0f, 0f, -0.6f);
+
+            _entityOnTile = new Tuple<GameObject, EntityInstance>(entityObject, entity);
         }
 
         private void SpawnPadding(int tileSetId, TilePadding padding)
@@ -80,6 +88,21 @@ namespace TheWorkforce
                 Destroy(paddingObject);
             }
             _paddingObjects.Clear();
+        }
+
+        private void DestroyEntityOnTile()
+        {
+            if (_entityOnTile != null)
+            {
+                Destroy(_entityOnTile.Item1);
+                _entityOnTile = null;
+            }
+        }
+
+        private void ResetEntityOnTile()
+        {
+            _entityOnTile.Item2.OnEntityDestroy -= DestroyEntityOnTile;
+            DestroyEntityOnTile();
         }
     }   
 }

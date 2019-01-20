@@ -18,6 +18,7 @@ namespace TheWorkforce.Entities
         public List<EntityData> Collection;
         public Dictionary<ushort, EntityData> DataMappedToId;
         public Dictionary<uint, EntityInstance> InstanceMappedToId;
+        public List<EntityInstance> EntitiesToDestroy;
 
         private ushort _dataIdCounter = 0;
         private uint _entityIdCounter = 0;
@@ -27,6 +28,7 @@ namespace TheWorkforce.Entities
             _instance = this;
             DataMappedToId = new Dictionary<ushort, EntityData>();
             InstanceMappedToId = new Dictionary<uint, EntityInstance>();
+            EntitiesToDestroy = new List<EntityInstance>();
 
             foreach(var value in Collection)
             {
@@ -40,10 +42,9 @@ namespace TheWorkforce.Entities
             Debug.Log("[EntityCollection] - CreateEntity(ushort)");
 
             EntityData value = null;
-
             if(DataMappedToId.TryGetValue(dataIdKey, out value))
             {
-                InstanceMappedToId.Add(++_entityIdCounter, value.CreateInstance(_entityIdCounter));
+                InstanceMappedToId.Add(++_entityIdCounter, value.CreateInstance(_entityIdCounter, DestroyEntity));
                 return _entityIdCounter;
             }
 
@@ -56,6 +57,17 @@ namespace TheWorkforce.Entities
             InstanceMappedToId.TryGetValue(entityInstanceId, out value);
 
             return value;
+        }
+
+
+        private void DestroyEntity(uint entityInstanceId)
+        {
+            var instance = GetEntity(entityInstanceId);
+
+            if(instance != null)
+            {
+                EntitiesToDestroy.Add(instance);
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.EventSystems;
 using TheWorkforce.Game_State;
 using TheWorkforce.Inventory;
 using TheWorkforce.Entities;
@@ -23,7 +22,7 @@ namespace TheWorkforce
 
         #region Public Properties
         // TODO: Id will be required to identify the player across save files
-        public int Id { get; private set; }
+        public uint Id { get; private set; }
         public Player Player { get; protected set; }
         public GameManager GameManager { get; private set; }
         public Vector2 MouseWorldPosition { get; protected set; }
@@ -46,7 +45,7 @@ namespace TheWorkforce
         #region NetworkBehaviour Overrides
         public override void OnStartLocalPlayer()
         {
-            Id = playerControllerId;
+            Id = (uint)playerControllerId;
             var canvas = new GameObject("Player Canvases").transform;
             canvas.SetParent(transform);
 
@@ -67,12 +66,13 @@ namespace TheWorkforce
         {
             GameManager = gameManager;
 
-            Player = new Player(this, new SlotCollection(36),
+            Player = new Player(this, new SlotCollection(45),
                     //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
                     new PlayerMovement(3f, GetComponent<Animator>(), GameManager.WorldController.RequestPlayerChunkUpdate, transform)
                 );
             _inventoryDisplay.SetInventory(Player.Inventory);
             _mouseController = gameObject.AddComponent<MouseController>();
+            _mouseController.SetPlayer(Player);
             _mouseController.SetCamera(Instantiate(_cameraPrefab, transform).GetComponent<Camera>());
             _mouseController.SetEntityCollection(GameManager.EntityCollection);
             _mouseController.SetWorldController(GameManager.WorldController);
@@ -86,7 +86,7 @@ namespace TheWorkforce
 
             if(!isLocalPlayer)
             {
-                Player = new Player(this, new SlotCollection(36),
+                Player = new Player(this, new SlotCollection(45),
                         //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
                         new AnimatedMovement(3f, GetComponent<Animator>())
                     );

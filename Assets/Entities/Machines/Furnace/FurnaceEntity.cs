@@ -4,10 +4,11 @@ using TheWorkforce.Inventory;
 using TheWorkforce.Interfaces;
 using TheWorkforce.Scalars;
 using UnityEngine;
+using TheWorkforce.Entities.Interactions;
 
 namespace TheWorkforce.Entities
 {
-    public class FurnaceEntity : EntityInstance
+    public class FurnaceEntity : EntityInstance, IInteract
     {
         private readonly FurnaceData _data;
 
@@ -25,7 +26,7 @@ namespace TheWorkforce.Entities
         private Slot _outputSlot;
 
 
-        public FurnaceEntity(uint id, FurnaceData data) : base(id)
+        public FurnaceEntity(uint id, Action<uint> onDestroy, FurnaceData data) : base(id, onDestroy)
         {
             _data = data;
 
@@ -37,9 +38,14 @@ namespace TheWorkforce.Entities
             Output = new OutputSlot(_outputSlot);
         }
 
-        public FurnaceEntity(uint id, FurnaceData data, byte[] arr) : this(id, data)
+        public FurnaceEntity(uint id, Action<uint> onDestroy, FurnaceData data, byte[] arr) : this(id, onDestroy, data)
         {
 
+        }
+
+        public override uint GetDataTypeId()
+        {
+            return _data.Id;
         }
 
         public override GameObject Spawn()
@@ -143,6 +149,11 @@ namespace TheWorkforce.Entities
             ItemStack inputStack = Input.ItemStack;
 
             CurrentlyProcessing = Recipes.Get(inputStack.Item.Id, _data.Id);
+        }
+
+        public Interaction Interact(EntityInstance initiator)
+        {
+            throw new NotImplementedException();
         }
     }
 }

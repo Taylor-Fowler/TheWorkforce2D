@@ -2,10 +2,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 using TheWorkforce.Crafting;
-using TheWorkforce.Static_Classes;
 using TheWorkforce.Testing;
 using TheWorkforce.Network;
-using TheWorkforce.Items;
 using TheWorkforce.Entities;
 
 namespace TheWorkforce.Game_State
@@ -21,10 +19,10 @@ namespace TheWorkforce.Game_State
         public event ApplicationStateChangeHandler OnApplicationStateChange;
         #endregion
 
-        // TODO: Potentially create the main menu from a prefab and inject the reference to this game manager
-        //       List of potential injections:
-        //       - MainMenu
-        //       - PlayerController
+        #region Static Members
+        public static float GameTick;
+        #endregion
+
         #region Properties
         public PlayerController PlayerController { get; private set; }
         public WorldController WorldController { get; private set; }

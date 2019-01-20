@@ -1,9 +1,11 @@
-﻿using TheWorkforce.Inventory;
-using TheWorkforce.Items;
+﻿using TheWorkforce.Entities;
+using TheWorkforce.Interfaces;
+using TheWorkforce.Inventory;
+using UnityEngine;
 
 namespace TheWorkforce
 {
-    public class Player
+    public class Player : EntityInstance, IInventory
     {
         //public readonly int Id;
         #region Public Properties
@@ -15,12 +17,30 @@ namespace TheWorkforce
         protected PlayerController _controller { get; private set; }
 
         //public Player(PlayerController playerController, SlotCollection inventory, Toolbelt toolbelt, Movement movement)
-        public Player(PlayerController playerController, SlotCollection inventory, Movement movement)
+        public Player(PlayerController playerController, SlotCollection inventory, Movement movement) : base(playerController.Id, null)
         {
             _controller = playerController;
             Inventory = inventory;
             //Toolbelt = toolbelt;
             Movement = movement;
+        }
+
+        public override GameObject Spawn()
+        {
+            return null;
+        }
+
+        public override void Display()
+        {
+        }
+
+        public override void Hide()
+        {
+        }
+
+        public override uint GetDataTypeId()
+        {
+            throw new System.NotImplementedException();
         }
     }    
 }

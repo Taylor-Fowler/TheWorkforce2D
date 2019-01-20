@@ -11,22 +11,19 @@ namespace TheWorkforce.Inventory
 
         public ItemStack ItemStack { get; private set; }
 
-        public bool Add(ItemStack item)
+        public bool Add(ItemStack itemStack)
         {
+            if(itemStack == null)
+            {
+                return false;
+            }
+
             if (ItemStack == null)
             {
-                ItemStack = new ItemStack(item.Item, 0);
+                ItemStack = new ItemStack(itemStack.Item, 0);
             }
 
-            if (ItemStack.IsNull())
-            {
-                ItemStack.Copy(item);
-                item.Reset();
-                Dirty();
-                return true;
-            }
-
-            bool changed = ItemStack.Add(item);
+            bool changed = ItemStack.Add(itemStack);
             if (changed)
             {
                 Dirty();

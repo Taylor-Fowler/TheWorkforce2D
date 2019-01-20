@@ -43,11 +43,6 @@ namespace TheWorkforce
         /// </value>
         public Chunk Chunk { get; protected set; }
 
-        #region Debugging Members
-        #if DEBUG
-        [SerializeField] private Chunk _chunk;
-#endif
-        #endregion
 
         #region Unity API
         private void OnDrawGizmos()
@@ -75,9 +70,6 @@ namespace TheWorkforce
 
         public void SetChunk(Chunk chunk, World worldDetails)
         {
-            #if DEBUG
-            _chunk = chunk;
-            #endif
 
             Chunk = chunk;
             transform.position = Chunk.Position * Chunk.SIZE;
@@ -100,15 +92,17 @@ namespace TheWorkforce
         private void SpawnTileControllers()
         {
             for (int x = 0; x < Chunk.SIZE; x++)
-            for (int y = 0; y < Chunk.SIZE; y++)
             {
-                GameObject tile = new GameObject();
-                tile.transform.SetParent(transform);
-                tile.transform.position = transform.position + new Vector3(x + 0.5f, y + 0.5f, 0f);
-                tile.AddComponent<SpriteRenderer>();
-                tile.name = "Tile Controller: " + x + ", " + y;
+                for (int y = 0; y < Chunk.SIZE; y++)
+                {
+                    GameObject tile = new GameObject();
+                    tile.transform.SetParent(transform);
+                    tile.transform.position = transform.position + new Vector3(x + 0.5f, y + 0.5f, 0f);
+                    tile.AddComponent<SpriteRenderer>();
+                    tile.name = "Tile Controller: " + x + ", " + y;
 
-                _tileControllers.Add(tile.AddComponent<TileController>());
+                    _tileControllers.Add(tile.AddComponent<TileController>());
+                }
             }
         }
     }   

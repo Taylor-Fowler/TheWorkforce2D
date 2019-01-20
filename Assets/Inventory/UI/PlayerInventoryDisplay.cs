@@ -1,5 +1,4 @@
-﻿using TheWorkforce.Inventory;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace TheWorkforce
 {
@@ -9,9 +8,9 @@ namespace TheWorkforce
         [SerializeField] private GameObject _quickBarPanel;
         [SerializeField] private GameObject _craftingPanel;
 
-        public override void SetInventory(SlotCollection slots)
+        protected override void Start()
         {
-            base.SetInventory(slots);
+            base.Start();
             _inventoryPanel.SetActive(false);
             _craftingPanel.SetActive(false);
         }

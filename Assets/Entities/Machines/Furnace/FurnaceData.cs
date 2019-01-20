@@ -1,12 +1,12 @@
 ﻿using System;
-using TheWorkforce.Entities.Views;
+using TheWorkforce.Interfaces;
 using UnityEngine;
 
 
 namespace TheWorkforce.Entities
 {
     [CreateAssetMenu(fileName = "Furnace Data", menuName = "Entity Data/Machines/Furnace")]
-    public class FurnaceData : EntityData
+    public class FurnaceData : EntityData, ISlotDisplay
     {
         public EntityViewLink ViewLink;
         public Sprite Sprite;
@@ -39,14 +39,19 @@ namespace TheWorkforce.Entities
             return gameObject;
         }
 
-        public override EntityInstance CreateInstance(uint id)
+        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy)
         {
-            return new FurnaceEntity(id, this);
+            return new FurnaceEntity(id, onDestroy, this);
         }
 
-        public override EntityInstance CreateInstance(uint id, byte[] arr)
+        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy, byte[] arr)
         {
-            return new FurnaceEntity(id, this, arr);
+            return new FurnaceEntity(id, onDestroy, this, arr);
+        }
+
+        public void Display(SlotButton slotButton)
+        {
+            slotButton.SetItemImage(Sprite);
         }
     }
 }

@@ -67,14 +67,14 @@ namespace TheWorkforce
         {
             if (CorrespondingSlot != null)
             {
-                CorrespondingSlot.SubscribeToDirty(UpdateDisplay);
+                CorrespondingSlot.UnsubscribeToDirty(UpdateDisplay);
             }
 
             CorrespondingSlot = slot;
 
             if (CorrespondingSlot != null)
             {
-                CorrespondingSlot.UnsubscribeToDirty(UpdateDisplay);
+                CorrespondingSlot.SubscribeToDirty(UpdateDisplay);
             }
 
             UpdateDisplay(this);
@@ -94,9 +94,10 @@ namespace TheWorkforce
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (eventData.button == PointerEventData.InputButton.Left)
+            if (eventData.button == PointerEventData.InputButton.Left && CorrespondingSlot != null)
             {
-                //GiveItem();
+                var item = CorrespondingSlot.Remove();
+                CorrespondingSlot.Add(MouseController.Instance.AddItemStackToHand(item));
             }
         }
 
@@ -120,6 +121,12 @@ namespace TheWorkforce
             // Linker.ItemDescription.Hide();
         }
 
+        public void SetItemImage(Sprite sprite)
+        {
+            _itemImage.enabled = true;
+            _itemImage.sprite = sprite;
+        }
+
         protected virtual void EmptySlot()
         {
             _itemImage.enabled = false;
@@ -131,8 +138,11 @@ namespace TheWorkforce
 
         protected virtual void ItemInSlot()
         {
-            _itemImage.enabled = true;
-            //_itemImage.sprite = CorrespondingSlot.ItemStack.Item.Icon;
+            ISlotDisplay slotDisplay = CorrespondingSlot.ItemStack.Item as ISlotDisplay;
+            if(slotDisplay != null)
+            {
+                slotDisplay.Display(this);
+            }
 
             _itemCountBackgroundImage.enabled = true;
             _itemCount.text = CorrespondingSlot.ItemStack.Count.ToString();

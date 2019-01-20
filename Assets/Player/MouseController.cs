@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using TheWorkforce.Entities;
+﻿using TheWorkforce.Entities;
+using TheWorkforce.Entities.Interactions;
+using TheWorkforce.Interfaces;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -8,6 +8,13 @@ namespace TheWorkforce
 {
     public class MouseController : MonoBehaviour
     {
+        #region Static Members
+        public static MouseController Instance => _instance;
+        private static MouseController _instance;
+        #endregion
+
+        #region Private Members
+        private Player _player;
         private Camera _personalCamera;
         private EntityCollection _entityCollection;
         private WorldController _worldController;
@@ -16,6 +23,26 @@ namespace TheWorkforce
 
         private Tile _activeTile;
         private EntityInstance _activeInstance;
+        private Interaction _activeInteraction;
+        private ItemStack _itemInHand;
+        #endregion
+
+        #region Unity API
+        private void Awake()
+        {
+            if(_instance != null)
+            {
+                DestroyImmediate(this);
+            }
+            _instance = this;
+        }
+        #endregion
+
+        #region Simple Setters
+        public void SetPlayer(Player player)
+        {
+            _player = player;
+        }
 
         public void SetCamera(Camera camera)
         {
@@ -31,6 +58,7 @@ namespace TheWorkforce
         {
             _worldController = worldController;
         }
+        #endregion
 
         public Vector2 CalculateWorldPosition()
         {
@@ -42,6 +70,20 @@ namespace TheWorkforce
             _worldPosition = _personalCamera.ScreenToWorldPoint(mousePosition);
 
             return _worldPosition;
+        }
+
+        public ItemStack AddItemStackToHand(ItemStack itemStack)
+        {
+            // Do a simple swap if either of the items are null or the items mismatch
+            if(_itemInHand == null || itemStack == null || _itemInHand.Item != itemStack.Item)
+            {
+                var hand = _itemInHand;
+                _itemInHand = itemStack;
+                return hand;
+            }
+            
+            _itemInHand.Add(itemStack);
+            return itemStack;
         }
 
         public void UpdateMouseOver()
@@ -56,6 +98,7 @@ namespace TheWorkforce
             {
                 UpdateMouseOverEntity();
             }
+            UpdateInteraction();
         }
 
         private void UpdateMouseOverTile()
@@ -83,6 +126,45 @@ namespace TheWorkforce
                     _activeInstance = _entityCollection.GetEntity(entity);
                     _activeInstance?.Display();
                 }
+            }
+        }
+
+        private void UpdateInteraction()
+        {
+            bool isInteracting = Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject();            
+
+            // there is no current interaction
+            if(_activeInteraction == null)
+            {
+                if (isInteracting)
+                {
+                    StartNewInteraction();
+                }
+            }
+            else if(_activeInteraction.Target != _activeInstance)
+            {
+                //end previous interaction
+                //try start a new interaction
+                if(isInteracting)
+                {
+                    StartNewInteraction();
+                }
+            }
+            else
+            {
+                if(_activeInteraction.RequiresConstantInteraction && !isInteracting)
+                {
+                    //end previous interaction
+                }
+            }
+        }
+
+        private void StartNewInteraction()
+        {
+            IInteract interact = (_activeInstance == null) ? null : _activeInstance as IInteract;
+            if (interact != null)
+            {
+                _activeInteraction = interact.Interact(_player);
             }
         }
 
