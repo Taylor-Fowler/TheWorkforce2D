@@ -32,7 +32,7 @@ namespace TheWorkforce
             {
                 for (int i = 0; i < _slotCollection.Size; ++i)
                 {
-                    _inventoryButtons[i].LinkSlot(_slotCollection.GetSlot(i));
+                    _inventoryButtons[i].SetSlot(_slotCollection.GetSlot(i));
                 }
             }
         }

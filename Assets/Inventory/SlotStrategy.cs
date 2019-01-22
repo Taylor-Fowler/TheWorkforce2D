@@ -7,6 +7,12 @@ namespace TheWorkforce.Inventory
     {
         protected ISlot _slot;
 
+        public event DirtySlot OnDirty
+        {
+            add { _slot.OnDirty += value; }
+            remove { _slot.OnDirty -= value; }
+        }
+
         public SlotStrategy(ISlot slot)
         {
             _slot = slot;
@@ -33,16 +39,6 @@ namespace TheWorkforce.Inventory
         public virtual bool IsEmpty()
         {
             return _slot.IsEmpty();
-        }
-
-        public void SubscribeToDirty(DirtyHandler handler)
-        {
-            _slot.SubscribeToDirty(handler);
-        }
-
-        public void UnsubscribeToDirty(DirtyHandler handler)
-        {
-            _slot.UnsubscribeToDirty(handler);
         }
     }
 }

@@ -14,17 +14,19 @@ namespace TheWorkforce.Inventory
         /// </summary>
         public uint Size { get; protected set; }
 
-        private readonly List<Slot> _slots;
+        private readonly List<ISlot> _slots;
         protected Dictionary<uint, List<uint>> _itemIdFoundInSlots = new Dictionary<uint, List<uint>>();
         
         public SlotCollection(uint size)
         {
             Size = size;
-            _slots = new List<Slot>((int)Size);
+            _slots = new List<ISlot>((int)Size);
 
             for(uint i = 0; i < Size; ++i)
             {
-                _slots.Add(new Slot());
+                var slot = new Slot();
+                _slots.Add(slot);
+                slot.OnDirty += Slot_OnDirty;
             }
         }
 
@@ -41,18 +43,8 @@ namespace TheWorkforce.Inventory
         {
             UnityEngine.Debug.Log("[SlotCollection] - Add(ItemStack) \n"
                     + "itemStack: " + itemStack);
-            List<uint> slots = GetSlotsWithItemId(itemStack.Item.Id);
 
-            // There are slots with the item id in, therefore we should try to add the 
-            // item to that slot
-            if(slots != null)
-            {
-                AddItemToSlotsWithItem(itemStack, slots);
-            }
-            else
-            {
-                slots = AddItemIdToSlotsMap(itemStack.Item.Id);
-            }
+            var slots = GetSlotsForItemId(itemStack);
 
             if(!itemStack.IsNull())
             {
@@ -66,6 +58,7 @@ namespace TheWorkforce.Inventory
             if(slotIndex < Size)
             {
                 toRemove = _slots[(int)slotIndex].Remove();
+
             }
 
             return toRemove;
@@ -95,6 +88,24 @@ namespace TheWorkforce.Inventory
             }
 
             return -1;
+        }
+
+        private List<uint> GetSlotsForItemId(ItemStack itemStack)
+        {
+            List<uint> slots = GetSlotsWithItemId(itemStack.Item.Id);
+
+            // There are slots with the item id in, therefore we should try to add the 
+            // item to that slot
+            if (slots != null)
+            {
+                AddItemToSlotsWithItem(itemStack, slots);
+            }
+            else
+            {
+                slots = AddItemIdToSlotsMap(itemStack.Item.Id);
+            }
+
+            return slots;
         }
 
         private void AddItemToSlotsWithItem(ItemStack itemStack, List<uint> slotsWithItem)
@@ -134,10 +145,44 @@ namespace TheWorkforce.Inventory
             return slots;
         }
 
-        #region Custom Event Invoking
+        private void RemoveSlotIndexFromSlotsMap(uint slotIndex, uint itemId)
+        {
+            List<uint> slots;
+            if(_itemIdFoundInSlots.TryGetValue(itemId, out slots))
+            {
+                slots.Remove(slotIndex);
+            }
+        }
+
+        #region Custom Event Invoking/Response
         protected virtual void Dirty()
         {
             OnDirty?.Invoke(this);
+        }
+
+        private void Slot_OnDirty(ISlot slot, ItemStack previous)
+        {
+            // when an item slot changes
+            if(slot.ItemStack == null)
+            {
+
+            }
+            var index = _slots.IndexOf(slot);
+
+
+            if(slot.ItemStack.Item != previous.Item)
+            {
+                if (previous != null && previous.Item != null)
+                {
+                    RemoveSlotIndexFromSlotsMap((uint)index, previous.Item.Id);
+                }
+
+                if(slot.ItemStack != null && slot.ItemStack.Item != null)
+                {
+                    List<uint> slots = GetSlotsForItemId(slot.ItemStack);
+                    slots.Add((uint)index);
+                }
+            }
         }
         #endregion
     }

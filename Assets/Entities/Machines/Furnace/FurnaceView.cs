@@ -18,9 +18,9 @@ namespace TheWorkforce.Entities.Views
         public void SetFurnace(FurnaceEntity furnace)
         {
             _furnace = furnace;
-            _ingredientInput.LinkSlot(_furnace.Input);
-            _fuelInput.LinkSlot(_furnace.FuelSlot);
-            _produceOutput.LinkSlot(_furnace.Output);
+            _ingredientInput.SetSlot(_furnace.Input);
+            _fuelInput.SetSlot(_furnace.FuelSlot);
+            _produceOutput.SetSlot(_furnace.Output);
         }
 
         public void Open()

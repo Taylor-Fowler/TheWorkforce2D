@@ -1,13 +1,13 @@
-﻿using TheWorkforce.Game_State;
+﻿using System;
 using TheWorkforce.Interfaces;
 
 namespace TheWorkforce.Inventory
 {
+    public delegate void DirtySlot(ISlot slot, ItemStack previous);
+
     public sealed class Slot : ISlot
     {
-        #region Custom Event Declaration
-        private event DirtyHandler OnDirty;
-        #endregion
+        public event DirtySlot OnDirty;
 
         public ItemStack ItemStack { get; private set; }
 
@@ -18,15 +18,21 @@ namespace TheWorkforce.Inventory
                 return false;
             }
 
+            ItemStack previous = null;
+
             if (ItemStack == null)
             {
                 ItemStack = new ItemStack(itemStack.Item, 0);
+            }
+            else
+            {
+                previous = new ItemStack(ItemStack);
             }
 
             bool changed = ItemStack.Add(itemStack);
             if (changed)
             {
-                Dirty();
+                Dirty(previous);
             }
 
             return changed;
@@ -38,10 +44,11 @@ namespace TheWorkforce.Inventory
             {
                 return null;
             }
+            var previous = new ItemStack(ItemStack);
 
             ItemStack value = new ItemStack(ItemStack);
             ItemStack.Reset();
-            Dirty();
+            Dirty(previous);
 
             return value;
         }
@@ -52,21 +59,10 @@ namespace TheWorkforce.Inventory
         }
 
         #region Custom Event Invoking
-        public void SubscribeToDirty(DirtyHandler handler)
+        private void Dirty(ItemStack previous)
         {
-            OnDirty += handler;
+            OnDirty?.Invoke(this, previous);
         }
-
-        public void UnsubscribeToDirty(DirtyHandler handler)
-        {
-            OnDirty -= handler;
-        }
-
-        private void Dirty()
-        {
-            OnDirty?.Invoke(this);
-        }
-
         #endregion
     }
 }

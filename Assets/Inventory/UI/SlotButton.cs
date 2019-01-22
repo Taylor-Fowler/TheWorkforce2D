@@ -63,24 +63,24 @@ namespace TheWorkforce
         }
         #endregion
 
-        public void LinkSlot(ISlot slot)
+        public void SetSlot(ISlot slot)
         {
             if (CorrespondingSlot != null)
             {
-                CorrespondingSlot.UnsubscribeToDirty(UpdateDisplay);
+                CorrespondingSlot.OnDirty -= Slot_OnDirty;
             }
 
             CorrespondingSlot = slot;
 
             if (CorrespondingSlot != null)
             {
-                CorrespondingSlot.SubscribeToDirty(UpdateDisplay);
+                CorrespondingSlot.OnDirty += Slot_OnDirty;
             }
 
-            UpdateDisplay(this);
+            UpdateDisplay();
         }
 
-        public void UpdateDisplay(object source)
+        public void UpdateDisplay()
         {
             if (CorrespondingSlot != null && !CorrespondingSlot.IsEmpty())
             {
@@ -153,6 +153,11 @@ namespace TheWorkforce
         protected void SetBackgroundImage()
         {
             _backgroundImage.sprite = (_hasPointerFocus) ? _focusedBackground : _defaultBackground;
+        }
+
+        private void Slot_OnDirty(ISlot slot, ItemStack previous)
+        {
+            UpdateDisplay();
         }
 
         //protected void UpdateTooltip()
