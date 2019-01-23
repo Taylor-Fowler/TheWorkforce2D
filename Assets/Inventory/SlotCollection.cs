@@ -17,6 +17,11 @@ namespace TheWorkforce.Inventory
         private readonly List<ISlot> _slots;
         protected Dictionary<uint, List<uint>> _itemIdFoundInSlots = new Dictionary<uint, List<uint>>();
         
+        // two ways the slot can have items added
+        // directly to the inventory which then chooses the slot
+        // directly to the slot
+
+
         public SlotCollection(uint size)
         {
             Size = size;
@@ -39,16 +44,18 @@ namespace TheWorkforce.Inventory
             return _slots[index];
         }
 
-        public virtual void Add(ItemStack itemStack)
+        /// <summary>
+        /// Attempts to add a stack of items to any available slots within the collection
+        /// </summary>
+        /// <param name="stackToAdd">The stack of items to add</param>
+        public virtual void Add(ItemStack stackToAdd)
         {
-            UnityEngine.Debug.Log("[SlotCollection] - Add(ItemStack) \n"
-                    + "itemStack: " + itemStack);
+            var slots = GetSlotsForItem(stackToAdd);
+            AddItemToSlotsWithItem(stackToAdd, slots);
 
-            var slots = GetSlotsForItemId(itemStack);
-
-            if(!itemStack.IsNull())
+            if (!stackToAdd.IsEmpty())
             {
-                AddItemToEmptySlots(itemStack, slots);
+                AddItemToEmptySlots(stackToAdd, slots);
             }
         }
 
@@ -58,26 +65,17 @@ namespace TheWorkforce.Inventory
             if(slotIndex < Size)
             {
                 toRemove = _slots[(int)slotIndex].Remove();
-
             }
 
             return toRemove;
         }
 
-        public virtual int NextEmpty()
-        {
-            for(int i = 0; i < Size; ++i)
-            {
-                if(_slots[i].IsEmpty())
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        public virtual int NextEmpty(int previous)
+        /// <summary>
+        /// Find the next empty slot within the collection
+        /// </summary>
+        /// <param name="previous">Default: 0. The starting index to begin searching from</param>
+        /// <returns>The index of the next empty slot</returns>
+        public virtual int NextEmpty(int previous = 0)
         {
             for(; previous < Size; ++previous)
             {
@@ -86,21 +84,27 @@ namespace TheWorkforce.Inventory
                     return previous;
                 }
             }
-
             return -1;
         }
 
-        private List<uint> GetSlotsForItemId(ItemStack itemStack)
+        /// <summary>
+        /// Looks for the given item within the _itemIdFoundInSlots collection
+        /// </summary>
+        /// <param name="itemStack">The item to look for</param>
+        /// <returns>A list of uints that represent the indices of slots that contain the item</returns>
+        private List<uint> GetSlotsForItem(ItemStack itemStack)
         {
-            List<uint> slots = GetSlotsWithItemId(itemStack.Item.Id);
-
-            // There are slots with the item id in, therefore we should try to add the 
-            // item to that slot
-            if (slots != null)
+            if(itemStack == null)
             {
-                AddItemToSlotsWithItem(itemStack, slots);
+                return null;
             }
-            else
+
+            List<uint> slots = null;
+            _itemIdFoundInSlots.TryGetValue(itemStack.Item.Id, out slots);
+
+            // The item Id has not been registered (i.e. has never been attempted to be added to the collection)
+            // So register the item Id and get the newly created list
+            if (slots == null)
             {
                 slots = AddItemIdToSlotsMap(itemStack.Item.Id);
             }
@@ -113,7 +117,7 @@ namespace TheWorkforce.Inventory
             foreach(var slotIndex in slotsWithItem)
             {
                 _slots[(int)slotIndex].Add(itemStack);
-                if(itemStack.IsNull())
+                if(itemStack.IsEmpty())
                 {
                     return;
                 }
@@ -123,21 +127,19 @@ namespace TheWorkforce.Inventory
         private void AddItemToEmptySlots(ItemStack itemStack, List<uint> registerSlotIds)
         {
             int nextEmpty = NextEmpty();
-            while(nextEmpty != -1 && !itemStack.IsNull())
+            while(nextEmpty != -1 && !itemStack.IsEmpty())
             {
-                registerSlotIds.Add((uint)nextEmpty);
+                //registerSlotIds.Add((uint)nextEmpty);
                 _slots[nextEmpty].Add(itemStack);
-                nextEmpty = NextEmpty(nextEmpty);
+                nextEmpty = NextEmpty(++nextEmpty);
             }
         }
 
-        private List<uint> GetSlotsWithItemId(uint itemId)
-        {
-            List<uint> slots = null;
-            _itemIdFoundInSlots.TryGetValue(itemId, out slots);
-            return slots;
-        }
-
+        /// <summary>
+        /// Adds a new list of uints to the _itemIdFoundInSlots collection with the item Id given as the key
+        /// </summary>
+        /// <param name="itemId">The key of the new pair in the dictionary</param>
+        /// <returns>An empty list that should have slot indices added to it</returns>
         private List<uint> AddItemIdToSlotsMap(uint itemId)
         {
             List<uint> slots = new List<uint>();
@@ -162,25 +164,21 @@ namespace TheWorkforce.Inventory
 
         private void Slot_OnDirty(ISlot slot, ItemStack previous)
         {
-            // when an item slot changes
-            if(slot.ItemStack == null)
+            if (slot.ItemStack == null || previous == null || slot.ItemStack.Item != previous.Item)
             {
+                var index = _slots.IndexOf(slot);
 
-            }
-            var index = _slots.IndexOf(slot);
-
-
-            if(slot.ItemStack.Item != previous.Item)
-            {
+                // if there was previously another item in the slot, remove its mapping
                 if (previous != null && previous.Item != null)
                 {
                     RemoveSlotIndexFromSlotsMap((uint)index, previous.Item.Id);
                 }
 
+                // if there is now a valid item in the slot then register the slot index in the mapping
                 if(slot.ItemStack != null && slot.ItemStack.Item != null)
                 {
-                    List<uint> slots = GetSlotsForItemId(slot.ItemStack);
-                    slots.Add((uint)index);
+                    List<uint> slots = GetSlotsForItem(slot.ItemStack);
+                    slots?.Add((uint)index);
                 }
             }
         }

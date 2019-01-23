@@ -8,7 +8,6 @@ namespace TheWorkforce.Inventory
     public sealed class Slot : ISlot
     {
         public event DirtySlot OnDirty;
-
         public ItemStack ItemStack { get; private set; }
 
         public bool Add(ItemStack itemStack)
@@ -44,18 +43,17 @@ namespace TheWorkforce.Inventory
             {
                 return null;
             }
-            var previous = new ItemStack(ItemStack);
 
-            ItemStack value = new ItemStack(ItemStack);
+            var value = new ItemStack(ItemStack);
             ItemStack.Reset();
-            Dirty(previous);
+            Dirty(value);
 
             return value;
         }
 
         public bool IsEmpty()
         {
-            return ItemStack == null || ItemStack.IsNull();
+            return ItemStack == null || ItemStack.IsEmpty();
         }
 
         #region Custom Event Invoking

@@ -139,10 +139,7 @@ namespace TheWorkforce
         protected virtual void ItemInSlot()
         {
             ISlotDisplay slotDisplay = CorrespondingSlot.ItemStack.Item as ISlotDisplay;
-            if(slotDisplay != null)
-            {
-                slotDisplay.Display(this);
-            }
+            slotDisplay?.Display(this);
 
             _itemCountBackgroundImage.enabled = true;
             _itemCount.text = CorrespondingSlot.ItemStack.Count.ToString();

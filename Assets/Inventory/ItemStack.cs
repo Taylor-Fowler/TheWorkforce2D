@@ -30,9 +30,8 @@ namespace TheWorkforce
         /// Copy constructor that copies the item and count from another stack of items
         /// </summary>
         /// <param name="toCopy">Item stack to copy</param>
-        public ItemStack(ItemStack toCopy)
+        public ItemStack(ItemStack toCopy) : this(toCopy.Item, toCopy.Count)
         {
-            Copy(toCopy);
         }
 
         /// <summary>
@@ -49,7 +48,7 @@ namespace TheWorkforce
         /// Determines whether the item stack is nullable
         /// </summary>
         /// <returns>True when the item stack has zero items</returns>
-        public bool IsNull()
+        public bool IsEmpty()
         {
             return Count == 0;
         }
@@ -64,8 +63,13 @@ namespace TheWorkforce
         /// <returns>True if any of the item stack is added</returns>
         public bool Add(ItemStack toAdd, float stackModifier = 1.0f)
         {
+            // NOTE: This may cause headaches later...
+            if (Item == null)
+            {
+                Item = toAdd.Item;
+            }
             // Only add the item if it is the same as the one in the stack
-            if (Item != toAdd.Item)
+            else if (Item != toAdd.Item)
             {
                 return false;
             }
@@ -111,6 +115,13 @@ namespace TheWorkforce
             return Item.Equals(compare.Item);
         }
 
+        // TODO: Remove
+        public void Reset()
+        {
+            Item = null;
+            Count = 0;
+        }
+
         /// <summary>
         /// Decrement operator which decreases the item stack count by 1
         /// </summary>
@@ -131,18 +142,12 @@ namespace TheWorkforce
             return value;
         }
 
-        // TODO: Remove
-        public void Reset()
-        {
-            Item = null;
-            Count = 0;
-        }
 
         // TODO: Remove
-        public bool IsFull(uint stackSize)
-        {
-            return Count == stackSize;
-        }
+        //public bool IsFull(uint stackSize)
+        //{
+        //    return Count == stackSize;
+        //}
 
         // TODO: Remove/Reimplement
         //public void Display(InventoryButton button)
