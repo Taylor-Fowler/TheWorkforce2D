@@ -11,6 +11,7 @@ namespace TheWorkforce.Game_State
     public delegate void GameStateChangeHandler(object source, GameStateArgs gameStateArgs);
     public delegate void ApplicationStateChangeHandler(object source, ApplicationStateArgs applicationStateArgs);
     public delegate void DirtyHandler(object source);
+    public delegate void DestroyHandler();
     
     public class GameManager : MonoBehaviour
     {
@@ -26,8 +27,8 @@ namespace TheWorkforce.Game_State
         #region Properties
         public PlayerController PlayerController { get; private set; }
         public WorldController WorldController { get; private set; }
-        public CustomNetworkManager NetworkManager { get { return _networkManager; } }
-        public EntityCollection EntityCollection { get { return _entityCollection; } }
+        public CustomNetworkManager NetworkManager => _networkManager;
+        public EntityCollection EntityCollection => _entityCollection;
         #endregion
 
         #region Private Members
@@ -49,9 +50,6 @@ namespace TheWorkforce.Game_State
 
             StartCoroutine(InitialiseAssets(FinishedLoadingAssets));
         }
-        #endregion
-
-        #region Public Methods
         #endregion
 
         private IEnumerator InitialiseAssets(Action callback)
@@ -86,6 +84,16 @@ namespace TheWorkforce.Game_State
                 WorldController.Startup(this);
                 PlayerController.Startup(this);
                 ApplicationStateChange(EApplicationState.Ingame);
+                StartCoroutine(IncrementTickTime());
+            }
+        }
+
+        private IEnumerator IncrementTickTime()
+        {
+            while(true)
+            {
+                GameTime.Update();
+                yield return new WaitForFixedUpdate();
             }
         }
 

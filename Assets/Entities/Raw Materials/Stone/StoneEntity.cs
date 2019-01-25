@@ -10,10 +10,12 @@ namespace TheWorkforce.Entities
         private readonly StoneData _data;
 
         public ushort Amount;
+        public ushort TicksToHarvest;
 
         public StoneEntity(uint id, Action<uint> onDestroy, StoneData data) : base(id, onDestroy)
         {
             Amount = 10;
+            TicksToHarvest = 120;
             _data = data;
         }
 
@@ -43,7 +45,7 @@ namespace TheWorkforce.Entities
             IInventory inventory = initiator as IInventory;
             if(inventory != null)
             {
-                return new HarvestInteraction(this, _data, DecreaseAmount, inventory);
+                return new HarvestInteraction(this, _data, DecreaseAmount, inventory, TicksToHarvest);
             }
             return null;
         }
@@ -59,6 +61,7 @@ namespace TheWorkforce.Entities
             if(Amount == 0)
             {
                 // kill the entity
+                Destroy();
             }
             return true;
         }

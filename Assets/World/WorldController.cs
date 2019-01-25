@@ -61,7 +61,6 @@ namespace TheWorkforce
                     ChunkControllers.Add(chunkObject.AddComponent<ChunkController>());
                 }
             }
-            RequestPlayerChunkUpdate(transform.position);
 
             Debug.Log("[WorldController : IManager] - Startup() \n"
                     + "Server Seed: " + _world.Seed);
@@ -102,28 +101,38 @@ namespace TheWorkforce
         #region NetworkBehaviour Overrides
         public override void OnStartLocalPlayer()
         {
-            base.OnStartLocalPlayer();
             Local = this;
             WorldControllerStartup();
         }
         #endregion
 
-        public void RequestPlayerChunkUpdate(Vector2 playerPosition)
+        // This is called when a plyer object on the server moves enough to request a chunk update
+        // This should only be called on the server
+        public void RequestPlayerChunkUpdate(int playerId, Vector2 playerPosition)
         {
-            var chunksPreviouslyLoaded = _world.GetPlayerLoadedChunkPositions(playerControllerId);
+            if (!isServer || !isLocalPlayer)
+            {
+                Debug.LogError("RequestPlayerChunkUpdate can only be called on the Server's local WorldController");
+                return;
+            }
+            // Find all of the chunks loaded for the player
+            var chunksPreviouslyLoaded = _world.GetPlayerLoadedChunkPositions(playerId);
+            // Find the chunks needed for the player based on their new position
             var chunksNeededForPlayer = Chunk.ListOfSurroundingChunksOfWorldPosition(playerPosition);
+            var chunksNeededForPlayerArray = Chunk.SurroundingChunksOfWorldPosition(playerPosition);
 
-            _world.UpdatePlayerChunks(playerControllerId, chunksNeededForPlayer);
+            
+            // Tell the world about the chunks that the player now depends upon
+            _world.UpdatePlayerChunks(playerId, chunksNeededForPlayer);
+            // Remove any loaded chunks from our collection, they do not need to be loaded
             _world.FilterLoadedChunks(chunksNeededForPlayer);
             // Load chunks from file
 
+            // Generate the new chunks
             var generatedChunks = _worldGeneration.GenerateChunks(chunksNeededForPlayer);
-            _world.AddChunks(generatedChunks);
+            RpcReceiveChunksWithDependencies(NetworkChunk.ChunkListToNetworkChunkArray(generatedChunks), playerId, chunksNeededForPlayerArray);
 
-            if(isLocalPlayer)
-            {
-                UpdateChunkControllers(_world.GetPlayerLoadedChunks(playerControllerId), chunksPreviouslyLoaded.Intersect(chunksNeededForPlayer).ToList());
-            }
+            //UpdateChunkControllers(_world.GetPlayerLoadedChunks(playerId), chunksPreviouslyLoaded.Intersect(chunksNeededForPlayer).ToList());
         }
 
         public Tile RequestTile(Vector2 chunkPosition, Vector2 tilePosition)
@@ -138,57 +147,48 @@ namespace TheWorkforce
 
             return tile;
         }
+    
+        //public void UpdatePlayerPosition(Vector2 playerPosition)
+        //{
+        //    // What happens when a player moves to a new chunk?
+        //    // 3 players: A (host), B and C (regular clients)
+        //    // Players A and B are in the same chunk
+        //    // Player C moves into a new chunk:
+        //    // 1. Tell the Host about the chunks that were kept loaded by Player C
+        //    //    that are no longer needed to be loaded and also about the new chunks that player
+        //    //    C is keeping loaded
+        //    // 2. The Host checks if any other player needs the chunks that have been asked to
+        //    //    be unloaded by player C. The Host notifies all clients to unload said chunks.
+        //    // 3. The Host then tells all clients to load the chunks requested by player C.
+        //    // 4. Finally, the Host generates the chunks requested by player C and sends the data
+        //    //    to all clients
+    
+        //    // Get all the chunks in the vicinity of the player
+        //    List<Vector2> chunksToGenerate = Chunk.ListOfSurroundingChunksOfWorldPosition(playerPosition);
+    
+        //    // Find the chunks that need to be loaded, which are all the generated chunks,
+        //    // minus all of the chunks that are already loaded
+        //    List<Vector2> chunksToLoad = chunksToGenerate.Except(_world.ChunksSurroundingLocalPlayer).ToList();
+    
+        //    // Find the chunks that are no longer in the vicinity of the player,
+        //    // Previously surrounding chunks - chunks that are currently surrounding
+        //    // = chunks no longer surrounding
+        //    var chunksToUnload = _world.ChunksSurroundingLocalPlayer.Except(chunksToGenerate).ToArray();
+    
+        //    // Update the chunks surrounding the player now that we know what has changed
+        //    _world.SetChunksSurroundingLocalPlayer(chunksToGenerate);
+    
+        //    // Remove all the chunks that are loaded from our list of chunks to generate
+        //    _world.FilterLoadedChunks(chunksToGenerate);
+    
+    
+        //    chunksToLoad = chunksToLoad.Except(chunksToGenerate).ToList();
+    
+        //    CmdPlayerChunkUpdate(chunksToUnload, chunksToLoad.ToArray(), chunksToGenerate.ToArray(),
+        //        playerControllerId);
 
-        protected void SetInitialPlayerPosition()
-        {
-            _world.SetChunksSurroundingLocalPlayer(Chunk.ListOfSurroundingChunksOfWorldPosition(transform.position));
-            Vector2[] surroundingChunks = _world.ChunksSurroundingLocalPlayer.ToArray();
-
-            CmdPlayerChunkUpdate(new Vector2[0], surroundingChunks, surroundingChunks, playerControllerId);
-            WorldPlayerPositionUpdate(transform.position);
-        }
-    
-        public void UpdatePlayerPosition(Vector2 playerPosition)
-        {
-            // What happens when a player moves to a new chunk?
-            // 3 players: A (host), B and C (regular clients)
-            // Players A and B are in the same chunk
-            // Player C moves into a new chunk:
-            // 1. Tell the Host about the chunks that were kept loaded by Player C
-            //    that are no longer needed to be loaded and also about the new chunks that player
-            //    C is keeping loaded
-            // 2. The Host checks if any other player needs the chunks that have been asked to
-            //    be unloaded by player C. The Host notifies all clients to unload said chunks.
-            // 3. The Host then tells all clients to load the chunks requested by player C.
-            // 4. Finally, the Host generates the chunks requested by player C and sends the data
-            //    to all clients
-    
-            // Get all the chunks in the vicinity of the player
-            List<Vector2> chunksToGenerate = Chunk.ListOfSurroundingChunksOfWorldPosition(playerPosition);
-    
-            // Find the chunks that need to be loaded, which are all the generated chunks,
-            // minus all of the chunks that are already loaded
-            List<Vector2> chunksToLoad = chunksToGenerate.Except(_world.ChunksSurroundingLocalPlayer).ToList();
-    
-            // Find the chunks that are no longer in the vicinity of the player,
-            // Previously surrounding chunks - chunks that are currently surrounding
-            // = chunks no longer surrounding
-            var chunksToUnload = _world.ChunksSurroundingLocalPlayer.Except(chunksToGenerate).ToArray();
-    
-            // Update the chunks surrounding the player now that we know what has changed
-            _world.SetChunksSurroundingLocalPlayer(chunksToGenerate);
-    
-            // Remove all the chunks that are loaded from our list of chunks to generate
-            _world.FilterLoadedChunks(chunksToGenerate);
-    
-    
-            chunksToLoad = chunksToLoad.Except(chunksToGenerate).ToList();
-    
-            CmdPlayerChunkUpdate(chunksToUnload, chunksToLoad.ToArray(), chunksToGenerate.ToArray(),
-                playerControllerId);
-
-            WorldPlayerPositionUpdate(playerPosition);
-        }
+        //    WorldPlayerPositionUpdate(playerPosition);
+        //}
 
         private void UpdateChunkControllers(List<Chunk> chunksToDisplay, List<Vector2> chunksToKeepDisplayed)
         {
@@ -197,18 +197,14 @@ namespace TheWorkforce
             //    chunk controllers collection and needed to display collection
             // 3. Loop through the remaining controllers and assign a chunk from 
             //    the need to display collection        
-            List<ChunkController> chunkControllersToSet;
+            List<ChunkController> chunkControllersToSet = ChunkControllers;
 
-            if(chunksToKeepDisplayed.Count == 0)
-            {
-                chunkControllersToSet = ChunkControllers;
-            }
-            else
-            {
-                chunkControllersToSet = ChunkControllers
-                    .Where(value => chunksToKeepDisplayed.Contains(value.Chunk.Position) != true)
-                    .ToList();
-            }
+            // if(chunksToKeepDisplayed.Count != 0)
+            // {
+            //     chunkControllersToSet = ChunkControllers
+            //         .Where(value => chunksToKeepDisplayed.Contains(value.Chunk.Position) != true)
+            //         .ToList();
+            // }
 
             for (int i = 0; i < chunksToDisplay.Count; i++)
             {
@@ -314,6 +310,30 @@ namespace TheWorkforce
             }
         }
     
+        [ClientRpc]
+        private void RpcReceiveChunkDependencies(int playerId, Vector2[] chunkPositions)
+        {
+            if(!isServer)
+            {
+                Local._world.UpdatePlayerChunks(playerId, chunkPositions);
+            }
+        }
+
+        [ClientRpc]
+        private void RpcReceiveChunksWithDependencies(NetworkChunk[] networkChunks, int playerId, Vector2[] chunkPositions)
+        {
+            Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
+            Local._world.AddChunks(unpackedChunks);
+            if(!isServer)
+            {
+                Local._world.UpdatePlayerChunks(playerId, chunkPositions);
+            }
+            if(Local.GameManager.PlayerController.Id == playerId)
+            {
+                Local.UpdateChunkControllers(Local._world.GetPlayerLoadedChunks(playerId), null);
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -323,20 +343,19 @@ namespace TheWorkforce
         {
             Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
             Local._world.AddChunks(unpackedChunks);
+            // List<ChunkController> chunkControllersToSet = ChunkControllers
+            //     .Where(value =>
+            //         value.Chunk == null || _world.ChunksSurroundingLocalPlayer.Contains(value.Chunk.Position) != true)
+            //     .ToList();
     
-            List<ChunkController> chunkControllersToSet = ChunkControllers
-                .Where(value =>
-                    value.Chunk == null || _world.ChunksSurroundingLocalPlayer.Contains(value.Chunk.Position) != true)
-                .ToList();
+            // List<Chunk> chunksToDisplay = unpackedChunks
+            //     .Where(value => _world.ChunksSurroundingLocalPlayer.Contains(value.Position))
+            //     .ToList();
     
-            List<Chunk> chunksToDisplay = unpackedChunks
-                .Where(value => _world.ChunksSurroundingLocalPlayer.Contains(value.Position))
-                .ToList();
-    
-            for (int i = 0; i < chunksToDisplay.Count; i++)
-            {
-                chunkControllersToSet[i].SetChunk(chunksToDisplay[i], _world);
-            }
+            // for (int i = 0; i < chunksToDisplay.Count; i++)
+            // {
+            //     chunkControllersToSet[i].SetChunk(chunksToDisplay[i], _world);
+            // }
         }
         #endregion
     }

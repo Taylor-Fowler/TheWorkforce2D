@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheWorkforce.Game_State;
+﻿using TheWorkforce.Game_State;
 
 namespace TheWorkforce.Entities.Interactions
 {
     public delegate void EndOfInteractionHandler();
 
-    public abstract class Interaction : IProcessTick
+    public abstract class Interaction : TickAction
     {
         public readonly EntityInstance Target;
         public readonly bool RequiresConstantInteraction;
@@ -19,8 +14,13 @@ namespace TheWorkforce.Entities.Interactions
         {
             Target = target;
             RequiresConstantInteraction = requiresConstantInteraction;
-        }        
+            Target.OnEntityDestroy += Destroy;
+        }
 
-        public abstract void ProcessTick(float time);
+        public override void Destroy()
+        {
+            base.Destroy();
+            Target.OnEntityDestroy -= Destroy;
+        }
     }
 }

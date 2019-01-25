@@ -13,23 +13,20 @@ namespace TheWorkforce
     /// </summary>
     public class PlayerController : NetworkBehaviour, IManager
     {
-        #region Custom Event Declarations
         /// <summary>
         /// Called when the local PlayerController starts
         /// </summary>
         public static event PlayerControllerStartup OnPlayerControllerStartup;
-        #endregion
 
-        #region Public Properties
-        // TODO: Id will be required to identify the player across save files
-        public uint Id { get; private set; }
+        public int Id;
         public Player Player { get; protected set; }
         public GameManager GameManager { get; private set; }
         public Vector2 MouseWorldPosition { get; protected set; }
-        #endregion
 
         #region Private Members
         // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
+        // The local player controller, the local controller has a reference to the game manager
+        private static PlayerController Local;
         [SerializeField] private GameObject _cameraPrefab;
         [SerializeField] private GameObject _inventoryPrefab;
         [SerializeField] private GameObject _toolbeltPrefab;
@@ -45,7 +42,7 @@ namespace TheWorkforce
         #region NetworkBehaviour Overrides
         public override void OnStartLocalPlayer()
         {
-            Id = (uint)playerControllerId;
+            Local = this;
             var canvas = new GameObject("Player Canvases").transform;
             canvas.SetParent(transform);
 
@@ -65,14 +62,7 @@ namespace TheWorkforce
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
-
-            Player = new Player(this, new SlotCollection(45),
-                    //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
-                    new PlayerMovement(3f, GetComponent<Animator>(), GameManager.WorldController.RequestPlayerChunkUpdate, transform)
-                );
-            _inventoryDisplay.SetInventory(Player.Inventory);
             _mouseController = gameObject.AddComponent<MouseController>();
-            _mouseController.SetPlayer(Player);
             _mouseController.SetCamera(Instantiate(_cameraPrefab, transform).GetComponent<Camera>());
             _mouseController.SetEntityCollection(GameManager.EntityCollection);
             _mouseController.SetWorldController(GameManager.WorldController);
@@ -82,14 +72,29 @@ namespace TheWorkforce
         #region Unity API
         private void Start()
         {
+            Id = playerControllerId;
             MouseWorldPosition = Vector2.zero;
 
-            if(!isLocalPlayer)
+            // All players on the server have a reference to the world controller request player chunk update
+            if(isServer)
+            {
+                Player = new Player(this, new SlotCollection(45),
+                    //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
+                    new PlayerMovement(Id, 3f, GetComponent<Animator>(), Local.GameManager.WorldController.RequestPlayerChunkUpdate, transform)
+                );
+            }
+            else
             {
                 Player = new Player(this, new SlotCollection(45),
                         //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
                         new AnimatedMovement(3f, GetComponent<Animator>())
-                    );
+                );
+            }
+
+            if(isLocalPlayer)
+            {
+                _inventoryDisplay.SetInventory(Player.Inventory);
+                _mouseController.SetPlayer(Player);
             }
         }
 

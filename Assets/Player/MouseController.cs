@@ -155,6 +155,7 @@ namespace TheWorkforce
                 if(_activeInteraction.RequiresConstantInteraction && !isInteracting)
                 {
                     //end previous interaction
+                    _activeInteraction.Destroy();
                 }
             }
         }
@@ -165,6 +166,7 @@ namespace TheWorkforce
             if (interact != null)
             {
                 _activeInteraction = interact.Interact(_player);
+                _activeInteraction.OnDestroy += ResetInteraction;
             }
         }
 
@@ -172,6 +174,15 @@ namespace TheWorkforce
         {
             _activeInstance?.Hide();
             _activeInstance = null;
+        }
+
+        private void ResetInteraction()
+        {
+            if(_activeInteraction != null)
+            {
+                _activeInteraction.OnDestroy -= ResetInteraction;
+                _activeInteraction = null;
+            }
         }
     }
 }
