@@ -13,14 +13,14 @@ namespace TheWorkforce
         /// <summary>
         /// The number of items in the stack
         /// </summary>
-        public uint Count { get; private set; }
+        public ushort Count { get; private set; }
 
         /// <summary>
         /// Constructor that initialises the number of items in the stack and the item contained in the stack
         /// </summary>
         /// <param name="item">The item that is stacked</param>
         /// <param name="count">The count of items in the stack</param>
-        public ItemStack(EntityData item, uint count)
+        public ItemStack(EntityData item, ushort count)
         {
             Item = item;
             Count = count;
@@ -74,7 +74,7 @@ namespace TheWorkforce
                 return false;
             }
 
-            uint space = SpaceLeft(stackModifier);
+            var space = SpaceLeft(stackModifier);
 
             // If there is no space at all in the stack then return immediately 
             if (space == 0)
@@ -100,9 +100,9 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="modifier">The modifier of the stack size, defaults to 1.0f</param>
         /// <returns>The number of spaces left in the stack</returns>
-        public uint SpaceLeft(float modifier = 1.0f)
+        public ushort SpaceLeft(float modifier = 1.0f)
         {
-            return (uint)(Item.MaxStackSize * modifier) - Count;
+            return (ushort)((Item.MaxStackSize * modifier) - Count);
         }
 
         /// <summary>

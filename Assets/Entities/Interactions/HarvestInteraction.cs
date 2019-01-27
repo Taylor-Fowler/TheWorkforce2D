@@ -29,7 +29,6 @@ namespace TheWorkforce.Entities.Interactions
                 {
                     _initiatorInventory.Inventory.Add(new ItemStack(_targetData, 1));
                 }
-                // else destroy this
             }            
         }
 

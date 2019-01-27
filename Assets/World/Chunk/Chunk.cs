@@ -98,20 +98,20 @@ namespace TheWorkforce
 
         #region Public Constants
         /// <summary>
-        ///     The width and height of each Chunk (in number of tiles).
+        /// The width and height of each Chunk (in number of tiles).
         /// </summary>
-        public const int SIZE = 4;
+        public const int SIZE = 8;
     
         /// <summary>
-        ///     The area of each Chunk (number of tiles per chunk).
+        /// The area of each Chunk (number of tiles per chunk).
         /// </summary>
         public const int AREA = SIZE * SIZE;
     
         /// <summary>
-        ///     The default number of Chunks to keep loaded in both the x and y direction,
-        ///     so the actual default number of chunks to keep loaded is KEEP_LOADED^2.
+        /// The default number of Chunks to keep loaded in both the x and y direction,
+        /// so the actual default number of chunks to keep loaded is KEEP_LOADED^2.
         /// </summary>
-        public const int KEEP_LOADED = 3;
+        public const int KEEP_LOADED = 5;
         #endregion
 
         #region Public Properties    
@@ -154,8 +154,8 @@ namespace TheWorkforce
         }
     
         /// <summary>
-        ///     Reconstructs Chunk from a NetworkChunk object, this constructor is used for
-        ///     initialising Chunks that have been sent across the Network.
+        /// Reconstructs Chunk from a NetworkChunk object, this constructor is used for
+        /// initialising Chunks that have been sent across the Network.
         /// </summary>
         /// <param name="networkChunk">The network chunk.</param>
         public Chunk(NetworkChunk networkChunk) : this(networkChunk.Position)
@@ -163,7 +163,7 @@ namespace TheWorkforce
             for (int x = 0; x < SIZE; x++)
             for (int y = 0; y < SIZE; y++)
             {
-                Tiles[x, y] = new Tile(networkChunk.NetworkTiles[x * SIZE + y]);
+                Tiles[x, y] = new Tile(networkChunk.NetworkTiles[x * SIZE + y], new Vector2(x, y));
             }
         }
         #endregion
@@ -182,9 +182,9 @@ namespace TheWorkforce
 
 
         /// <summary>
-        ///     Calculates the World Position of the Chunk, the returned World Position
-        ///     represents where the Chunk starts in the World (i.e bottom left corner of the
-        ///     Chunk.
+        /// Calculates the World Position of the Chunk, the returned World Position
+        /// represents where the Chunk starts in the World (i.e bottom left corner of the
+        /// Chunk.
         /// </summary>
         /// <returns>The World Position of the Chunk.</returns>
         public Vector2 WorldPosition()

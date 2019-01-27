@@ -12,9 +12,13 @@ namespace TheWorkforce.Entities
     {
         private readonly FurnaceData _data;
 
-        public readonly ConstrainedSlot<IFuel> FuelSlot;
-        public readonly Slot Input;
-        public readonly OutputSlot Output;
+        // Every EntityInstance has a WorldPosition
+        // EntityData will return const int declaring how many bytes are needed
+
+        // Slot = ItemStack = ushort and ushort = 4 bytes
+        public readonly ConstrainedSlot<IFuel> FuelSlot; // 4 bytes
+        public readonly Slot Input; // 8 bytes
+        public readonly OutputSlot Output; // 12 bytes
 
         public float Heat = 0.0f;
         public Fuel CurrentFuel;

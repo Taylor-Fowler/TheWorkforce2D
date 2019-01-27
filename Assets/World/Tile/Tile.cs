@@ -7,7 +7,12 @@ namespace TheWorkforce
     public class Tile
     {
         #region Public Static Methods
-        public static Vector2 TilePosition(Vector2 worldPosition)
+        /// <summary>
+        /// Calculates the relative tile position from a given world position
+        /// </summary>
+        /// <param name="worldPosition">The world position to calculate from</param>
+        /// <returns>A tile position relative to its chunk, ranging from: 0 -> (Chunk.SIZE-1)</returns>
+        public static Vector2 TilePositionInRelationToChunk(Vector2 worldPosition)
         {
             worldPosition.x %= Chunk.SIZE;
             worldPosition.y %= Chunk.SIZE;
@@ -15,16 +20,17 @@ namespace TheWorkforce
             worldPosition.x = Mathf.Floor(worldPosition.x);
             worldPosition.y = Mathf.Floor(worldPosition.y);
 
+            // The world position's x co-ordinate is in the negative axis therefore we remap the range
+            // Original x: (-1, -2, -3...-15, 0) -> Remapped x: (15 to 0) 
             if(worldPosition.x < 0)
             {
                 worldPosition.x = Chunk.SIZE + worldPosition.x;
             }
-
+            // Same formula as above
             if(worldPosition.y < 0)
             {
                 worldPosition.y = Chunk.SIZE + worldPosition.y;
             }
-
             return worldPosition;
         }
         #endregion
@@ -34,24 +40,31 @@ namespace TheWorkforce
         #endregion
 
         #region Public Members
-        public byte TileSetId;
-        public uint StaticEntityInstanceId;
+        public readonly byte TileSetId;
+        public readonly float Moisture;
+        public readonly float Elevation;
+        public readonly Vector2 Position;
 
-        public float Moisture;
-        public float Elevation;
-        public Vector2 Position;
+        public uint StaticEntityInstanceId;
         #endregion
 
-        public Tile() {}
 
-        public Tile(NetworkTile networkTile)
+        public Tile(NetworkTile networkTile, Vector2 position)
         {
             TileSetId = networkTile.TileSetId;
 
             StaticEntityInstanceId = networkTile.StaticEntityInstanceId;
             Moisture = networkTile.Moisture;
             Elevation = networkTile.Elevation;
-            Position = networkTile.Position;
+            Position = position;
+        }
+
+        public Tile(byte tileSetId, float moisture, float elevation, Vector2 position)
+        {
+            TileSetId = tileSetId;
+            Moisture = moisture;
+            Elevation = elevation;
+            Position = position;
         }
 
         #region Public Methods

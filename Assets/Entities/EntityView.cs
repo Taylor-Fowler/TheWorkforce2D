@@ -14,6 +14,7 @@ namespace TheWorkforce.Entities
         private void Start()
         {
             _link.View = this;
+            Hide();
         }
 
         public void SetTitle(string title)

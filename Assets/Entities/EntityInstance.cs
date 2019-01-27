@@ -1,5 +1,4 @@
 ﻿using System;
-using TheWorkforce.Entities.Interactions;
 using TheWorkforce.UI;
 using UnityEngine;
 
@@ -33,6 +32,7 @@ namespace TheWorkforce.Entities
         public void Destroy()
         {
             OnEntityDestroy?.Invoke();
+            _onDestroy(_id);
         }
     }
 }

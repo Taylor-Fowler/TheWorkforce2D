@@ -104,7 +104,7 @@ namespace TheWorkforce
         private void UpdateMouseOverTile()
         {
             Vector2 chunkPosition = Chunk.CalculateResidingChunk(_worldPosition);
-            Vector2 tilePosition = Tile.TilePosition(_worldPosition);
+            Vector2 tilePosition = Tile.TilePositionInRelationToChunk(_worldPosition);
 
             _activeTile = _worldController.RequestTile(chunkPosition, tilePosition);
         }

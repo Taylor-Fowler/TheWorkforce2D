@@ -28,10 +28,10 @@ namespace TheWorkforce.Testing
                 _playerChunkPosition.text = 
                     position.ToString() + "\n"
                     + Chunk.CalculateResidingChunk(position).ToString() + "\n"
-                    + Tile.TilePosition(position).ToString() + "\n"
+                    + Tile.TilePositionInRelationToChunk(position).ToString() + "\n"
                     + mousePosition.ToString() + "\n"
                     + Chunk.CalculateResidingChunk(mousePosition).ToString() + "\n"
-                    + Tile.TilePosition(mousePosition).ToString() + "\n";
+                    + Tile.TilePositionInRelationToChunk(mousePosition).ToString() + "\n";
             }
         }
 

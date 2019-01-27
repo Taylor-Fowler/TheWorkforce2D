@@ -223,7 +223,7 @@ namespace TheWorkforce
                 // go from left to right
                 for (int xOffset = -1; xOffset <= 1; xOffset++)
                 {
-                    Tile neighbourTile = new Tile();
+                    Tile neighbourTile = null;
     
                     // Check if the neighbour tile we are interested in is located in a different chunk
                     // If the tile position + offset is less than zero or equal to the size of a chunk then it means that the 
@@ -246,7 +246,7 @@ namespace TheWorkforce
                     {
                         //return new Dictionary<int, TilePadding>();
                         if (!GetNeighbouringChunkTile(chunk.Position, neighbourChunkDirection,
-                            tile.Position + new Vector2(xOffset, yOffset), ref neighbourTile)) continue;
+                            tile.Position + new Vector2(xOffset, yOffset), out neighbourTile)) continue;
                     }
                     // The tile we are interested in is located in the current chunk, get the value of it
                     else
@@ -268,7 +268,7 @@ namespace TheWorkforce
             return tilePadding;
         }
     
-        public bool GetNeighbouringChunkTile(Vector2 chunk, Vector2 direction, Vector2 tilePosition, ref Tile tile)
+        public bool GetNeighbouringChunkTile(Vector2 chunk, Vector2 direction, Vector2 tilePosition, out Tile tile)
         {
             if (ChunksLoaded.ContainsKey(chunk + direction))
             {
@@ -287,7 +287,7 @@ namespace TheWorkforce
     
                 return true;
             }
-    
+            tile = null;
             return false;
         }
 

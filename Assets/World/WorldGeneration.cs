@@ -32,21 +32,18 @@ namespace TheWorkforce
                     {
                         Vector2 worldChunkPosition = chunk.WorldPosition();
     
-                        float noise = GetNoise((int) worldChunkPosition.x + x, (int) worldChunkPosition.y + y);
+                        float noise = GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y);
                         
-                        Tile tile = new Tile
-                        {
-                            Position = new Vector2(x, y),
-                            Elevation = noise,
-                            Moisture = GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y, noise),
-                            TileSetId = (byte)(noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2)
-                        };
+                        Tile tile = new Tile(
+                            (byte)(noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2),
+                            GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y, noise),
+                            noise,
+                            new Vector2(x, y));
 
                         GenerateGeneratableItems(tile, worldChunkPosition);
                         chunk.Tiles[x, y] = tile;
                     }
             }
-    
             return chunks;
         }
 
@@ -65,9 +62,7 @@ namespace TheWorkforce
                     noise /= 1f - 0.666f;
 
                     float weightPerItem = 1f / generatables.Count;
-
                     int index = Mathf.FloorToInt(noise / weightPerItem);
-
 
                     tile.PlaceEntity(Entities.EntityCollection.Instance().CreateEntity(generatables[index].ItemId));
                 }
@@ -86,7 +81,6 @@ namespace TheWorkforce
                 //xModifier *= xModifier;
                 //xModifier *= 0.666f;
             }
-    
             xModifier *= 0.5f;
     
             if (y < 0)
@@ -97,7 +91,6 @@ namespace TheWorkforce
                 //yModifier *= 0.666f;
             }
             yModifier *= 0.5f;
-    
             return Mathf.PerlinNoise(x * xModifier, y * yModifier);
         }
 
@@ -110,7 +103,6 @@ namespace TheWorkforce
                 xModifier += (float)NegativeXSeed / int.MaxValue;
                 xModifier *= 0.5f;
             }
-
             xModifier *= 0.5f * modifier * 0.48917f;
 
             if (y < 0)
@@ -119,7 +111,6 @@ namespace TheWorkforce
                 yModifier *= 0.5f;
             }
             yModifier *= 0.5f * modifier * (modifier * 0.98163f);
-
             return Mathf.PerlinNoise(x * xModifier, y * yModifier);
         }
     }

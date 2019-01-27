@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TheWorkforce.Game_State;
 using UnityEngine;
 
 namespace TheWorkforce.Entities
@@ -35,19 +36,19 @@ namespace TheWorkforce.Entities
                 value.Initialise(++_dataIdCounter);
                 DataMappedToId.Add(_dataIdCounter, value);
             }
+
+            GameTime.SubscribeToPostUpdate(DestroyEntities);
         }
 
         public uint CreateEntity(ushort dataIdKey)
         {
-            Debug.Log("[EntityCollection] - CreateEntity(ushort)");
-
             EntityData value = null;
+            //Debug.Log("[EntityCollection] - CreateEntity(ushort)");
             if(DataMappedToId.TryGetValue(dataIdKey, out value))
             {
                 InstanceMappedToId.Add(++_entityIdCounter, value.CreateInstance(_entityIdCounter, DestroyEntity));
                 return _entityIdCounter;
             }
-
             return 0;
         }
 
@@ -62,12 +63,23 @@ namespace TheWorkforce.Entities
 
         private void DestroyEntity(uint entityInstanceId)
         {
+            Debug.Log("[EntityCollection] - DestroyEntity(uint) \n" 
+                    + "entityInstanceId: " + entityInstanceId.ToString());
             var instance = GetEntity(entityInstanceId);
 
             if(instance != null)
             {
                 EntitiesToDestroy.Add(instance);
             }
+        }
+
+        private void DestroyEntities()
+        {
+            foreach (var entity in EntitiesToDestroy)
+            {
+                InstanceMappedToId.Remove(entity.GetId());
+            }
+            EntitiesToDestroy.Clear();
         }
     }
 }

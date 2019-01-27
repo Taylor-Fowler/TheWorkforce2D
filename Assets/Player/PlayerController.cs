@@ -27,6 +27,7 @@ namespace TheWorkforce
         // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
         // The local player controller, the local controller has a reference to the game manager
         private static PlayerController Local;
+        private bool _hasStarted = false;
         [SerializeField] private GameObject _cameraPrefab;
         [SerializeField] private GameObject _inventoryPrefab;
         [SerializeField] private GameObject _toolbeltPrefab;
@@ -66,41 +67,14 @@ namespace TheWorkforce
             _mouseController.SetCamera(Instantiate(_cameraPrefab, transform).GetComponent<Camera>());
             _mouseController.SetEntityCollection(GameManager.EntityCollection);
             _mouseController.SetWorldController(GameManager.WorldController);
+            CmdStartAll();
             //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
         }
 
         #region Unity API
-        private void Start()
-        {
-            Id = playerControllerId;
-            MouseWorldPosition = Vector2.zero;
-
-            // All players on the server have a reference to the world controller request player chunk update
-            if(isServer)
-            {
-                Player = new Player(this, new SlotCollection(45),
-                    //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
-                    new PlayerMovement(Id, 3f, GetComponent<Animator>(), Local.GameManager.WorldController.RequestPlayerChunkUpdate, transform)
-                );
-            }
-            else
-            {
-                Player = new Player(this, new SlotCollection(45),
-                        //new Toolbelt((IEnumerable<EToolType>)Enum.GetValues(typeof(EToolType))),
-                        new AnimatedMovement(3f, GetComponent<Animator>())
-                );
-            }
-
-            if(isLocalPlayer)
-            {
-                _inventoryDisplay.SetInventory(Player.Inventory);
-                _mouseController.SetPlayer(Player);
-            }
-        }
-
         private void Update()
         {
-            if (!isLocalPlayer || GameManager == null)
+            if (!isLocalPlayer || GameManager == null || !_hasStarted)
             {
                 return;
             }
@@ -160,6 +134,43 @@ namespace TheWorkforce
             if(Player != null)
             {
                 Player.Movement.Move(horizontal, vertical, transform);            
+            }
+        }
+
+        [Command]
+        private void CmdStartAll()
+        {
+            RpcStart();
+        }
+
+        [ClientRpc]
+        private void RpcStart()
+        {
+            Id = playerControllerId;
+            MouseWorldPosition = Vector2.zero;
+            _hasStarted = true;
+
+            // All players on the server have a reference to the world controller request player chunk update
+            if (isServer || isLocalPlayer)
+            {
+                Player = new Player(this, new SlotCollection(45), new PlayerMovement(
+                        Id,
+                        3f,
+                        GetComponent<Animator>(),
+                        Local.GameManager.WorldController.RequestPlayerChunkUpdate,
+                        transform
+                    )
+                );
+            }
+            else
+            {
+                Player = new Player(this, new SlotCollection(45), new AnimatedMovement(3f, GetComponent<Animator>()));
+            }
+
+            if (isLocalPlayer)
+            {
+                _inventoryDisplay.SetInventory(Player.Inventory);
+                _mouseController.SetPlayer(Player);
             }
         }
         #endregion

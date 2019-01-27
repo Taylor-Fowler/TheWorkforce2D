@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace TheWorkforce
 {
     public struct NetworkChunk
     {
-        public Vector2 Position;
-        public NetworkTile[] NetworkTiles;
+        public Vector2 Position; // 8 bytes
+        public NetworkTile[] NetworkTiles; // sizeof(NetworkTile) * Chunk.AREA (256 * 13 = 2560 + 3 * 256 = 2560 + 768)
 
         public NetworkChunk(Chunk chunk)
         {
@@ -31,10 +30,5 @@ namespace TheWorkforce
 
             return networkChunks;
         }
-    }
-
-    public class ChunkMessage : MessageBase
-    {
-        public NetworkChunk[] Chunks;
-    }    
+    }   
 }

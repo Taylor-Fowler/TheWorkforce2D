@@ -82,9 +82,12 @@ namespace TheWorkforce.Game_State
             if(WorldController != null && PlayerController != null)
             {
                 WorldController.Startup(this);
-                PlayerController.Startup(this);
-                ApplicationStateChange(EApplicationState.Ingame);
-                StartCoroutine(IncrementTickTime());
+                StartCoroutine(WorldController.InitialiseConnection(delegate 
+                {
+                    PlayerController.Startup(this);
+                    ApplicationStateChange(EApplicationState.Ingame);
+                    StartCoroutine(IncrementTickTime());
+                }));
             }
         }
 
@@ -93,6 +96,7 @@ namespace TheWorkforce.Game_State
             while(true)
             {
                 GameTime.Update();
+                GameTime.PostUpdate();
                 yield return new WaitForFixedUpdate();
             }
         }
