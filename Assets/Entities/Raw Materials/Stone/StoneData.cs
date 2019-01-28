@@ -19,17 +19,16 @@ namespace TheWorkforce.Entities
             Generatable = new Generatable(0.7f, 0.3f, 0.9f, 0.5f, id);
         }
 
-        public override void Display()
+        public override void Display(EntityView entityView)
         {
-            ViewLink.View.Display();
-            ViewLink.View.SetTitle(Name);
-            ViewLink.View.SetDescription(Description);
-            ViewLink.View.SetImage(Sprite);
+            entityView.SetTitle(Name);
+            entityView.SetDescription(Description);
+            entityView.SetImage(Sprite);
         }
 
         public override void Hide()
         {
-            ViewLink.View.Hide();
+            
         }
 
         public override GameObject Template()
@@ -40,12 +39,12 @@ namespace TheWorkforce.Entities
             return gameObject;
         }
 
-        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy)
+        public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy)
         {
-            return new StoneEntity(id, onDestroy, this);
+            return new StoneEntity(id, x, y, onDestroy, this);
         }
 
-        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy, byte[] arr)
+        public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy, byte[] arr)
         {
             throw new System.NotImplementedException();
         }

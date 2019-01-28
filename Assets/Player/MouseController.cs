@@ -14,9 +14,12 @@ namespace TheWorkforce
         #endregion
 
         #region Private Members
+        [SerializeField] private Sprite _outlineSprite;
+        private EntityView _entityView;
         private Player _player;
         private Camera _personalCamera;
         private EntityCollection _entityCollection;
+        private EntityInteractionDisplay _entityInteractionDisplay;
         private WorldController _worldController;
         private Vector2 _screenPosition;
         private Vector2 _worldPosition;
@@ -25,6 +28,8 @@ namespace TheWorkforce
         private EntityInstance _activeInstance;
         private Interaction _activeInteraction;
         private ItemStack _itemInHand;
+
+        private SpriteRenderer _outlinerRenderer;
         #endregion
 
         #region Unity API
@@ -35,6 +40,11 @@ namespace TheWorkforce
                 DestroyImmediate(this);
             }
             _instance = this;
+            _entityInteractionDisplay = FindObjectOfType<EntityInteractionDisplay>();
+            _outlineSprite = Resources.Load<Sprite>("UI/64x64 Outline");
+            _outlinerRenderer = new GameObject("Outline Renderer").AddComponent<SpriteRenderer>();
+            _outlinerRenderer.sprite = _outlineSprite;
+            _outlinerRenderer.gameObject.SetActive(false);
         }
         #endregion
 
@@ -57,6 +67,11 @@ namespace TheWorkforce
         public void SetWorldController(WorldController worldController)
         {
             _worldController = worldController;
+        }
+
+        public void SetEntityView(EntityView entityView)
+        {
+            _entityView = entityView;
         }
         #endregion
 
@@ -124,7 +139,9 @@ namespace TheWorkforce
                 {
                     NullifyEntityReference();
                     _activeInstance = _entityCollection.GetEntity(entity);
-                    _activeInstance?.Display();
+                    _entityView.SetEntity(_activeInstance);
+
+                    SetOutline();
                 }
             }
         }
@@ -144,6 +161,7 @@ namespace TheWorkforce
             else if(_activeInteraction.Target != _activeInstance)
             {
                 //end previous interaction
+                _activeInteraction.Destroy();
                 //try start a new interaction
                 if(isInteracting)
                 {
@@ -158,6 +176,7 @@ namespace TheWorkforce
                     _activeInteraction.Destroy();
                 }
             }
+            _activeInteraction?.Display(_entityInteractionDisplay);
         }
 
         private void StartNewInteraction()
@@ -180,8 +199,27 @@ namespace TheWorkforce
         {
             if(_activeInteraction != null)
             {
+                _activeInteraction.Hide(_entityInteractionDisplay);
                 _activeInteraction.OnDestroy -= ResetInteraction;
                 _activeInteraction = null;
+            }
+        }
+
+        private void SetOutline()
+        {
+            if (_activeInstance != null)
+            {
+                var data = _activeInstance.GetData();
+                int width = data.Width;
+                int height = data.Height;
+
+                _outlinerRenderer.transform.localScale = new Vector3(width, height, 1.0f);
+                _outlinerRenderer.transform.position = new Vector3(_activeInstance.X + (0.5f * width), _activeInstance.Y + (0.5f * height), -2.0f);
+                _outlinerRenderer.gameObject.SetActive(true);
+            }
+            else
+            {
+                _outlinerRenderer.gameObject.SetActive(false);
             }
         }
     }

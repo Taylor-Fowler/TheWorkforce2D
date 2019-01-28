@@ -10,9 +10,10 @@ namespace TheWorkforce.Entities
         private readonly StoneData _data;
 
         public ushort Amount;
+        // TODO: TicksToHarvest should be moved to StoneData
         public ushort TicksToHarvest;
 
-        public StoneEntity(uint id, Action<uint> onDestroy, StoneData data) : base(id, onDestroy)
+        public StoneEntity(uint id, int x, int y, Action<uint> onDestroy, StoneData data) : base(id, x, y, onDestroy)
         {
             Amount = 10;
             TicksToHarvest = 120;
@@ -29,10 +30,11 @@ namespace TheWorkforce.Entities
             return _data.Template();
         }
 
-        public override void Display()
+        public override void Display(EntityView entityView)
         {
-            _data.Display();
-            _data.ViewLink.View.SetDescription(Amount.ToString());
+            _data.Display(entityView);
+            entityView.SetDescription("Harvest Time: " + TicksToHarvest.ToString());
+            entityView.SetImageAmount(Amount);
         }
 
         public override void Hide()
@@ -57,13 +59,18 @@ namespace TheWorkforce.Entities
                 return false;
             }
             --Amount;
+            OnDirty();
 
             if(Amount == 0)
             {
-                // kill the entity
                 Destroy();
             }
             return true;
+        }
+
+        public override EntityData GetData()
+        {
+            return _data;
         }
     }
 }

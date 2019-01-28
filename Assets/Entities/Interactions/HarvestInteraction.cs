@@ -32,9 +32,14 @@ namespace TheWorkforce.Entities.Interactions
             }            
         }
 
-        // onDestroy
-        // interacting entity stops the interaction...in which case, they call the ondestroy method directly.
-        // the entity that this interaction is between, no longer exists
-        // 
+        public override void Display(EntityInteractionDisplay entityInteractionDisplay)
+        {
+            entityInteractionDisplay.DisplayHarvest(_ticksUntilNextHarvest, _ticksPerHarvest);
+        }
+
+        public override void Hide(EntityInteractionDisplay entityInteractionDisplay)
+        {
+            entityInteractionDisplay.HideHarvest();
+        }
     }
 }

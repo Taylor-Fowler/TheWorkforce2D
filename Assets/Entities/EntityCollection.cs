@@ -40,13 +40,13 @@ namespace TheWorkforce.Entities
             GameTime.SubscribeToPostUpdate(DestroyEntities);
         }
 
-        public uint CreateEntity(ushort dataIdKey)
+        public uint CreateEntity(ushort dataIdKey, int x, int y)
         {
             EntityData value = null;
             //Debug.Log("[EntityCollection] - CreateEntity(ushort)");
             if(DataMappedToId.TryGetValue(dataIdKey, out value))
             {
-                InstanceMappedToId.Add(++_entityIdCounter, value.CreateInstance(_entityIdCounter, DestroyEntity));
+                InstanceMappedToId.Add(++_entityIdCounter, value.CreateInstance(_entityIdCounter, x, y, DestroyEntity));
                 return _entityIdCounter;
             }
             return 0;

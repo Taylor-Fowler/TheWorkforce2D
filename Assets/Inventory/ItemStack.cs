@@ -66,6 +66,10 @@ namespace TheWorkforce
             // NOTE: This may cause headaches later...
             if (Item == null)
             {
+                if(toAdd.Item == null)
+                {
+                    return false;
+                }
                 Item = toAdd.Item;
             }
             // Only add the item if it is the same as the one in the stack

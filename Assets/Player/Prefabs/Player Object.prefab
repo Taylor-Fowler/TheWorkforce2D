@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c140ca8eaa35ca6449da3bcb37b5ce2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Id: 0
   _cameraPrefab: {fileID: 1840921609967512, guid: 252cfe03d1a455c47b7cd7afc4424982,
     type: 2}
   _inventoryPrefab: {fileID: 1416692558039966, guid: 530584b41748b2b488f0589e3873153e,
@@ -162,6 +163,7 @@ MonoBehaviour:
     type: 2}
   _hudOptionsPrefab: {fileID: 1405982550697130, guid: 44fa4c67123922b4faee953e3f51549b,
     type: 2}
+  _entityViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}
 --- !u!114 &114287458830173330
 MonoBehaviour:
   m_ObjectHideFlags: 1

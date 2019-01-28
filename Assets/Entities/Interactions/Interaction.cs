@@ -21,6 +21,9 @@ namespace TheWorkforce.Entities.Interactions
             Target.OnEntityDestroy += Destroy;
         }
 
+        public abstract void Display(EntityInteractionDisplay entityInteractionDisplay);
+        public abstract void Hide(EntityInteractionDisplay entityInteractionDisplay);
+
         /// <summary>
         /// Calls TickAction.Destroy and unsubscribes from any events that was subscribed to
         /// </summary>

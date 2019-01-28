@@ -33,6 +33,7 @@ namespace TheWorkforce
         [SerializeField] private GameObject _toolbeltPrefab;
         [SerializeField] private GameObject _itemInspectorPrefab;
         [SerializeField] private GameObject _hudOptionsPrefab;
+        [SerializeField] private EntityViewLink _entityViewLink;
 
         private MouseController _mouseController;
         private PlayerInventoryDisplay _inventoryDisplay;
@@ -64,6 +65,7 @@ namespace TheWorkforce
         {
             GameManager = gameManager;
             _mouseController = gameObject.AddComponent<MouseController>();
+            _mouseController.SetEntityView(_entityViewLink.View);
             _mouseController.SetCamera(Instantiate(_cameraPrefab, transform).GetComponent<Camera>());
             _mouseController.SetEntityCollection(GameManager.EntityCollection);
             _mouseController.SetWorldController(GameManager.WorldController);
@@ -170,6 +172,7 @@ namespace TheWorkforce
             if (isLocalPlayer)
             {
                 _inventoryDisplay.SetInventory(Player.Inventory);
+                _inventoryDisplay.Hide();
                 _mouseController.SetPlayer(Player);
             }
         }

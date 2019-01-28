@@ -13,22 +13,16 @@ namespace TheWorkforce.Entities
 
         public float HeatRequired = 10.0f;
         public float HeatGenerationRate = 2.0f;
-        
-        public void InstanceView(FurnaceEntity entity)
-        {
-            Display();
-        }
 
-        public override void Display()
+        public override void Display(EntityView entityView)
         {
-            ViewLink.View.SetTitle(Name);
-            ViewLink.View.SetDescription(Description);
-            ViewLink.View.SetImage(Sprite);
+            entityView.SetTitle(Name);
+            entityView.SetDescription(Description);
+            entityView.SetImage(Sprite);
         }
 
         public override void Hide()
         {
-            ViewLink.View.Hide();
         }
 
         public override GameObject Template()
@@ -39,14 +33,14 @@ namespace TheWorkforce.Entities
             return gameObject;
         }
 
-        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy)
+        public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy)
         {
-            return new FurnaceEntity(id, onDestroy, this);
+            return new FurnaceEntity(id, x, y, onDestroy, this);
         }
 
-        public override EntityInstance CreateInstance(uint id, Action<uint> onDestroy, byte[] arr)
+        public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy, byte[] arr)
         {
-            return new FurnaceEntity(id, onDestroy, this, arr);
+            return new FurnaceEntity(id, x, y, onDestroy, this, arr);
         }
 
         public void Display(SlotButton slotButton)

@@ -1,10 +1,9 @@
 ﻿using System;
-using TheWorkforce.UI;
 using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
-    public abstract class EntityData : ScriptableObject, IDisplay
+    public abstract class EntityData : ScriptableObject, IEntityDisplay
     {
         public ushort Id;
         public string Name;
@@ -18,7 +17,7 @@ namespace TheWorkforce.Entities
             Id = id;
         }
 
-        public abstract void Display();
+        public abstract void Display(EntityView entityView);
         public abstract void Hide();
 
 
@@ -28,7 +27,7 @@ namespace TheWorkforce.Entities
         ///     2. World data is loaded
         ///     3. A player places an item in the world
         /// </summary>
-        public abstract EntityInstance CreateInstance(uint id, Action<uint> onDestroy);
+        public abstract EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy);
 
         /// <summary>
         /// Create Instance is called when an entity is added to the game, this can be through one of the following ways:
@@ -37,7 +36,7 @@ namespace TheWorkforce.Entities
         ///     3. A player places an item in the world
         /// </summary>
         /// <param name="arr"></param>
-        public abstract EntityInstance CreateInstance(uint id, Action<uint> onDestroy, byte[] arr);
+        public abstract EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy, byte[] arr);
 
         public virtual GameObject Template()
         {

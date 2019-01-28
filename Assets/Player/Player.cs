@@ -17,7 +17,7 @@ namespace TheWorkforce
         protected PlayerController _controller { get; private set; }
 
         //public Player(PlayerController playerController, SlotCollection inventory, Toolbelt toolbelt, Movement movement)
-        public Player(PlayerController playerController, SlotCollection inventory, Movement movement) : base((uint)playerController.Id, null)
+        public Player(PlayerController playerController, SlotCollection inventory, Movement movement) : base((uint)playerController.Id, 0, 0, null)
         {
             _controller = playerController;
             Inventory = inventory;
@@ -30,7 +30,7 @@ namespace TheWorkforce
             return null;
         }
 
-        public override void Display()
+        public override void Display(EntityView entityView)
         {
         }
 
@@ -39,6 +39,11 @@ namespace TheWorkforce
         }
 
         public override uint GetDataTypeId()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override EntityData GetData()
         {
             throw new System.NotImplementedException();
         }

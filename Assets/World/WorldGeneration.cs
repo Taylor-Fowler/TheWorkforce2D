@@ -63,8 +63,8 @@ namespace TheWorkforce
 
                     float weightPerItem = 1f / generatables.Count;
                     int index = Mathf.FloorToInt(noise / weightPerItem);
-
-                    tile.PlaceEntity(Entities.EntityCollection.Instance().CreateEntity(generatables[index].ItemId));
+                    Vector2 worldPosition = tile.Position + chunkWorldPosition;
+                    tile.PlaceEntity(Entities.EntityCollection.Instance().CreateEntity(generatables[index].ItemId, (int)worldPosition.x, (int)worldPosition.y));
                 }
 
             }

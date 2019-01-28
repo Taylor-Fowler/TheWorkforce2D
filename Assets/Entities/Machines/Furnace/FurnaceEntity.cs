@@ -30,7 +30,7 @@ namespace TheWorkforce.Entities
         private Slot _outputSlot;
 
 
-        public FurnaceEntity(uint id, Action<uint> onDestroy, FurnaceData data) : base(id, onDestroy)
+        public FurnaceEntity(uint id, int x, int y, Action<uint> onDestroy, FurnaceData data) : base(id, x, y, onDestroy)
         {
             _data = data;
 
@@ -42,7 +42,7 @@ namespace TheWorkforce.Entities
             Output = new OutputSlot(_outputSlot);
         }
 
-        public FurnaceEntity(uint id, Action<uint> onDestroy, FurnaceData data, byte[] arr) : this(id, onDestroy, data)
+        public FurnaceEntity(uint id, int x, int y, Action<uint> onDestroy, FurnaceData data, byte[] arr) : this(id, x, y, onDestroy, data)
         {
 
         }
@@ -57,9 +57,9 @@ namespace TheWorkforce.Entities
             return _data.Template();
         }
 
-        public override void Display()
+        public override void Display(EntityView entityView)
         {
-            _data.Display();
+            _data.Display(entityView);
         }
 
         public override void Hide()
@@ -158,6 +158,11 @@ namespace TheWorkforce.Entities
         public Interaction Interact(EntityInstance initiator)
         {
             throw new NotImplementedException();
+        }
+
+        public override EntityData GetData()
+        {
+            return _data;
         }
     }
 }
