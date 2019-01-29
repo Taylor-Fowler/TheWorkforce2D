@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Name: Entity Collection
   m_EditorClassIdentifier: 
   Collection:
-  - {fileID: 11400000, guid: 63121bf22552f564da808af99ebd45c3, type: 2}
   - {fileID: 11400000, guid: dfbce85b93e0a684da677eed13b29369, type: 2}
+  - {fileID: 11400000, guid: 7ab1c5e965fc68f47829401b93809692, type: 2}
+  - {fileID: 11400000, guid: 46a9b06612903434bbee97b6c1d232c9, type: 2}

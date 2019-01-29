@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
-    [CreateAssetMenu(fileName = "Stone Data", menuName = "Entity Data/Raw Materials/Stone")]
-    public class StoneData : EntityData, ISlotDisplay
+    [CreateAssetMenu(fileName = "Ore Data", menuName = "Entity Data/Raw Materials/Ore")]
+    public class OreData : EntityData, ISlotDisplay
     {
         public EntityViewLink ViewLink;
         public Sprite Sprite;
@@ -16,7 +16,7 @@ namespace TheWorkforce.Entities
         {
             base.Initialise(id);
             // Register as a generatable object
-            Generatable = new Generatable(0.7f, 0.3f, 0.9f, 0.5f, id);
+            Generatable.Initialise(id);
         }
 
         public override void Display(EntityView entityView)
@@ -41,7 +41,7 @@ namespace TheWorkforce.Entities
 
         public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy)
         {
-            return new StoneEntity(id, x, y, onDestroy, this);
+            return new OreEntity(id, x, y, onDestroy, this);
         }
 
         public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy, byte[] arr)

@@ -1,23 +1,38 @@
-﻿namespace TheWorkforce
+﻿using UnityEngine;
+
+namespace TheWorkforce
 {
+    [System.Serializable]
     public class Generatable
     {
-        public readonly float MaximumMoisture;
-        public readonly float MinimumMoisture;
+        public float MaximumMoisture => _maximumMoisture;
 
-        public readonly float MaximumElevation;
-        public readonly float MinimumElevation;
+        [Range(0, 1), SerializeField] private float _maximumMoisture;
 
-        public readonly ushort ItemId;
+        public float MinimumMoisture => _minimumMoisture;
+        [Range(0, 1), SerializeField] private float _minimumMoisture;
 
-        public Generatable(float maximumMoisture, float minimumMoisture, float maximumElevation, float minimumElevation, ushort itemId)
+        public float MaximumElevation => _maximumElevation;
+        [Range(0, 1), SerializeField] private float _maximumElevation;
+
+        public float MinimumElevation => _minimumElevation;
+        [Range(0, 1), SerializeField] private float _minimumElevation;
+
+        public ushort ItemId => _itemId;
+        private ushort _itemId;
+
+        //public Generatable(float maximumMoisture, float minimumMoisture, float maximumElevation, float minimumElevation, ushort itemId)
+        //{
+        //    _maximumMoisture = maximumMoisture;
+        //    _minimumMoisture = minimumMoisture;
+        //    _maximumElevation = maximumElevation;
+        //    _minimumElevation = minimumElevation;
+        //    _itemId = itemId;
+        //}
+
+        public void Initialise(ushort itemId)
         {
-            MaximumMoisture = maximumMoisture;
-            MinimumMoisture = minimumMoisture;
-            MaximumElevation = maximumElevation;
-            MinimumElevation = minimumElevation;
-            ItemId = itemId;
-
+            _itemId = itemId;
             Generation.Register(this);
         }
 

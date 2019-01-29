@@ -9,13 +9,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab066e3470dd1e1488a18d7e5f7dce62, type: 3}
-  m_Name: Stone Data
+  m_Name: Iron Data
   m_EditorClassIdentifier: 
-  Id: 4
-  Name: Stone
-  Description: Stone
+  Id: 0
+  Name: Iron Ore
+  Description: Basic Iron Ore
   MaxStackSize: 32
   Width: 1
   Height: 1
   ViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}
-  Sprite: {fileID: 21300000, guid: dbf23c26fd2815840ab0f6e5dcd2f85e, type: 3}
+  Sprite: {fileID: 21300000, guid: dc55c32d47b247d4da2c474de4bcbc40, type: 3}
+  Generatable:
+    _maximumMoisture: 0.2
+    _minimumMoisture: 0
+    _maximumElevation: 0.4
+    _minimumElevation: 0

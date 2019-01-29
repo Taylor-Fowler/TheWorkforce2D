@@ -5,15 +5,15 @@ using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
-    public class StoneEntity : EntityInstance, IInteract
+    public class OreEntity : EntityInstance, IInteract
     {
-        private readonly StoneData _data;
+        private readonly OreData _data;
 
         public ushort Amount;
-        // TODO: TicksToHarvest should be moved to StoneData
+        // TODO: TicksToHarvest should be moved to OreData
         public ushort TicksToHarvest;
 
-        public StoneEntity(uint id, int x, int y, Action<uint> onDestroy, StoneData data) : base(id, x, y, onDestroy)
+        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data) : base(id, x, y, onDestroy)
         {
             Amount = 10;
             TicksToHarvest = 120;

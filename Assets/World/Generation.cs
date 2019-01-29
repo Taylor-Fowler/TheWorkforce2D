@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace TheWorkforce
 {
@@ -44,7 +45,8 @@ namespace TheWorkforce
         public static List<Generatable> GetGeneratables(float moisture, float elevation)
         {
             List<Generatable> _recentGeneratables = new List<Generatable>();
-
+            //Debug.Log("[Generation] - GetGeneration(float, float) \n" 
+            //        + "_ascendingElevationRequirements.Count: " + _ascendingElevationRequirements.Count.ToString());
             foreach(var generatable in _ascendingElevationRequirements)
             {
                 if(generatable.CanGenerate(moisture, elevation))

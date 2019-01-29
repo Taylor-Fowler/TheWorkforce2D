@@ -21,11 +21,15 @@ namespace TheWorkforce.Entities
         public Dictionary<uint, EntityInstance> InstanceMappedToId;
         public List<EntityInstance> EntitiesToDestroy;
 
-        private ushort _dataIdCounter = 0;
-        private uint _entityIdCounter = 0;
+        private ushort _dataIdCounter;
+        private uint _entityIdCounter;
 
         public void Initialise()
         {
+            _entityIdCounter = _dataIdCounter = 0;
+            //Debug.Log("[EntityCollection] - Initialise() \n" 
+            //        + "_dataIdCounter: " + _dataIdCounter.ToString());
+
             _instance = this;
             DataMappedToId = new Dictionary<ushort, EntityData>();
             InstanceMappedToId = new Dictionary<uint, EntityInstance>();
@@ -42,8 +46,8 @@ namespace TheWorkforce.Entities
 
         public uint CreateEntity(ushort dataIdKey, int x, int y)
         {
-            EntityData value = null;
             //Debug.Log("[EntityCollection] - CreateEntity(ushort)");
+            EntityData value = null;
             if(DataMappedToId.TryGetValue(dataIdKey, out value))
             {
                 InstanceMappedToId.Add(++_entityIdCounter, value.CreateInstance(_entityIdCounter, x, y, DestroyEntity));

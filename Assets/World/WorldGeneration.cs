@@ -50,16 +50,16 @@ namespace TheWorkforce
         private void GenerateGeneratableItems(Tile tile, Vector2 chunkWorldPosition)
         {
             float noise = GetNoise((int)(chunkWorldPosition.x + tile.Position.x), (int)(chunkWorldPosition.y + tile.Position.y), tile.Elevation + tile.Moisture);
-            if(noise >= 0.666f)
+            if(tile.Elevation + tile.Moisture >= 0.133f)
             {
                 List<Generatable> generatables = Generation.GetGeneratables(tile.Moisture, tile.Elevation);
 
                 if(generatables.Count != 0)
                 {
                     // Noise is between 1f and 0.666f, find out its value between 0 and 0.333f
-                    noise = 1f - noise;
+                    //noise = 1f - noise;
                     // Get a value between 0 and 1
-                    noise /= 1f - 0.666f;
+                    //noise /= 1f - 0.666f;
 
                     float weightPerItem = 1f / generatables.Count;
                     int index = Mathf.FloorToInt(noise / weightPerItem);
