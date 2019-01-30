@@ -23,16 +23,19 @@ namespace TheWorkforce.Entities
             _onDestroy = onDestroy;
         }
 
+        public abstract byte[] GetPacket();
+
+        public abstract EntityData GetData();
+        public abstract uint GetDataTypeId();
+
+        public abstract GameObject Spawn();
+
+        public abstract void Display(EntityView entityView);
+
         public uint GetId()
         {
             return _id;
         }
-
-        public abstract EntityData GetData();
-        public abstract uint GetDataTypeId();
-        public abstract GameObject Spawn();
-        public abstract void Display(EntityView entityView);
-        public abstract void Hide();
 
         public void Destroy()
         {

@@ -34,16 +34,17 @@ namespace TheWorkforce
         {
         }
 
-        public override void Hide()
-        {
-        }
-
         public override uint GetDataTypeId()
         {
             throw new System.NotImplementedException();
         }
 
         public override EntityData GetData()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override byte[] GetPacket()
         {
             throw new System.NotImplementedException();
         }

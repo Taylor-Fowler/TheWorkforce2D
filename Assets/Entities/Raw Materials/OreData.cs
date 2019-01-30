@@ -9,8 +9,9 @@ namespace TheWorkforce.Entities
     {
         public EntityViewLink ViewLink;
         public Sprite Sprite;
-        // Generation reference that stores how much stone would be generated in a single vein
-        public Generatable Generatable;
+        public Generatable Generatable; // Generation reference that stores how much stone would be generated in a single vein
+        public ushort TicksToHarvest => _ticksToHarvest;
+        [SerializeField] private ushort _ticksToHarvest = 120;
 
         public override void Initialise(ushort id)
         {
@@ -19,16 +20,16 @@ namespace TheWorkforce.Entities
             Generatable.Initialise(id);
         }
 
+        public override int PacketSize()
+        {
+            return base.PacketSize() + sizeof(ushort);
+        }
+
         public override void Display(EntityView entityView)
         {
             entityView.SetTitle(Name);
             entityView.SetDescription(Description);
             entityView.SetImage(Sprite);
-        }
-
-        public override void Hide()
-        {
-            
         }
 
         public override GameObject Template()
@@ -46,7 +47,7 @@ namespace TheWorkforce.Entities
 
         public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy, byte[] arr)
         {
-            throw new System.NotImplementedException();
+            return new OreEntity(id, x, y, onDestroy, this, BitConverter.ToUInt16(arr, 0));
         }
 
         public void Display(SlotButton slotButton)

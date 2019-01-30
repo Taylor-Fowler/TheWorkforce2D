@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TheWorkforce.Game_State;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ namespace TheWorkforce.Entities
         #endregion
 
         public List<EntityData> Collection;
+        public List<EntityInstance> ActiveEntities;
         public Dictionary<ushort, EntityData> DataMappedToId;
         public Dictionary<uint, EntityInstance> InstanceMappedToId;
         public List<EntityInstance> EntitiesToDestroy;
@@ -31,6 +33,7 @@ namespace TheWorkforce.Entities
             //        + "_dataIdCounter: " + _dataIdCounter.ToString());
 
             _instance = this;
+            ActiveEntities = new List<EntityInstance>();
             DataMappedToId = new Dictionary<ushort, EntityData>();
             InstanceMappedToId = new Dictionary<uint, EntityInstance>();
             EntitiesToDestroy = new List<EntityInstance>();
@@ -50,27 +53,48 @@ namespace TheWorkforce.Entities
             EntityData value = null;
             if(DataMappedToId.TryGetValue(dataIdKey, out value))
             {
-                InstanceMappedToId.Add(++_entityIdCounter, value.CreateInstance(_entityIdCounter, x, y, DestroyEntity));
+                EntityInstance instance = value.CreateInstance(_entityIdCounter, x, y, DestroyEntity);
+                ActiveEntities.Add(instance);
+                InstanceMappedToId.Add(++_entityIdCounter, instance);
                 return _entityIdCounter;
             }
             return 0;
+        }
+
+        public void CreateEntity(ushort dataIdKey, uint entityId, byte[] payload, ref int offset)
+        {
+            EntityData value = null;
+            if (DataMappedToId.TryGetValue(dataIdKey, out value))
+            {
+                int x = BitConverter.ToInt32(payload, offset);
+                offset += sizeof(int);
+                int y = BitConverter.ToInt32(payload, offset);
+                offset += sizeof(int);
+                int actualPacketSize = value.PacketSize() - 8;
+
+                byte[] arr = new byte[actualPacketSize];
+                Array.Copy(payload, offset, arr, 0, actualPacketSize);
+                offset += actualPacketSize;
+
+                EntityInstance entityInstance = value.CreateInstance(entityId, x, y, DestroyEntity, arr);
+                ActiveEntities.Add(entityInstance);
+                InstanceMappedToId.Add(entityId, entityInstance);
+            }
         }
 
         public EntityInstance GetEntity(uint entityInstanceId)
         {
             EntityInstance value = null;
             InstanceMappedToId.TryGetValue(entityInstanceId, out value);
-
             return value;
         }
-
 
         private void DestroyEntity(uint entityInstanceId)
         {
             Debug.Log("[EntityCollection] - DestroyEntity(uint) \n" 
                     + "entityInstanceId: " + entityInstanceId.ToString());
-            var instance = GetEntity(entityInstanceId);
 
+            var instance = GetEntity(entityInstanceId);
             if(instance != null)
             {
                 EntitiesToDestroy.Add(instance);
@@ -82,6 +106,7 @@ namespace TheWorkforce.Entities
             foreach (var entity in EntitiesToDestroy)
             {
                 InstanceMappedToId.Remove(entity.GetId());
+                ActiveEntities.Remove(entity);
             }
             EntitiesToDestroy.Clear();
         }

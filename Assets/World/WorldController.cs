@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using TheWorkforce.Game_State;
 using System.Collections;
+using TheWorkforce.Entities;
 
 // -> Player Moves 
 // -> Inform World Controller 
@@ -35,8 +36,45 @@ namespace TheWorkforce
         public event WorldPlayerPositionUpdateHandler OnWorldPlayerPositionUpdate;
         #endregion
 
-        #region IManager Implementation
+        #region Public Indexers
+        public TileController this[Vector2 chunkPosition, Vector2 tilePosition]
+        {
+            get
+            {
+                ChunkController chunkController = ChunkControllers.Find(c => c.Chunk != null && c.Chunk.Position == chunkPosition);
+                if(chunkController != null)
+                {
+                    return chunkController[tilePosition];
+                }
+                return null;
+            }
+        }
+        #endregion
+
+        #region Public Members
+        /// <summary>
+        /// A list of chunk controllers that are used to display the local area to the player
+        /// </summary>
+        public readonly List<ChunkController> ChunkControllers = new List<ChunkController>();
         public GameManager GameManager { get; private set; }
+        #endregion
+
+        #region Private Members
+        // private List<ChunkController> _availableChunkControllers;
+        private bool _hasInitialised = false;
+        private Dictionary<Vector2, List<int>> _allChunksLoadedByPlayerPositions;
+        private World _world;
+        private WorldGeneration _worldGeneration;
+        private GameObject _gameWorldAnchorObject;
+        #endregion
+
+        #region NetworkBehaviour Overrides
+        public override void OnStartLocalPlayer()
+        {
+            Local = this;
+            WorldControllerStartup();
+        }
+        #endregion
 
         public void Startup(GameManager gameManager)
         {
@@ -67,46 +105,6 @@ namespace TheWorkforce
             Debug.Log("[WorldController : IManager] - Startup() \n"
                     + "Server Seed: " + _world.Seed);
         }
-        #endregion
-
-        #region Public Indexers
-        public TileController this[Vector2 chunkPosition, Vector2 tilePosition]
-        {
-            get
-            {
-                ChunkController chunkController = ChunkControllers.Find(c => c.Chunk != null && c.Chunk.Position == chunkPosition);
-                if(chunkController != null)
-                {
-                    return chunkController[tilePosition];
-                }
-                return null;
-            }
-        }
-        #endregion
-
-        #region Public Members
-        /// <summary>
-        /// A list of chunk controllers that are used to display the local area to the player
-        /// </summary>
-        public readonly List<ChunkController> ChunkControllers = new List<ChunkController>();
-        #endregion
-
-        #region Private Members
-        // private List<ChunkController> _availableChunkControllers;
-        private bool _hasInitialised = false;
-        private Dictionary<Vector2, List<int>> _allChunksLoadedByPlayerPositions;
-        private World _world;
-        private WorldGeneration _worldGeneration;
-        private GameObject _gameWorldAnchorObject;
-        #endregion
-
-        #region NetworkBehaviour Overrides
-        public override void OnStartLocalPlayer()
-        {
-            Local = this;
-            WorldControllerStartup();
-        }
-        #endregion
 
         public IEnumerator InitialiseConnection(Action callback)
         {
@@ -117,6 +115,14 @@ namespace TheWorkforce
             }
 
             CmdRequestAllLoadedChunks();
+            while(!_hasInitialised)
+            {
+                yield return null;
+            }
+
+            _hasInitialised = false;
+
+            CmdRequestAllEntities();
             while(!_hasInitialised)
             {
                 yield return null;
@@ -347,6 +353,49 @@ namespace TheWorkforce
             Debug.Log("[WorldController] - CmdRequestAllLoadedChunks()");
         }
 
+        [Command]
+        private void CmdRequestAllEntities()
+        {
+            int bytesLeft = 1400 - sizeof(bool); // packet size - bool
+            
+            List<uint> entityIds = new List<uint>();
+            List<ushort> dataIds = new List<ushort>();
+            List<byte> payload = new List<byte>();
+
+            int numberOfEntities = EntityCollection.Instance().ActiveEntities.Count;
+            for(int i = 0; i < numberOfEntities; ++i)
+            {
+                EntityInstance entityInstance = EntityCollection.Instance().ActiveEntities[i];
+                EntityData entityData = entityInstance.GetData();
+                bytesLeft -= sizeof(uint); // The EntityInstanceId
+                bytesLeft -= sizeof(ushort); // The EntityDataId
+                bytesLeft -= entityData.PacketSize(); // Payload
+
+                // Cannot accomodate this entity within the packet
+                if (bytesLeft < 0)
+                {
+                    TargetReceiveEntities(connectionToClient, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray(), false);
+                    entityIds.Clear();
+                    dataIds.Clear();
+                    payload.Clear();
+                    bytesLeft = 1400 - sizeof(bool);
+                }
+
+                entityIds.Add(entityInstance.GetId());
+                dataIds.Add(entityData.Id);
+                payload.AddRange(entityInstance.GetPacket());
+
+                // Last Entity to add
+                if(i == numberOfEntities - 1)
+                {
+                    TargetReceiveEntities(connectionToClient, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray(), true);
+                    entityIds.Clear();
+                    dataIds.Clear();
+                    payload.Clear();
+                }
+            }
+        }
+
         [TargetRpc]
         private void TargetReceiveChunks(NetworkConnection conn, NetworkChunk[] networkChunks, bool finished)
         {
@@ -356,6 +405,17 @@ namespace TheWorkforce
             Debug.Log("[WorldController] - TargetReceiveChunks(NetworkConnection, NetworkChunk[])");
         }
 
+        [TargetRpc]
+        private void TargetReceiveEntities(NetworkConnection conn, uint[] entityIds, ushort[] dataIds, byte[] entityPayload, bool finished)
+        {
+            int offset = 0;
+
+            for(int i = 0; i < entityIds.Length; ++i)
+            {
+                EntityCollection.Instance().CreateEntity(dataIds[i], entityIds[i], entityPayload, ref offset);
+            }
+            _hasInitialised = finished;
+        }
         /// <summary>
         /// Rpc informing all clients to remove the chunks provided from their list of loaded chunks
         /// </summary>
@@ -402,19 +462,6 @@ namespace TheWorkforce
         {
             Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
             Local._world.AddChunks(unpackedChunks);
-            // List<ChunkController> chunkControllersToSet = ChunkControllers
-            //     .Where(value =>
-            //         value.Chunk == null || _world.ChunksSurroundingLocalPlayer.Contains(value.Chunk.Position) != true)
-            //     .ToList();
-    
-            // List<Chunk> chunksToDisplay = unpackedChunks
-            //     .Where(value => _world.ChunksSurroundingLocalPlayer.Contains(value.Position))
-            //     .ToList();
-    
-            // for (int i = 0; i < chunksToDisplay.Count; i++)
-            // {
-            //     chunkControllersToSet[i].SetChunk(chunksToDisplay[i], _world);
-            // }
         }
         #endregion
     }

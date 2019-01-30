@@ -7,17 +7,27 @@ namespace TheWorkforce.Entities
 {
     public class OreEntity : EntityInstance, IInteract
     {
+        public ushort Amount;
         private readonly OreData _data;
 
-        public ushort Amount;
-        // TODO: TicksToHarvest should be moved to OreData
-        public ushort TicksToHarvest;
-
-        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data) : base(id, x, y, onDestroy)
+        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data, ushort amount) : base(id, x, y, onDestroy)
         {
-            Amount = 10;
-            TicksToHarvest = 120;
+            Amount = amount;
             _data = data;
+        }
+
+        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data) 
+            : this(id, x, y, onDestroy, data, 10)
+        {
+        }
+
+        public override byte[] GetPacket()
+        {
+            byte[] bytes = new byte[_data.PacketSize()];
+            Array.Copy(BitConverter.GetBytes(X), bytes, sizeof(int));
+            Array.Copy(BitConverter.GetBytes(Y), 0, bytes, 4, sizeof(int));
+            Array.Copy(BitConverter.GetBytes(Amount), 0, bytes, 8, sizeof(ushort));
+            return bytes;
         }
 
         public override uint GetDataTypeId()
@@ -33,13 +43,8 @@ namespace TheWorkforce.Entities
         public override void Display(EntityView entityView)
         {
             _data.Display(entityView);
-            entityView.SetDescription("Harvest Time: " + TicksToHarvest.ToString());
+            entityView.SetDescription("Harvest Time: " + _data.TicksToHarvest.ToString());
             entityView.SetImageAmount(Amount);
-        }
-
-        public override void Hide()
-        {
-            _data.Hide();
         }
 
         public Interaction Interact(EntityInstance initiator)
@@ -47,7 +52,7 @@ namespace TheWorkforce.Entities
             IInventory inventory = initiator as IInventory;
             if(inventory != null)
             {
-                return new HarvestInteraction(this, _data, DecreaseAmount, inventory, TicksToHarvest);
+                return new HarvestInteraction(this, _data, DecreaseAmount, inventory, _data.TicksToHarvest);
             }
             return null;
         }

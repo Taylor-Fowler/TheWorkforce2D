@@ -17,9 +17,12 @@ namespace TheWorkforce.Entities
             Id = id;
         }
 
-        public abstract void Display(EntityView entityView);
-        public abstract void Hide();
+        public virtual int PacketSize()
+        {
+            return sizeof(int) * 2;
+        }
 
+        public abstract void Display(EntityView entityView);
 
         /// <summary>
         /// Create Instance is called when an entity is added to the game, this can be through one of the following ways:

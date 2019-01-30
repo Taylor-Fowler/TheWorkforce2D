@@ -107,7 +107,7 @@ namespace TheWorkforce
 
             if (EventSystem.current.IsPointerOverGameObject())
             {
-                _activeInstance?.Hide();
+                NullifyEntityReference();
             }
             else
             {
@@ -191,8 +191,8 @@ namespace TheWorkforce
 
         private void NullifyEntityReference()
         {
-            _activeInstance?.Hide();
             _activeInstance = null;
+            _entityView.SetEntity(_activeInstance);
         }
 
         private void ResetInteraction()

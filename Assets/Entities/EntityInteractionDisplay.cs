@@ -8,6 +8,11 @@ namespace TheWorkforce
         [SerializeField] private GameObject _harvestBackground;
         [SerializeField] private Image _harvestCurrentAmount;
 
+        private void Start()
+        {
+            HideHarvest();
+        }
+
         public void DisplayHarvest(ushort ticksLeft, ushort ticksTotal)
         {
             _harvestBackground.SetActive(true);

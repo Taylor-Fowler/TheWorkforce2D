@@ -14,15 +14,16 @@ namespace TheWorkforce.Entities
         public float HeatRequired = 10.0f;
         public float HeatGenerationRate = 2.0f;
 
+        public override int PacketSize()
+        {
+            return base.PacketSize();
+        }
+
         public override void Display(EntityView entityView)
         {
             entityView.SetTitle(Name);
             entityView.SetDescription(Description);
             entityView.SetImage(Sprite);
-        }
-
-        public override void Hide()
-        {
         }
 
         public override GameObject Template()

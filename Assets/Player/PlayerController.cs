@@ -31,13 +31,11 @@ namespace TheWorkforce
         [SerializeField] private GameObject _cameraPrefab;
         [SerializeField] private GameObject _inventoryPrefab;
         [SerializeField] private GameObject _toolbeltPrefab;
-        [SerializeField] private GameObject _itemInspectorPrefab;
         [SerializeField] private GameObject _hudOptionsPrefab;
         [SerializeField] private EntityViewLink _entityViewLink;
 
         private MouseController _mouseController;
         private PlayerInventoryDisplay _inventoryDisplay;
-        private EntityInstance _mouseOverInstance;
         //private ToolbeltDisplay _toolbeltDisplay;
         #endregion
 
@@ -70,12 +68,19 @@ namespace TheWorkforce
             _mouseController.SetEntityCollection(GameManager.EntityCollection);
             _mouseController.SetWorldController(GameManager.WorldController);
             CmdStartAll();
+            // All other players on the client should listen for when the player is ready and then initialise themselves also.
+            // Local Player tells other players on this client (who are already in game) that they should initialise
+
             //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
         }
 
         #region Unity API
         private void Update()
         {
+            // Dont update if...
+            //  - Not the local player
+            //  - The game manager hasnt been initialised yet
+            //  - The game hasnt started
             if (!isLocalPlayer || GameManager == null || !_hasStarted)
             {
                 return;

@@ -47,6 +47,11 @@ namespace TheWorkforce.Entities
 
         }
 
+        public override byte[] GetPacket()
+        {
+            throw new NotImplementedException();
+        }
+
         public override uint GetDataTypeId()
         {
             return _data.Id;
@@ -60,11 +65,6 @@ namespace TheWorkforce.Entities
         public override void Display(EntityView entityView)
         {
             _data.Display(entityView);
-        }
-
-        public override void Hide()
-        {
-            _data.Hide();
         }
 
         public void ProcessTick(float deltaTime)
