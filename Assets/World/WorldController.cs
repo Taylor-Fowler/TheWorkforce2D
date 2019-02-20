@@ -135,11 +135,13 @@ namespace TheWorkforce
         public void RequestPlayerChunkUpdate(int playerId, Vector2 playerPosition)
         {
             Debug.Log("[WorldController] - RequestPlayerChunkUpdate(int, Vector2)");
-            // Local player tell their client dependant objects that they have moved
+
+            // The local player should notify any listeners of their movement
             if(isLocalPlayer)
             {
                 WorldPlayerPositionUpdate(playerPosition);
             }
+
             // Only the server should process the chunk update
             if(!isServer)
             {

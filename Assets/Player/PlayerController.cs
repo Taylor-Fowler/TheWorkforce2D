@@ -8,15 +8,23 @@ namespace TheWorkforce
 {
     public delegate void PlayerControllerStartup(object source, PlayerController playerController);
 
+    /*
+     * https://docs.unity3d.com/Manual/NetworkBehaviourCallbacks.html
+     * 
+     * 
+     */
+
     /// <summary>
     /// The PlayerController is the bridge between user input and player interaction in the world.
     /// </summary>
     public class PlayerController : NetworkBehaviour, IManager
     {
         /// <summary>
-        /// Called when the local PlayerController starts
+        /// An event that is invoked when the local player starts
         /// </summary>
-        public static event PlayerControllerStartup OnPlayerControllerStartup;
+        public static event PlayerControllerStartup OnLocalPlayerControllerStartup;
+        private static PlayerController Local;
+
 
         public int Id;
         public Player Player { get; protected set; }
@@ -26,7 +34,6 @@ namespace TheWorkforce
         #region Private Members
         // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
         // The local player controller, the local controller has a reference to the game manager
-        private static PlayerController Local;
         private bool _hasStarted = false;
         [SerializeField] private GameObject _cameraPrefab;
         [SerializeField] private GameObject _inventoryPrefab;
@@ -75,6 +82,25 @@ namespace TheWorkforce
         }
 
         #region Unity API
+        private void Start()
+        {
+            if (isServer || isLocalPlayer)
+            {
+                CreateLocalPlayer();
+            }
+            else
+            {
+                CreateRemotePlayer();
+            }
+
+            if (isLocalPlayer)
+            {
+                _inventoryDisplay.SetInventory(Player.Inventory);
+                _inventoryDisplay.Hide();
+                _mouseController.SetPlayer(Player);
+            }
+        }
+
         private void Update()
         {
             // Dont update if...
@@ -121,10 +147,27 @@ namespace TheWorkforce
             _mouseController.UpdateMouseOver();
         }
 
+        private void CreateLocalPlayer()
+        {
+            Player = new Player(this, new SlotCollection(45), new PlayerMovement(
+                        Id,
+                        3f,
+                        GetComponent<Animator>(),
+                        Local.GameManager.WorldController.RequestPlayerChunkUpdate,
+                        transform
+                    )
+                );
+        }
+
+        private void CreateRemotePlayer()
+        {
+            Player = new Player(this, new SlotCollection(45), new AnimatedMovement(3f, GetComponent<Animator>()));
+        }
+
         #region Custom Event Invoking
         private void PlayerControllerStartup()
         {
-            OnPlayerControllerStartup?.Invoke(this, this);
+            OnLocalPlayerControllerStartup?.Invoke(this, this);
         }
         #endregion
 
@@ -157,29 +200,24 @@ namespace TheWorkforce
             MouseWorldPosition = Vector2.zero;
             _hasStarted = true;
 
-            // All players on the server have a reference to the world controller request player chunk update
-            if (isServer || isLocalPlayer)
-            {
-                Player = new Player(this, new SlotCollection(45), new PlayerMovement(
-                        Id,
-                        3f,
-                        GetComponent<Animator>(),
-                        Local.GameManager.WorldController.RequestPlayerChunkUpdate,
-                        transform
-                    )
-                );
-            }
-            else
-            {
-                Player = new Player(this, new SlotCollection(45), new AnimatedMovement(3f, GetComponent<Animator>()));
-            }
+            // The server should treat all player controllers as local players in terms of initialisation
+            // This is so that when ANY player moves, the server will process the move and be able to 
+            // update chunk dependencies based on the movement
+            //if (isServer || isLocalPlayer)
+            //{
+            //    CreateLocalPlayer();
+            //}
+            //else
+            //{
+            //    CreateRemotePlayer();
+            //}
 
-            if (isLocalPlayer)
-            {
-                _inventoryDisplay.SetInventory(Player.Inventory);
-                _inventoryDisplay.Hide();
-                _mouseController.SetPlayer(Player);
-            }
+            //if (isLocalPlayer)
+            //{
+            //    _inventoryDisplay.SetInventory(Player.Inventory);
+            //    _inventoryDisplay.Hide();
+            //    _mouseController.SetPlayer(Player);
+            //}
         }
         #endregion
     }

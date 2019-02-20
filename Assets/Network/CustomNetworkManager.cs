@@ -5,19 +5,23 @@ using TheWorkforce.Game_State;
 
 namespace TheWorkforce.Network
 {
+    /*
+     * IMPORTANT REFERENCES:
+     * 
+     * Callback order: https://docs.unity3d.com/Manual/NetworkManagerCallbacks.html
+     * https://docs.unity3d.com/Manual/UNetManager.html
+     * 
+     * 
+     */
     public class CustomNetworkManager : NetworkManager, IManager
     {
-        #region IManager Implementation
         public GameManager GameManager { get; private set; }
+        private Action _loadGame;
 
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
         }
-        #endregion
-
-        private short _currentPlayerId = 0;
-        private Action _loadGame;
 
         public void SetLoadGameAction(Action loadGame)
         {
@@ -54,10 +58,9 @@ namespace TheWorkforce.Network
         public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
         {
             var player = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-            NetworkServer.AddPlayerForConnection(conn, player, ++_currentPlayerId);
+            NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
 
-            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnServerAddPlayer(NetworkConnection, short) \n"
-                    + "_currentPlayerId: " + _currentPlayerId.ToString());
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnServerAddPlayer(NetworkConnection, short)");
         }
         #endregion
     }

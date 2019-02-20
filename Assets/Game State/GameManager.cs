@@ -20,10 +20,6 @@ namespace TheWorkforce.Game_State
         public event ApplicationStateChangeHandler OnApplicationStateChange;
         #endregion
 
-        #region Static Members
-        public static float GameTick;
-        #endregion
-
         #region Properties
         public PlayerController PlayerController { get; private set; }
         public WorldController WorldController { get; private set; }
@@ -46,13 +42,13 @@ namespace TheWorkforce.Game_State
             _currentGameState = EGameState.NotLoaded;
 
             WorldController.OnWorldControllerStartup += WorldController_OnWorldControllerStartup;
-            PlayerController.OnPlayerControllerStartup += PlayerController_OnPlayerControllerStartup;
+            PlayerController.OnLocalPlayerControllerStartup += PlayerController_OnLocalPlayerControllerStartup;
 
-            StartCoroutine(InitialiseAssets(FinishedLoadingAssets));
+            StartCoroutine(InitialiseAssets());
         }
         #endregion
 
-        private IEnumerator InitialiseAssets(Action callback)
+        private IEnumerator InitialiseAssets()
         {
             _entityCollection.Initialise();
             TerrainTileSet.InitialiseTileSets();
@@ -69,11 +65,6 @@ namespace TheWorkforce.Game_State
             #endif
 
             yield return new WaitForSeconds(1f);
-            callback();
-        }
-
-        private void FinishedLoadingAssets()
-        {
             ApplicationStateChange(EApplicationState.Menu);
         }
 
@@ -93,10 +84,13 @@ namespace TheWorkforce.Game_State
 
         private IEnumerator IncrementTickTime()
         {
-            while(true)
+            while(_currentApplicationState == EApplicationState.Ingame)
             {
-                GameTime.Update();
-                GameTime.PostUpdate();
+                if(_currentGameState == EGameState.Active)
+                {
+                    GameTime.Update();
+                    GameTime.PostUpdate();
+                }
                 yield return new WaitForFixedUpdate();
             }
         }
@@ -126,7 +120,7 @@ namespace TheWorkforce.Game_State
             StartupIngameControllers();
         }
 
-        private void PlayerController_OnPlayerControllerStartup(object source, PlayerController playerController)
+        private void PlayerController_OnLocalPlayerControllerStartup(object source, PlayerController playerController)
         {
             PlayerController = playerController;
             StartupIngameControllers();
