@@ -1,53 +1,52 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using TheWorkforce.Items;
+using UnityEngine;
 
 namespace TheWorkforce.Crafting
 {
-    public static class Recipes
+    [CreateAssetMenu(fileName = "New Recipes List", menuName = "Scriptable Objects/Crafting/Recipes")]
+    public class Recipes : ScriptableObject
     {
-        private static Dictionary<ushort, List<CraftingRecipe>> _producedInsideOf;
-        private static Dictionary<ushort, List<CraftingRecipe>> _producedItemRecipes;
-        private static Dictionary<ushort, List<CraftingRecipe>> _requiredItemRecipes;
+        public static Recipes Instance => _instance;
+        private static Recipes _instance;
 
+        [SerializeField] private CraftingRecipe[] _allRecipes;
+        private ushort _currentId = 0;
 
-        public static void Initialise()
+        private Dictionary<ushort, List<CraftingRecipe>> _producedInsideOf;
+        private Dictionary<ushort, List<CraftingRecipe>> _producedItemRecipes;
+        private Dictionary<ushort, List<CraftingRecipe>> _requiredItemRecipes;
+
+        /// <summary>
+        /// Initialises the lists required for managing all of the crafting recipes and then
+        /// proceeds to initialise the attached recipes by giving them an Id managed by this object
+        /// </summary>
+        public void Initialise()
         {
+            if(_instance == null)
+            {
+                _instance = this;
+            }
             _producedInsideOf = new Dictionary<ushort, List<CraftingRecipe>>();
             _producedItemRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
             _requiredItemRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
 
-            //AddRecipe(new CraftingRecipe
-            //    (
-            //        new ushort[][]
-            //        {
-            //            new ushort[] { Stone.ItemData.Id, 5 }
-            //        },
-            //        new ushort[][]
-            //        {
-            //            new ushort[] { Furnace.ItemData.Id, 1 }
-            //        },
-            //        2.0f
-            //    )
-            //);
-
-            //AddRecipe(new CraftingRecipe
-            //    (
-            //        new ushort[][]
-            //        {
-            //            new ushort[] { IronOre.ItemData.Id, 1 }
-            //        },
-            //        new ushort[][]
-            //        {
-            //            new ushort[] { IronIngot.ItemData.Id, 1 }
-            //        },
-            //        5.0f
-            //    ),
-            //    Furnace.ItemData.Id
-            //);
+            foreach(var recipe in _allRecipes)
+            {
+                recipe.Initialise(++_currentId, this);
+            }
         }
 
-        public static CraftingRecipe Get(ushort ingredientId, ushort insideId)
+        /// <summary>
+        /// Clears the singleton reference and resets the Id counter
+        /// </summary>
+        public void Clear()
+        {
+            _currentId = 0;
+            _instance = null;
+        }
+
+        public CraftingRecipe Get(ushort ingredientId, ushort insideId)
         {
             List<CraftingRecipe> insideList = null;
 
@@ -63,35 +62,28 @@ namespace TheWorkforce.Crafting
             return null;
         }
 
-        private static void AddRecipe(CraftingRecipe recipe)
+        public void RegisterProduce(EditorItemStack[] itemsProduced, CraftingRecipe recipe)
         {
-            AddRecipe(recipe, 0);
-        }
-
-        private static void AddRecipe(CraftingRecipe recipe, ushort insideId)
-        {
-            AddToDictionary(_producedInsideOf, insideId, recipe);
-            RegisterProduce(recipe);
-            RegisterRequirements(recipe);
-        }
-
-        private static void RegisterProduce(CraftingRecipe recipe)
-        {
-            for(int i = 0; i < recipe.ItemsProduced.Count; i += 2)
+            foreach(EditorItemStack itemStack in itemsProduced)
             {
-                AddToDictionary(_producedItemRecipes, recipe.ItemsProduced[i], recipe);
+                AddToDictionary(_producedItemRecipes, itemStack.Item.Id, recipe);
             }
         }
 
-        private static void RegisterRequirements(CraftingRecipe recipe)
+        public void RegisterRequirements(EditorItemStack[] itemsRequired, CraftingRecipe recipe)
         {
-            for (int i = 0; i < recipe.ItemsRequired.Count; i += 2)
+            foreach (EditorItemStack itemStack in itemsRequired)
             {
-                AddToDictionary(_requiredItemRecipes, recipe.ItemsRequired[i], recipe);
+                AddToDictionary(_requiredItemRecipes, itemStack.Item.Id, recipe);
             }
         }
 
-        private static void AddToDictionary(Dictionary<ushort, List<CraftingRecipe>> dictionary, ushort itemId, CraftingRecipe recipe)
+        public void RegisterProducedInside(ushort machineId, CraftingRecipe recipe)
+        {
+            AddToDictionary(_producedInsideOf, machineId, recipe);
+        }
+
+        private void AddToDictionary(Dictionary<ushort, List<CraftingRecipe>> dictionary, ushort itemId, CraftingRecipe recipe)
         {
             List<CraftingRecipe> recipesAssociatedWithItem;
             if (!dictionary.TryGetValue(itemId, out recipesAssociatedWithItem))
@@ -99,7 +91,6 @@ namespace TheWorkforce.Crafting
                 recipesAssociatedWithItem = new List<CraftingRecipe>();
                 dictionary.Add(itemId, recipesAssociatedWithItem);
             }
-
             recipesAssociatedWithItem.Add(recipe);
         }
     }

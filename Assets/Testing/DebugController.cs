@@ -5,26 +5,11 @@ namespace TheWorkforce.Testing
 {
     public class DebugController : MonoBehaviour, IManager
     {
-        #region IManager Implementation
         public GameManager GameManager { get; private set; }
-
-        public void Startup(GameManager gameManager)
-        {
-            GameManager = gameManager;
-            GameManager.OnApplicationStateChange += GameManager_OnApplicationStateChange;
-        }
-
-        #endregion
-
-        #region Public Members
         public GameObject DebugCanvas;
         public DebugItemsLoaded DebugItemsLoaded;
-        #endregion
 
-        #region Private Members
         [SerializeField] private DebugPlayerDetails _debugPlayerDetails;
-        #endregion
-
 
         #region Unity API
         private void Update()
@@ -42,6 +27,12 @@ namespace TheWorkforce.Testing
         }
         #endregion
 
+        public void Startup(GameManager gameManager)
+        {
+            GameManager = gameManager;
+            GameManager.OnApplicationStateChange += GameManager_OnApplicationStateChange;
+        }
+
         #region Custom Event Responses
         private void GameManager_OnApplicationStateChange(object source, ApplicationStateArgs applicationStateArgs)
         {
@@ -57,10 +48,6 @@ namespace TheWorkforce.Testing
             Debug.Log("[DebugController] - GameManager_OnApplicationStateChange(object, ApplicationStateArgs) \n " 
                     + "applicationStateArgs.Current: " + applicationStateArgs.Current.ToString());
         }
-        #endregion
-
-        #region Button Events
-
         #endregion
     }
 }

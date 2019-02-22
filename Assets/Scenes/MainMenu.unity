@@ -285,6 +285,7 @@ MonoBehaviour:
   _currentApplicationState: 0
   _currentGameState: 0
   _networkManager: {fileID: 346675080}
+  _recipes: {fileID: 11400000, guid: 475a752739ef83148a4a0ac28c86ad7c, type: 2}
   _debugController: {fileID: 723856416}
 --- !u!114 &346675080
 MonoBehaviour:

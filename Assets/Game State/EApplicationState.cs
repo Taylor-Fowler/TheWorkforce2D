@@ -5,6 +5,7 @@ namespace TheWorkforce.Game_State
         Launching,
         Menu,
         Loading,
-        Ingame
+        Ingame,
+        ReturningToMenu
     };
 }

@@ -15,25 +15,22 @@ namespace TheWorkforce.Game_State
     
     public class GameManager : MonoBehaviour
     {
-        #region Custom Event Declarations
         public event GameStateChangeHandler OnGameStateChange;
         public event ApplicationStateChangeHandler OnApplicationStateChange;
-        #endregion
 
-        #region Properties
         public PlayerController PlayerController { get; private set; }
         public WorldController WorldController { get; private set; }
         public CustomNetworkManager NetworkManager => _networkManager;
         public EntityCollection EntityCollection => _entityCollection;
-        #endregion
+        public Recipes Recipes => _recipes;
 
-        #region Private Members
         [SerializeField] private EntityCollection _entityCollection;
         [SerializeField] private EApplicationState _currentApplicationState;
         [SerializeField] private EGameState _currentGameState;
+
         [SerializeField] private CustomNetworkManager _networkManager;
+        [SerializeField] private Recipes _recipes;
         [SerializeField] private DebugController _debugController;
-        #endregion
         
         #region Unity API
         private void Awake()
@@ -45,6 +42,11 @@ namespace TheWorkforce.Game_State
             PlayerController.OnLocalPlayerControllerStartup += PlayerController_OnLocalPlayerControllerStartup;
 
             StartCoroutine(InitialiseAssets());
+        }
+
+        private void OnDestroy()
+        {
+            Recipes.Clear();
         }
         #endregion
 
@@ -77,6 +79,7 @@ namespace TheWorkforce.Game_State
                 {
                     PlayerController.Startup(this);
                     ApplicationStateChange(EApplicationState.Ingame);
+                    GameStateChange(EGameState.Active);
                     StartCoroutine(IncrementTickTime());
                 }));
             }

@@ -27,106 +27,109 @@ namespace TheWorkforce
 
     public class WorldController : NetworkBehaviour, IManager
     {
-        #region Static Members
-        private static WorldController Local;
-        #endregion
-
-        #region Custom Event Declarations
         public static event WorldControllerStartup OnWorldControllerStartup;
+        private static WorldController Local;
+
         public event WorldPlayerPositionUpdateHandler OnWorldPlayerPositionUpdate;
-        #endregion
 
-        #region Public Indexers
-        public TileController this[Vector2 chunkPosition, Vector2 tilePosition]
-        {
-            get
-            {
-                ChunkController chunkController = ChunkControllers.Find(c => c.Chunk != null && c.Chunk.Position == chunkPosition);
-                if(chunkController != null)
-                {
-                    return chunkController[tilePosition];
-                }
-                return null;
-            }
-        }
-        #endregion
-
-        #region Public Members
         /// <summary>
         /// A list of chunk controllers that are used to display the local area to the player
         /// </summary>
         public readonly List<ChunkController> ChunkControllers = new List<ChunkController>();
-        public GameManager GameManager { get; private set; }
-        #endregion
 
-        #region Private Members
+        /// <summary>
+        /// A reference to the active game manager
+        /// </summary>
+        public GameManager GameManager { get; private set; }
+
         // private List<ChunkController> _availableChunkControllers;
         private bool _hasInitialised = false;
         private Dictionary<Vector2, List<int>> _allChunksLoadedByPlayerPositions;
         private World _world;
         private WorldGeneration _worldGeneration;
         private GameObject _gameWorldAnchorObject;
-        #endregion
 
-        #region NetworkBehaviour Overrides
+        public TileController this[Vector2 chunkPosition, Vector2 tilePosition]
+        {
+            get
+            {
+                ChunkController chunkController = ChunkControllers.Find(c => c.Chunk != null && c.Chunk.Position == chunkPosition);
+                if (chunkController != null)
+                {
+                    return chunkController[tilePosition];
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Initialises the local player reference and attempts to startup this controller
+        /// </summary>
         public override void OnStartLocalPlayer()
         {
             Local = this;
             WorldControllerStartup();
         }
-        #endregion
 
+        /// <summary>
+        /// Stores the game manager reference and initialises the world objects and world generation object (if server)
+        /// </summary>
+        /// <param name="gameManager"></param>
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
+            // Create the world object and its anchor
             _world = new World(784893570);
             _gameWorldAnchorObject = new GameObject
             {
                 name = "World"
             };
+            // Set the z position to 1, this is important for ordering of tiles
             _gameWorldAnchorObject.transform.position = new Vector3(0f, 0f, 1f);
             _allChunksLoadedByPlayerPositions = new Dictionary<Vector2, List<int>>();
-
-            for (int x = 0; x < Chunk.KEEP_LOADED; x++)
+            // Initialise all the chunk controllers that we will ever need
+            for(int i = 0; i < Chunk.KEEP_LOADED * Chunk.KEEP_LOADED; ++i)
             {
-                for (int y = 0; y < Chunk.KEEP_LOADED; y++)
-                {
-                    GameObject chunkObject = new GameObject();
-                    chunkObject.transform.SetParent(_gameWorldAnchorObject.transform);
-
-                    ChunkControllers.Add(chunkObject.AddComponent<ChunkController>());
-                }
+                GameObject chunkObject = new GameObject();
+                chunkObject.transform.SetParent(_gameWorldAnchorObject.transform);
+                ChunkControllers.Add(chunkObject.AddComponent<ChunkController>());
             }
+            // The server controls the world generation and so it should be the only player that creates world generation
             if (isServer)
             {
                 _worldGeneration = new WorldGeneration(_world.Seed, _world.NegativeXSeed, _world.NegativeYSeed);
             }
-
             Debug.Log("[WorldController : IManager] - Startup() \n"
                     + "Server Seed: " + _world.Seed);
         }
 
         public IEnumerator InitialiseConnection(Action callback)
         {
+            // Server does not need to worry about hearing from the other players as it is the first player
             if(isServer)
             {
                 callback();
                 yield break;
             }
 
+            // Before we can say we are safely initialised, we must request all of the loaded chunks
             CmdRequestAllLoadedChunks();
             while(!_hasInitialised)
             {
                 yield return null;
             }
 
+            // We will reuse this going further so reset it
             _hasInitialised = false;
 
+            // We must know of all the enitities that are actively processing in the world before we can resume gameplay on all clients
             CmdRequestAllEntities();
             while(!_hasInitialised)
             {
                 yield return null;
             }
+
+            // Connection has been initialised, inform the listener/s
             callback();
         }
 

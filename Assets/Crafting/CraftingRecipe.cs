@@ -1,49 +1,24 @@
 using System.Collections.Generic;
-using TheWorkforce.Items;
+using UnityEngine;
 
 namespace TheWorkforce.Crafting
 {
-    public class CraftingRecipe
+    [CreateAssetMenu(fileName = "New Crafting Recipe", menuName = "Scriptable Objects/Crafting/Crafting Recipe")]
+    public class CraftingRecipe : ScriptableObject
     {
-        private static ushort CurrentId = 0;
+        public ushort Id { get; private set;  }
+        public float CraftingTime => _craftingTime;
 
-        public ushort Id { get; }
-        public float CraftingTime { get; }
-        public List<ushort> ItemsRequired { get; }
-        public List<ushort> ItemsProduced { get; }
+        [SerializeField] private float _craftingTime;
+        [SerializeField] private EditorItemStack[] _itemsRequired;
+        [SerializeField] private EditorItemStack[] _itemsProduced;
 
-        private CraftingRecipe()
+        public void Initialise(ushort id, Recipes allRecipes)
         {
-            Id = ++CurrentId;
-            ItemsRequired = new List<ushort>();
-            ItemsProduced = new List<ushort>();
-        }
-
-        public CraftingRecipe(ushort[][] required, ushort[][] produced, float craftingTime) : this()
-        {
-            foreach (var requirement in required)
-            {
-                RegisterRequirement(requirement[0], requirement[1]);
-            }
-
-            foreach (var produce in produced)
-            {
-                RegisterProduce(produce[0], produce[1]);
-            }
-
-            CraftingTime = craftingTime;
-        }
-
-        public void RegisterRequirement(ushort itemRequiredId, ushort required)
-        {
-            ItemsRequired.Add(itemRequiredId);
-            ItemsRequired.Add(required);
-        }
-
-        public void RegisterProduce(ushort itemProducedId, ushort produced)
-        {
-            ItemsProduced.Add(itemProducedId);
-            ItemsProduced.Add(produced);
+            Id = id;
+            allRecipes.RegisterProduce(_itemsProduced, this);
+            allRecipes.RegisterRequirements(_itemsRequired, this);
+            allRecipes.RegisterProducedInside(0, this);
         }
     }
 

@@ -152,7 +152,7 @@ namespace TheWorkforce.Entities
             ItemStack outputStack = Output.ItemStack;
             ItemStack inputStack = Input.ItemStack;
 
-            CurrentlyProcessing = Recipes.Get(inputStack.Item.Id, _data.Id);
+            CurrentlyProcessing = Recipes.Instance.Get(inputStack.Item.Id, _data.Id);
         }
 
         public Interaction Interact(EntityInstance initiator)
