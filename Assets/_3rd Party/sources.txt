@@ -1,0 +1,2 @@
+UI Blur: https://gist.github.com/JohannesMP/7d62f282705169a2855a0aac315ff381
+	 https://forum.unity.com/threads/solved-dynamic-blurred-background-on-ui.345083/
