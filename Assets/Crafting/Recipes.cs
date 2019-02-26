@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,12 +11,37 @@ namespace TheWorkforce.Crafting
         public static Recipes Instance => _instance;
         private static Recipes _instance;
 
+        /// <summary>
+        /// Backing field for the OnInitialised event...explicit events require this
+        /// </summary>
+        private event Action _onInitialised;
+        public event Action OnInitialised
+        {
+            add
+            {
+                if(_isInitialised)
+                {
+                    value.Invoke();
+                }
+                else
+                {
+                    _onInitialised += value;
+                }
+            }
+            remove
+            {
+                _onInitialised -= value;
+            }
+        }
+
+        public CraftingRecipe[] AllRecipes => _allRecipes;
         [SerializeField] private CraftingRecipe[] _allRecipes;
+        private bool _isInitialised = false;
         private ushort _currentId = 0;
 
         private Dictionary<ushort, List<CraftingRecipe>> _producedInsideOf;
-        private Dictionary<ushort, List<CraftingRecipe>> _producedItemRecipes;
-        private Dictionary<ushort, List<CraftingRecipe>> _requiredItemRecipes;
+        private Dictionary<ushort, List<CraftingRecipe>> _produceRecipes;
+        private Dictionary<ushort, List<CraftingRecipe>> _ingredientsRecipes;
 
         /// <summary>
         /// Initialises the lists required for managing all of the crafting recipes and then
@@ -28,13 +54,17 @@ namespace TheWorkforce.Crafting
                 _instance = this;
             }
             _producedInsideOf = new Dictionary<ushort, List<CraftingRecipe>>();
-            _producedItemRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
-            _requiredItemRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
+            _produceRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
+            _ingredientsRecipes = new Dictionary<ushort, List<CraftingRecipe>>();
 
             foreach(var recipe in _allRecipes)
             {
                 recipe.Initialise(++_currentId, this);
             }
+
+            _isInitialised = true;
+            Action onInitialisation = _onInitialised;
+            onInitialisation?.Invoke();
         }
 
         /// <summary>
@@ -44,6 +74,7 @@ namespace TheWorkforce.Crafting
         {
             _currentId = 0;
             _instance = null;
+            _isInitialised = false;
         }
 
         public CraftingRecipe Get(ushort ingredientId, ushort insideId)
@@ -53,7 +84,7 @@ namespace TheWorkforce.Crafting
             if(_producedInsideOf.TryGetValue(insideId, out insideList))
             {
                 List<CraftingRecipe> ingredientList = null;
-                if(_requiredItemRecipes.TryGetValue(ingredientId, out ingredientList))
+                if(_ingredientsRecipes.TryGetValue(ingredientId, out ingredientList))
                 {
                     var intersected = insideList.Intersect(ingredientList, new CraftingRecipeComparer());
                     return intersected.GetEnumerator().Current;
@@ -62,19 +93,16 @@ namespace TheWorkforce.Crafting
             return null;
         }
 
-        public void RegisterProduce(EditorItemStack[] itemsProduced, CraftingRecipe recipe)
+        public void RegisterProduce(EditorItemStack itemProduced, CraftingRecipe recipe)
         {
-            foreach(EditorItemStack itemStack in itemsProduced)
-            {
-                AddToDictionary(_producedItemRecipes, itemStack.Item.Id, recipe);
-            }
+            AddToDictionary(_produceRecipes, itemProduced.Item.Id, recipe);
         }
 
-        public void RegisterRequirements(EditorItemStack[] itemsRequired, CraftingRecipe recipe)
+        public void RegisterIngredients(EditorItemStack[] ingredients, CraftingRecipe recipe)
         {
-            foreach (EditorItemStack itemStack in itemsRequired)
+            foreach (EditorItemStack itemStack in ingredients)
             {
-                AddToDictionary(_requiredItemRecipes, itemStack.Item.Id, recipe);
+                AddToDictionary(_ingredientsRecipes, itemStack.Item.Id, recipe);
             }
         }
 

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Name: Furnace Recipe
   m_EditorClassIdentifier: 
   _craftingTime: 1
-  _itemsRequired:
+  _itemProduced:
+    Item: {fileID: 11400000, guid: 63121bf22552f564da808af99ebd45c3, type: 2}
+    Count: 1
+  _ingredients:
   - Item: {fileID: 11400000, guid: dfbce85b93e0a684da677eed13b29369, type: 2}
     Count: 5
-  _itemsProduced:
-  - Item: {fileID: 11400000, guid: 63121bf22552f564da808af99ebd45c3, type: 2}
-    Count: 1

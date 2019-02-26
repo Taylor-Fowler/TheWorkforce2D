@@ -9,7 +9,6 @@ namespace TheWorkforce.Entities
     public class FurnaceData : EntityData, ISlotDisplay
     {
         public EntityViewLink ViewLink;
-        public Sprite Sprite;
 
         public float HeatRequired = 10.0f;
         public float HeatGenerationRate = 2.0f;

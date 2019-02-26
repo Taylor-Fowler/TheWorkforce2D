@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
-using TheWorkforce.Game_State;
-using TheWorkforce.Interfaces;
 
 namespace TheWorkforce.Inventory
 {
+    using Game_State;
+    using Interfaces;
+    using Entities;
+    using System;
+
     public class SlotCollection
     {
         #region Custom Event Declaratations
@@ -79,12 +83,140 @@ namespace TheWorkforce.Inventory
         {
             for(; previous < Size; ++previous)
             {
-                if (_slots[previous].IsEmpty())
+                if (_slots[previous].IsEmpty)
                 {
                     return previous;
                 }
             }
             return -1;
+        }
+
+        public bool TransactionalAdd(ItemStack itemStack)
+        {
+            var slotIndices = GetSlotsForItem(itemStack);
+            List<Tuple<int, ushort>> transactions = new List<Tuple<int, ushort>>();
+
+            // Try to add the item to all slots that already contain the item
+            foreach(var slotIndex in slotIndices)
+            {
+                var slot = _slots[(int)slotIndex];
+                var isSpaceLeft = slot.SpaceLeft;
+                // Make sure there is space left
+                if(isSpaceLeft != null)
+                {
+                    ushort spaceLeft = (ushort)isSpaceLeft;
+                    if(spaceLeft > 0)
+                    {
+                        // We only want to add as much as there is to add, dont just fill up the slot because there is space
+                        if(spaceLeft > itemStack.Count)
+                        {
+                            spaceLeft = itemStack.Count;
+                        }
+                        slot.Add(itemStack);
+                        transactions.Add(new Tuple<int, ushort>((int)slotIndex, spaceLeft));
+                    }
+                }
+
+                if(itemStack.IsEmpty())
+                {
+                    return true;
+                }
+            }
+
+            // Try to add the item to any of the empty slots
+            int nextEmpty = NextEmpty();
+            while (nextEmpty != -1 && !itemStack.IsEmpty())
+            {
+                ushort count = itemStack.Count;
+                _slots[nextEmpty].Add(itemStack);
+                transactions.Add(new Tuple<int, ushort>(nextEmpty, (ushort)(count - itemStack.Count)));
+
+                nextEmpty = NextEmpty(++nextEmpty);
+            }
+
+            if (itemStack.IsEmpty())
+            {
+                return true;
+            }
+
+            Rollback(transactions);
+            return false;
+        }
+
+        public bool TransactionalRemove(EditorItemStack[] editorItemStacks)
+        {
+            // Each transaction consists of a slot ID to identify where the items came from and an
+            // ItemStack which defines what was removed
+            List<Tuple<int, ItemStack>> transactions = new List<Tuple<int, ItemStack>>();
+            //int[] transactions = new int[editorItemStacks.Length * 3];
+            bool success = true;
+
+            foreach(var itemStack in editorItemStacks)
+            {
+                ushort count = itemStack.Count;
+
+                var slots = GetSlotsForItem(itemStack.Item.Id);
+                if(slots != null)
+                {
+                    foreach (var slotIndex in slots)
+                    {
+                        ISlot slot = _slots[(int)slotIndex];
+                        ushort slotCount = slot.ItemStack.Count;
+                        ItemStack removed = null;
+
+                        if (slotCount > count)
+                        {
+                            removed = slot.Remove(count);
+                            slotCount = count;
+                        }
+                        else
+                        {
+                            removed = slot.Remove();
+                        }
+
+                        if (removed != null)
+                        {
+                            transactions.Add(new Tuple<int, ItemStack>((int)slotIndex, removed));
+                        }
+                        count -= slotCount;
+                        // Don't need to remove any more items from the inventory
+                        if (count == 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+                
+
+                if(count > 0)
+                {
+                    success = false;
+                    break;
+                }
+            }
+
+            if(!success)
+            {
+                Rollback(transactions);
+            }
+
+            return success;
+        }
+
+        private void Rollback(List<Tuple<int, ItemStack>> transactions)
+        {
+            foreach(var transaction in transactions)
+            {
+                _slots[transaction.Item1].Add(transaction.Item2);
+            }
+        }
+
+        private void Rollback(List<Tuple<int, ushort>> transactions)
+        {
+            foreach(var transaction in transactions)
+            {
+                _slots[transaction.Item1].Remove(transaction.Item2);
+            }
         }
 
         /// <summary>
@@ -109,6 +241,13 @@ namespace TheWorkforce.Inventory
                 slots = AddItemIdToSlotsMap(itemStack.Item.Id);
             }
 
+            return slots;
+        }
+
+        private List<uint> GetSlotsForItem(ushort id)
+        {
+            List<uint> slots = null;
+            _itemIdFoundInSlots.TryGetValue(id, out slots);
             return slots;
         }
 

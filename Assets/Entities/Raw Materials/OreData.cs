@@ -8,7 +8,6 @@ namespace TheWorkforce.Entities
     public class OreData : EntityData, ISlotDisplay
     {
         public EntityViewLink ViewLink;
-        public Sprite Sprite;
         public Generatable Generatable; // Generation reference that stores how much stone would be generated in a single vein
         public ushort TicksToHarvest => _ticksToHarvest;
         [SerializeField] private ushort _ticksToHarvest = 120;

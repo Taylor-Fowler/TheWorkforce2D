@@ -12,25 +12,11 @@ namespace TheWorkforce.Game_State
         private static List<Action> _postTickActions = new List<Action>();
         private static List<Action> _postTickActionsToRemove = new List<Action>();
 
-        public static void SubscribeToUpdate(TickAction action)
-        {
-            _tickActions.Add(action);
-        }
+        public static void SubscribeToUpdate(TickAction action) => _tickActions.Add(action);
+        public static void UnsubscribeToUpdate(TickAction action) => _tickActionsToRemove.Add(action);
 
-        public static void UnsubscribeToUpdate(TickAction action)
-        {
-            _tickActionsToRemove.Add(action);
-        }
-
-        public static void SubscribeToPostUpdate(Action action)
-        {
-            _postTickActions.Add(action);
-        }
-
-        public static void UnsubscribeToPostUpdate(Action action)
-        {
-            _postTickActionsToRemove.Add(action);
-        }
+        public static void SubscribeToPostUpdate(Action action) => _postTickActions.Add(action);
+        public static void UnsubscribeToPostUpdate(Action action) => _postTickActionsToRemove.Add(action);
 
         public static void Update()
         {

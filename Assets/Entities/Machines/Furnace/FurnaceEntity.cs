@@ -144,7 +144,7 @@ namespace TheWorkforce.Entities
             CurrentlyProcessing = null;
             RecipeTimeProcessed = 0.0f;
 
-            if (Input.IsEmpty())
+            if (Input.IsEmpty)
             {
                 return;
             }

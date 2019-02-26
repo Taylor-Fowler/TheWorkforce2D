@@ -7,9 +7,12 @@ namespace TheWorkforce.Interfaces
         event DirtySlot OnDirty;
 
         ItemStack ItemStack { get; }
+        ushort? SpaceLeft { get; }
+
         bool Add(ItemStack item);
         ItemStack Remove();
+        ItemStack Remove(ushort count);
 
-        bool IsEmpty();
+        bool IsEmpty { get; }
     }
 }

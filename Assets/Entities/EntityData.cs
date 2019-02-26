@@ -8,6 +8,7 @@ namespace TheWorkforce.Entities
         public ushort Id;
         public string Name;
         public string Description;
+        public Sprite Sprite;
         public byte MaxStackSize = 32;
         public byte Width = 1;
         public byte Height = 1;

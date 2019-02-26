@@ -97,7 +97,13 @@ namespace TheWorkforce
                 return hand;
             }
             
-            _itemInHand.Add(itemStack);
+            ushort amountAdded = _itemInHand.Add(itemStack.Count);
+            if(amountAdded == itemStack.Count)
+            {
+                return null;
+            }
+
+            itemStack.Subtract(amountAdded);
             return itemStack;
         }
 

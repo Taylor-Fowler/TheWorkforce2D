@@ -82,7 +82,7 @@ namespace TheWorkforce
 
         public void UpdateDisplay()
         {
-            if (CorrespondingSlot != null && !CorrespondingSlot.IsEmpty())
+            if (CorrespondingSlot != null && !CorrespondingSlot.IsEmpty)
             {
                 ItemInSlot();
             }

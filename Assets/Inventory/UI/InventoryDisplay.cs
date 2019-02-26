@@ -17,6 +17,8 @@ namespace TheWorkforce
 
             Debug.Log("[InventoryDisplay] - Start() \n" 
                     + gameObject.name + " - _inventoryButtons.Length - " + _inventoryButtons.Length);
+
+            Hide();
         }
         #endregion
 

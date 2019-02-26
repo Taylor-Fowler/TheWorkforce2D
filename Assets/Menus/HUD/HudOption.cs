@@ -23,7 +23,7 @@ namespace TheWorkforce
             _hudMenuOptions.SelectOption(this);
         }
 
-        public void SetMenuOptions(HudMenuOptions hudMenuOptions)
+        public virtual void Startup(HudMenuOptions hudMenuOptions)
         {
             _hudMenuOptions = hudMenuOptions;
         }

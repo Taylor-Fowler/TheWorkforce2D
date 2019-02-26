@@ -155,15 +155,11 @@ MonoBehaviour:
   Id: 0
   _cameraPrefab: {fileID: 1840921609967512, guid: 252cfe03d1a455c47b7cd7afc4424982,
     type: 2}
-  _inventoryPrefab: {fileID: 1416692558039966, guid: 530584b41748b2b488f0589e3873153e,
-    type: 2}
-  _toolbeltPrefab: {fileID: 1851790007243814, guid: c1cfc62ce303bfd469f6ced066f8849e,
-    type: 2}
-  _itemInspectorPrefab: {fileID: 1781787668765998, guid: d0a3f8bd0c68cca4ba8c8963457e4138,
-    type: 2}
-  _hudOptionsPrefab: {fileID: 1405982550697130, guid: 44fa4c67123922b4faee953e3f51549b,
-    type: 2}
   _entityViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}
+  _craftingDisplayRef: {fileID: 11400000, guid: 7982323cf1c942143b9131aa02fb7971,
+    type: 2}
+  _inventoryDisplayRef: {fileID: 11400000, guid: e66db6f68e9e32c42a88c53824148fe5,
+    type: 2}
 --- !u!114 &114287458830173330
 MonoBehaviour:
   m_ObjectHideFlags: 1

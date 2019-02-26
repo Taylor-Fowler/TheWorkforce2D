@@ -1,34 +1,36 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace TheWorkforce
 {
     public class HudMenuOptions : MonoBehaviour
     {
-        #region Properties
-        public DisplayHudOption InventoryHudOption { get { return _inventoryHudOption; } }
-        public DisplayHudOption ToolbeltHudOption { get { return _toolbeltHudOption; } }
-        #endregion
+        public DisplayHudOption InventoryHudOption => _inventoryHudOption;
+        public DisplayHudOption ToolbeltHudOption => _toolbeltHudOption;
+        public DisplayHudOption CraftingHudOption => _craftingHudOption;
 
-        #region Private Members
         [SerializeField] private DisplayHudOption _inventoryHudOption;
         [SerializeField] private DisplayHudOption _toolbeltHudOption;
+        [SerializeField] private DisplayHudOption _craftingHudOption;
 
-        private HudOption[] _hudOptions;
+        //private HudOption[] _hudOptions;
         private HudOption _selectedOption = null;
-        #endregion
 
         #region Unity API
         private void Start()
         {
-            _hudOptions = gameObject.GetComponentsInChildren<HudOption>();
+            _inventoryHudOption.Startup(this);
+            _toolbeltHudOption.Startup(this);
+            _craftingHudOption.Startup(this);
+            //_hudOptions = gameObject.GetComponentsInChildren<HudOption>();
+            //Debug.Log("[HudMenuOptions] - Start() \n" 
+            //        + "Number of Options: " + _hudOptions.Length.ToString());
 
-            foreach(var option in _hudOptions)
-            {
-                option.SetMenuOptions(this);
-                option.Deactivate();
-            }
+            //foreach(var option in _hudOptions)
+            //{
+            //    option.SetMenuOptions(this);
+            //    option.Deactivate();
+            //}
         }
         #endregion
 

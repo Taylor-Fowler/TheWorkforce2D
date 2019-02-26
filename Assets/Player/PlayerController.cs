@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
-using TheWorkforce.Game_State;
-using TheWorkforce.Inventory;
-using TheWorkforce.Entities;
 
 namespace TheWorkforce
 {
+    using Game_State;
+    using Inventory;
+    using Crafting;
+    using Entities;
+    using SOs.References;
+
     public delegate void PlayerControllerStartup(object source, PlayerController playerController);
 
     /*
@@ -25,43 +28,26 @@ namespace TheWorkforce
         public static event PlayerControllerStartup OnLocalPlayerControllerStartup;
         private static PlayerController Local;
 
-
         public int Id;
         public Player Player { get; protected set; }
         public GameManager GameManager { get; private set; }
         public Vector2 MouseWorldPosition { get; protected set; }
-
-        #region Private Members
         // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
         // The local player controller, the local controller has a reference to the game manager
         private bool _hasStarted = false;
+
         [SerializeField] private GameObject _cameraPrefab;
-        [SerializeField] private GameObject _inventoryPrefab;
-        [SerializeField] private GameObject _toolbeltPrefab;
-        [SerializeField] private GameObject _hudOptionsPrefab;
         [SerializeField] private EntityViewLink _entityViewLink;
+        [SerializeField] private PlayerCraftingDisplayRef _craftingDisplayRef;
+        [SerializeField] private PlayerInventoryDisplayRef _inventoryDisplayRef;
 
         private MouseController _mouseController;
-        private PlayerInventoryDisplay _inventoryDisplay;
         //private ToolbeltDisplay _toolbeltDisplay;
-        #endregion
 
         #region NetworkBehaviour Overrides
         public override void OnStartLocalPlayer()
         {
             Local = this;
-            var canvas = new GameObject("Player Canvases").transform;
-            canvas.SetParent(transform);
-
-            _inventoryDisplay = Instantiate(_inventoryPrefab, canvas).GetComponent<PlayerInventoryDisplay>();
-            //_toolbeltDisplay = Instantiate(_toolbeltPrefab, canvas).GetComponentInChildren<ToolbeltDisplay>();
-
-            {
-                var hud = Instantiate(_hudOptionsPrefab, canvas).GetComponent<HudMenuOptions>();
-                hud.InventoryHudOption.SetDisplay(_inventoryDisplay);    
-                //hud.ToolbeltHudOption.SetDisplay(_toolbeltDisplay);
-            }
-            
             PlayerControllerStartup();
         }
         #endregion
@@ -69,7 +55,14 @@ namespace TheWorkforce
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
+            CreateLocalPlayer();
+
+            _inventoryDisplayRef.Get().SetInventory(Player.Inventory);
+            _inventoryDisplayRef.Get().Hide();
+            gameObject.AddComponent<PlayerCrafting>().Initialise(_craftingDisplayRef.Get(), new RecipeProcessorQueue(), Player.Inventory);
+
             _mouseController = gameObject.AddComponent<MouseController>();
+            _mouseController.SetPlayer(Player);
             _mouseController.SetEntityView(_entityViewLink.View);
             _mouseController.SetCamera(Instantiate(_cameraPrefab, transform).GetComponent<Camera>());
             _mouseController.SetEntityCollection(GameManager.EntityCollection);
@@ -84,20 +77,21 @@ namespace TheWorkforce
         #region Unity API
         private void Start()
         {
-            if (isServer || isLocalPlayer)
+            // A player is initialised on their local client in OnStartLocalPlayer, all other clients will initialise the player
+            // later during the start method
+            if (!isLocalPlayer)
             {
-                CreateLocalPlayer();
-            }
-            else
-            {
-                CreateRemotePlayer();
-            }
-
-            if (isLocalPlayer)
-            {
-                _inventoryDisplay.SetInventory(Player.Inventory);
-                _inventoryDisplay.Hide();
-                _mouseController.SetPlayer(Player);
+                // The server should treat all player controllers as local players in terms of initialisation
+                // This is so that when ANY player moves, the server will process the move and be able to 
+                // update chunk dependencies based on the movement
+                if (isServer)
+                {
+                    CreateLocalPlayer();
+                }
+                else
+                {
+                    CreateRemotePlayer();
+                }
             }
         }
 
@@ -199,25 +193,6 @@ namespace TheWorkforce
             Id = playerControllerId;
             MouseWorldPosition = Vector2.zero;
             _hasStarted = true;
-
-            // The server should treat all player controllers as local players in terms of initialisation
-            // This is so that when ANY player moves, the server will process the move and be able to 
-            // update chunk dependencies based on the movement
-            //if (isServer || isLocalPlayer)
-            //{
-            //    CreateLocalPlayer();
-            //}
-            //else
-            //{
-            //    CreateRemotePlayer();
-            //}
-
-            //if (isLocalPlayer)
-            //{
-            //    _inventoryDisplay.SetInventory(Player.Inventory);
-            //    _inventoryDisplay.Hide();
-            //    _mouseController.SetPlayer(Player);
-            //}
         }
         #endregion
     }

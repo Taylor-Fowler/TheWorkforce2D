@@ -14,13 +14,14 @@ MonoBehaviour:
   Id: 1
   Name: Stone
   Description: Stone
+  Sprite: {fileID: 21300000, guid: dbf23c26fd2815840ab0f6e5dcd2f85e, type: 3}
   MaxStackSize: 32
   Width: 1
   Height: 1
   ViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}
-  Sprite: {fileID: 21300000, guid: dbf23c26fd2815840ab0f6e5dcd2f85e, type: 3}
   Generatable:
     _maximumMoisture: 0.4
     _minimumMoisture: 0.2
     _maximumElevation: 0.45
     _minimumElevation: 0.3
+  _ticksToHarvest: 30

@@ -3,21 +3,27 @@ using UnityEngine;
 
 namespace TheWorkforce.Crafting
 {
+    using Entities;
+
     [CreateAssetMenu(fileName = "New Crafting Recipe", menuName = "Scriptable Objects/Crafting/Crafting Recipe")]
     public class CraftingRecipe : ScriptableObject
     {
-        public ushort Id { get; private set;  }
-        public float CraftingTime => _craftingTime;
+        public ushort Id { get; private set; }
 
-        [SerializeField] private float _craftingTime;
-        [SerializeField] private EditorItemStack[] _itemsRequired;
-        [SerializeField] private EditorItemStack[] _itemsProduced;
+        public uint CraftingTime => _craftingTime;
+        [SerializeField] private uint _craftingTime;
+
+        public EditorItemStack ItemProduced => _itemProduced;
+        [SerializeField] private EditorItemStack _itemProduced;
+
+        public EditorItemStack[] Ingredients => _ingredients;
+        [SerializeField] private EditorItemStack[] _ingredients;
 
         public void Initialise(ushort id, Recipes allRecipes)
         {
             Id = id;
-            allRecipes.RegisterProduce(_itemsProduced, this);
-            allRecipes.RegisterRequirements(_itemsRequired, this);
+            allRecipes.RegisterProduce(_itemProduced, this);
+            allRecipes.RegisterIngredients(_ingredients, this);
             allRecipes.RegisterProducedInside(0, this);
         }
     }

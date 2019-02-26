@@ -1,62 +1,89 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TheWorkforce.UI;
 
 namespace TheWorkforce.Crafting
 {
-    //using TheWorkforce;
+    using SOs.Registers;
+    using UI;
 
+    [RequireComponent(typeof(RegisterPlayerCraftingDisplay))]
     public class PlayerCraftingDisplay : MonoBehaviour, IDisplay
     {
-        #region Public Members
-        public float TimeToDisplay = 1f;
-        #endregion
+        public Func<CraftingRecipe, bool> CanCraftRecipe;
 
-        #region Private Members
-        [SerializeField] private RectTransform _rectTransform;
-        [SerializeField] private RectTransform _craftingPanel;
-        [SerializeField] private Button _displayButton;
-        private Coroutine _slidingDisplay;
-        private bool _isDisplaying;
-        #endregion
+        [SerializeField] private Canvas _canvas;
+        [SerializeField] private Recipes _recipes;
+        [SerializeField] private Button _categoryButton;
+        [SerializeField] private CraftItemButton _craftItemPrefab;
 
-        #region Unity API
-        private void Start()
+        // Transforms just used as a reference point to instantiate
+        [SerializeField] private Transform _craftingButtonsAnchor;
+        [SerializeField] private RecipeDescriptionView _recipeDescriptionView;
+
+        // take a action reference to the player inventory...this display breaks down
+        // the recipe into a list of the items required and sends it to the inventory
+        // player must have a crafting processor which sends the currently crafting item to
+        // the HUD displaying what is being produced. also creates the coroutine which eventually
+        // adds the new item to the inventory
+        // if the inventory is full, the crafting queue is paused
+
+        private CraftItemButton _currentlyInspecting;
+
+        // Categories for each type of item
+        // Crafting component...
+        // Machiness
+
+        private List<CraftItemButton> _allButtons;
+
+        private void Awake()
         {
-            if(_rectTransform == null)
-            {
-                _rectTransform = GetComponent<RectTransform>();
-            }
-            _isDisplaying = false;
-            _slidingDisplay = null;
-            _displayButton.onClick.AddListener(ToggleDisplay);
+            Hide();
+            _recipes.OnInitialised += this._recipes_OnInitialised;
         }
-        #endregion
 
-        private void ToggleDisplay()
+        private void _recipes_OnInitialised()
         {
-            if(_slidingDisplay == null)
+            // generate the buttons
+            foreach(var recipe in _recipes.AllRecipes)
             {
-                _isDisplaying = !_isDisplaying;
-                _slidingDisplay = this.StartSafeCoroutine(new SlideTransition().StartTransitionHorizontally(_rectTransform, TimeToDisplay, _isDisplaying, _craftingPanel.rect.width),
-                    delegate
-                    {
-                        _slidingDisplay = null;
-                    }); 
+                CraftItemButton button = Instantiate(_craftItemPrefab, _craftingButtonsAnchor);
+                button.OnCraft = TryCraft;
+                button.OnInspect = Inspect;
+                button.AttachRecipe(recipe);
+            }
+        }
+
+        private void TryCraft(CraftingRecipe recipe)
+        {
+            if(CanCraftRecipe(recipe))
+            {
+                // some kind of visual feedback on the UI to show that it was queued
+            }
+        }
+
+        private void Inspect(CraftingRecipe recipe, CraftItemButton button)
+        {
+            _currentlyInspecting?.Default();
+            _currentlyInspecting = button;
+
+            if(_currentlyInspecting != null)
+            {
+                _recipeDescriptionView.Display(recipe);
             }
         }
 
         #region IDisplay Implementation
         public void Display()
         {
-            
+            //gameObject.SetActive(true);
+            _canvas.enabled = true;
         }
 
         public void Hide()
         {
-            
+            _canvas.enabled = false;
         }
         #endregion
     }
