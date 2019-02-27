@@ -17,15 +17,18 @@ namespace TheWorkforce.Crafting
         // 5: At the end of the process, add the resulting item to the inventory
 
         private PlayerCraftingDisplay _playerCraftingDisplay;
+        private PlayerRecipeQueueDisplay _playerRecipeQueueDisplay;
         private RecipeProcessorQueue _recipeProcessorQueue;
         private SlotCollection _inventory;
 
-        public void Initialise(PlayerCraftingDisplay playerCraftingDisplay, RecipeProcessorQueue recipeProcessorQueue, SlotCollection inventory)
+        public void Initialise(PlayerCraftingDisplay playerCraftingDisplay, PlayerRecipeQueueDisplay playerRecipeQueueDisplay, SlotCollection inventory)
         {
             _playerCraftingDisplay = playerCraftingDisplay;
-            _recipeProcessorQueue = recipeProcessorQueue;
+            _playerRecipeQueueDisplay = playerRecipeQueueDisplay;
             _inventory = inventory;
+            _recipeProcessorQueue = new RecipeProcessorQueue();
 
+            _playerRecipeQueueDisplay.Listen(_recipeProcessorQueue);
             _playerCraftingDisplay.CanCraftRecipe = TryCraft;
             _recipeProcessorQueue.UnloadProduce = _inventory.TransactionalAdd;
         }

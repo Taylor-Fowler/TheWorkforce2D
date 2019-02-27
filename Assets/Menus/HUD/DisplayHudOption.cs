@@ -18,6 +18,9 @@ namespace TheWorkforce
             {
                 _displayRef.ReferenceUpdated += Listen;
             }
+
+            // Initialise the default HUD image
+            base.Deactivate();
         }
 
         public override void Activate()

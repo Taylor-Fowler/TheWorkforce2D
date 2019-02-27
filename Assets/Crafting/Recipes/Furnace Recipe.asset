@@ -11,7 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c506c2f2da04b974489f3e76c3493886, type: 3}
   m_Name: Furnace Recipe
   m_EditorClassIdentifier: 
-  _craftingTime: 1
+  _craftingTime: 120
   _itemProduced:
     Item: {fileID: 11400000, guid: 63121bf22552f564da808af99ebd45c3, type: 2}
     Count: 1

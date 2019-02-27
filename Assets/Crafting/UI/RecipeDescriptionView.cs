@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 
-namespace TheWorkforce.Crafting.UI
+namespace TheWorkforce.Crafting
 {
     public class RecipeDescriptionView : MonoBehaviour
     {

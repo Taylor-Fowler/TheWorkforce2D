@@ -20,7 +20,7 @@ namespace TheWorkforce
         private void Start()
         {
             _inventoryHudOption.Startup(this);
-            _toolbeltHudOption.Startup(this);
+            //_toolbeltHudOption.Startup(this);
             _craftingHudOption.Startup(this);
             //_hudOptions = gameObject.GetComponentsInChildren<HudOption>();
             //Debug.Log("[HudMenuOptions] - Start() \n" 

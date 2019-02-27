@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace TheWorkforce.Crafting.UI
+namespace TheWorkforce.Crafting
 {
     [RequireComponent(typeof(Image))]
     public class CraftItemButton : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler

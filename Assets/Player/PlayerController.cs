@@ -40,6 +40,7 @@ namespace TheWorkforce
         [SerializeField] private EntityViewLink _entityViewLink;
         [SerializeField] private PlayerCraftingDisplayRef _craftingDisplayRef;
         [SerializeField] private PlayerInventoryDisplayRef _inventoryDisplayRef;
+        [SerializeField] private PlayerRecipeQueueDisplayRef _recipeQueueDisplayRef;
 
         private MouseController _mouseController;
         //private ToolbeltDisplay _toolbeltDisplay;
@@ -59,7 +60,7 @@ namespace TheWorkforce
 
             _inventoryDisplayRef.Get().SetInventory(Player.Inventory);
             _inventoryDisplayRef.Get().Hide();
-            gameObject.AddComponent<PlayerCrafting>().Initialise(_craftingDisplayRef.Get(), new RecipeProcessorQueue(), Player.Inventory);
+            gameObject.AddComponent<PlayerCrafting>().Initialise(_craftingDisplayRef.Get(), _recipeQueueDisplayRef.Get(), Player.Inventory);
 
             _mouseController = gameObject.AddComponent<MouseController>();
             _mouseController.SetPlayer(Player);

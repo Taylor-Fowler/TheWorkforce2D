@@ -160,6 +160,8 @@ MonoBehaviour:
     type: 2}
   _inventoryDisplayRef: {fileID: 11400000, guid: e66db6f68e9e32c42a88c53824148fe5,
     type: 2}
+  _recipeQueueDisplayRef: {fileID: 11400000, guid: b3811b866b3d3434783cab53e8412e47,
+    type: 2}
 --- !u!114 &114287458830173330
 MonoBehaviour:
   m_ObjectHideFlags: 1

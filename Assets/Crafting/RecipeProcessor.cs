@@ -9,8 +9,9 @@ namespace TheWorkforce.Crafting
     {
         public Func<ItemStack, bool> UnloadProduce;
 
-        public event Action<ItemStack> OnProcessed;
-        public event Action<CraftingRecipe> OnAddProcess;
+        public event Action<CraftingRecipe> OnStartProcess;
+        public event Action<RecipeProcessor> OnProcessing;
+        public event Action<ItemStack> OnFinishedProcess;
 
         public CraftingRecipe Processing => _processing; 
         protected CraftingRecipe _processing;
@@ -34,12 +35,18 @@ namespace TheWorkforce.Crafting
                 SuccessfullyUnloaded();
             }
 
-            if(IsProcessing && JustFinishedProcess())
+            if(IsProcessing)
             {
-                _tryingToUnload = new ItemStack(_processing.ItemProduced.Item, _processing.ItemProduced.Count);
-                if(UnloadProduce(_tryingToUnload))
+                bool finished = JustFinishedProcess();
+                OnProcessing?.Invoke(this);
+
+                if (finished)
                 {
-                    SuccessfullyUnloaded();
+                    _tryingToUnload = new ItemStack(_processing.ItemProduced.Item, _processing.ItemProduced.Count);
+                    if (UnloadProduce(_tryingToUnload))
+                    {
+                        SuccessfullyUnloaded();
+                    } 
                 }
             }
         }
@@ -48,7 +55,7 @@ namespace TheWorkforce.Crafting
         {
             // Assign the new recipe and tell listeners about it
             _processing = recipe;
-            OnAddProcess?.Invoke(recipe);
+            OnStartProcess?.Invoke(recipe);
         }
 
         public virtual void CancelProcess()
@@ -65,7 +72,7 @@ namespace TheWorkforce.Crafting
 
         protected virtual void SuccessfullyUnloaded()
         {
-            OnProcessed?.Invoke(_tryingToUnload);
+            OnFinishedProcess?.Invoke(_tryingToUnload);
             _tryingToUnload = null;
             _processing = null;
             ResetTimer();
@@ -109,7 +116,7 @@ namespace TheWorkforce.Crafting
         {
             if (_recipeQueue.Count > 0)
             {
-                _processing = _recipeQueue.Dequeue();
+                base.AddProcess(_recipeQueue.Dequeue());
             }
         }
     }
