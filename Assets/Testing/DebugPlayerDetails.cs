@@ -35,7 +35,7 @@ namespace TheWorkforce.Testing
             }
         }
 
-        public void DrawLines(object source, Vector2 position)
+        public void DrawLines(Vector2 position)
         {
             const int numberOfChunks = Chunk.KEEP_LOADED;
             const int halfNumberOfChunks = numberOfChunks / 2;

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
-using TheWorkforce.Game_State;
 using System.Collections;
-using TheWorkforce.Entities;
 
 // -> Player Moves 
 // -> Inform World Controller 
@@ -22,15 +20,14 @@ using TheWorkforce.Entities;
 
 namespace TheWorkforce
 {
-    public delegate void WorldPlayerPositionUpdateHandler(object source, Vector2 position);
-    public delegate void WorldControllerStartup(object source, WorldController controller);
+    using Game_State; using Interfaces; using Entities;
 
     public class WorldController : NetworkBehaviour, IManager
     {
-        public static event WorldControllerStartup OnWorldControllerStartup;
+        public static event Action<WorldController> OnWorldControllerStartup;
         private static WorldController Local;
 
-        public event WorldPlayerPositionUpdateHandler OnWorldPlayerPositionUpdate;
+        public event Action<Vector2> OnWorldPlayerPositionUpdate;
 
         /// <summary>
         /// A list of chunk controllers that are used to display the local area to the player
@@ -78,15 +75,17 @@ namespace TheWorkforce
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
-            // Create the world object and its anchor
+
             _world = new World(784893570);
             _gameWorldAnchorObject = new GameObject
             {
                 name = "World"
             };
+
             // Set the z position to 1, this is important for ordering of tiles
             _gameWorldAnchorObject.transform.position = new Vector3(0f, 0f, 1f);
             _allChunksLoadedByPlayerPositions = new Dictionary<Vector2, List<int>>();
+
             // Initialise all the chunk controllers that we will ever need
             for(int i = 0; i < Chunk.KEEP_LOADED * Chunk.KEEP_LOADED; ++i)
             {
@@ -99,8 +98,9 @@ namespace TheWorkforce
             {
                 _worldGeneration = new WorldGeneration(_world.Seed, _world.NegativeXSeed, _world.NegativeYSeed);
             }
+
             Debug.Log("[WorldController : IManager] - Startup() \n"
-                    + "Server Seed: " + _world.Seed);
+                        + "Server Seed: " + _world.Seed);
         }
 
         public IEnumerator InitialiseConnection(Action callback)
@@ -114,6 +114,7 @@ namespace TheWorkforce
 
             // Before we can say we are safely initialised, we must request all of the loaded chunks
             CmdRequestAllLoadedChunks();
+
             while(!_hasInitialised)
             {
                 yield return null;
@@ -124,6 +125,7 @@ namespace TheWorkforce
 
             // We must know of all the enitities that are actively processing in the world before we can resume gameplay on all clients
             CmdRequestAllEntities();
+
             while(!_hasInitialised)
             {
                 yield return null;
@@ -133,23 +135,40 @@ namespace TheWorkforce
             callback();
         }
 
+        /// <summary>
+        /// Called on the server when the chunk that a player is located in changes. (I.E. when a player moves from one chunk to another).
+        /// </summary>
+        /// <param name="playerController"></param>
+        /// <param name="position"></param>
+        public void OnServerPlayerChunkUpdate(PlayerController playerController, Vector2 position)
+        {
+            // What happens when a player moves to a new chunk?
+            //    // 3 players: A (host), B and C (regular clients)
+            //    // Players A and B are in the same chunk
+            //    // Player C moves into a new chunk:
+            //    // 1. Tell the Host about the chunks that were kept loaded by Player C
+            //    //    that are no longer needed to be loaded and also about the new chunks that player
+            //    //    C is keeping loaded
+            //    // 2. The Host checks if any other player needs the chunks that have been asked to
+            //    //    be unloaded by player C. The Host notifies all clients to unload said chunks.
+            //    // 3. The Host then tells all clients to load the chunks requested by player C.
+            //    // 4. Finally, the Host generates the chunks requested by player C and sends the data
+            //    //    to all clients
+
+            // Find all the chunks around the current player position, these are the new player dependant chunks
+            //var chunksRequired = Chunk.SurroundingChunksOfWorldPosition(position);
+
+            //var chunksPreviouslyRequired = _world.GetPlayerLoadedChunkPositions(playerController.Id);
+
+            RequestPlayerChunkUpdate(playerController.Id, position);
+
+            Debug.Log("[WorldController] - OnServerPlayerChunkUpdate(PlayerController, Vector2)");
+        }
+
         // This is called when a plyer object on the server moves enough to request a chunk update
         // This should only be called on the server
         public void RequestPlayerChunkUpdate(int playerId, Vector2 playerPosition)
         {
-            Debug.Log("[WorldController] - RequestPlayerChunkUpdate(int, Vector2)");
-
-            // The local player should notify any listeners of their movement
-            if(isLocalPlayer)
-            {
-                WorldPlayerPositionUpdate(playerPosition);
-            }
-
-            // Only the server should process the chunk update
-            if(!isServer)
-            {
-                return;
-            }
             // Find all of the chunks loaded for the player
             var chunksPreviouslyLoaded = _world.GetPlayerLoadedChunkPositions(playerId);
             // Find the chunks needed for the player based on their new position
@@ -168,19 +187,6 @@ namespace TheWorkforce
             RpcReceiveChunksWithDependencies(NetworkChunk.ChunkListToNetworkChunkArray(generatedChunks), playerId, chunksNeededForPlayerArray);
 
             //UpdateChunkControllers(_world.GetPlayerLoadedChunks(playerId), chunksPreviouslyLoaded.Intersect(chunksNeededForPlayer).ToList());
-        }
-
-        public Tile RequestTile(Vector2 chunkPosition, Vector2 tilePosition)
-        {
-            Tile tile = null;
-            Chunk chunk = _world.GetChunk(chunkPosition);
-
-            if(chunk != null)
-            {
-                tile = chunk.GetTile(tilePosition);
-            }
-
-            return tile;
         }
     
         //public void UpdatePlayerPosition(Vector2 playerPosition)
@@ -293,12 +299,12 @@ namespace TheWorkforce
         #region Custom Event Invoking
         private void WorldPlayerPositionUpdate(Vector2 position)
         {
-            OnWorldPlayerPositionUpdate?.Invoke(this, position);
+            OnWorldPlayerPositionUpdate?.Invoke(position);
         }
 
         private void WorldControllerStartup()
         {
-            OnWorldControllerStartup?.Invoke(this, this);
+            OnWorldControllerStartup?.Invoke(this);
         }
         #endregion
 
@@ -326,7 +332,7 @@ namespace TheWorkforce
     
             if (generated.Count != 0)
             {
-                RpcReceiveChunks(NetworkChunk.ChunkListToNetworkChunkArray(generated));
+                //RpcReceiveChunks(NetworkChunk.ChunkListToNetworkChunkArray(generated));
             }
 
             Debug.Log("[WorldController] - CmdPlayerChunkUpdate(Vector2[], Vector2[], Vector2[], int) \n" 
@@ -337,10 +343,11 @@ namespace TheWorkforce
         [Command]
         private void CmdRequestAllLoadedChunks()
         {
-            const int max = 25;
+            const int packetBufferSize = 16;
+
             int chunksLeft = Local._world.ChunksLoaded.Count;
             int chunksProcessed = 0;
-            List<Chunk> chunksToSend = new List<Chunk>(max);
+            List<Chunk> chunksToSend = new List<Chunk>(packetBufferSize);
 
             foreach (var chunkPair in Local._world.ChunksLoaded)
             {
@@ -348,8 +355,9 @@ namespace TheWorkforce
 
                 --chunksLeft;
                 bool lastSend = chunksLeft == 0;
-                if(++chunksProcessed == max || lastSend)
+                if(++chunksProcessed == packetBufferSize || lastSend)
                 {
+                    chunksProcessed = 0;
                     TargetReceiveChunks(connectionToClient, NetworkChunk.ChunkListToNetworkChunkArray(chunksToSend), lastSend);
                     chunksToSend.Clear();
                 }
@@ -410,6 +418,15 @@ namespace TheWorkforce
             Debug.Log("[WorldController] - TargetReceiveChunks(NetworkConnection, NetworkChunk[])");
         }
 
+
+        /// <summary>
+        /// Called on a specified client, entities along with their data are received.
+        /// </summary>
+        /// <param name="conn">The connection of the targeted client</param>
+        /// <param name="entityIds">The unique entity Ids contained</param>
+        /// <param name="dataIds">The data Id of the entity, used to identify what data type the entity requires</param>
+        /// <param name="entityPayload">The data required to populate every entity in the packet</param>
+        /// <param name="finished">Identifies whether this is the final packet of entity data from the request</param>
         [TargetRpc]
         private void TargetReceiveEntities(NetworkConnection conn, uint[] entityIds, ushort[] dataIds, byte[] entityPayload, bool finished)
         {
@@ -444,6 +461,27 @@ namespace TheWorkforce
         }
 
         [ClientRpc]
+        private void RpcReceiveChunks(NetworkChunk[] networkChunks, int playerId)
+        {
+            var unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks);
+            Local._world.AddChunks(unpackedChunks);
+
+            if (!isServer)
+            {
+                List<Vector2> chunkPositions = new List<Vector2>();
+                foreach(var chunk in unpackedChunks)
+                {
+                    chunkPositions.Add(chunk.Position);
+                }
+                Local._world.UpdatePlayerChunks(playerId, chunkPositions);
+            }
+            if (Local.GameManager.PlayerController.Id == playerId)
+            {
+                Local.UpdateChunkControllers(Local._world.GetPlayerLoadedChunks(playerId), null);
+            }
+        }
+
+        [ClientRpc]
         private void RpcReceiveChunksWithDependencies(NetworkChunk[] networkChunks, int playerId, Vector2[] chunkPositions)
         {
             Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
@@ -458,16 +496,16 @@ namespace TheWorkforce
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="networkChunks"></param>
-        [ClientRpc]
-        private void RpcReceiveChunks(NetworkChunk[] networkChunks)
-        {
-            Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
-            Local._world.AddChunks(unpackedChunks);
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="networkChunks"></param>
+        //[ClientRpc]
+        //private void RpcReceiveChunks(NetworkChunk[] networkChunks)
+        //{
+        //    Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
+        //    Local._world.AddChunks(unpackedChunks);
+        //}
         #endregion
     }
 }

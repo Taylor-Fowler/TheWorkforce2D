@@ -13,13 +13,12 @@ namespace TheWorkforce
     [Serializable]
     public class World
     {
-        #region Public Properties
-        public int Seed { get; }
-        public int NegativeXSeed { get; }
-        public int NegativeYSeed { get; }
-        #endregion
+        public const uint REGION_SIZE = 32;
 
-        #region Public Members
+        public readonly int Seed;
+        public readonly int NegativeXSeed;
+        public readonly int NegativeYSeed;
+
         /// <summary>
         /// ChunksGenerated contains all of the known chunks that have already been generated.
         /// This includes chunks that are in the save file and chunks that are currently loaded.
@@ -43,9 +42,6 @@ namespace TheWorkforce
 
         public Dictionary<int, List<Vector2>> PlayerLoadedChunks;
 
-        #endregion
-
-        #region Constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="World" /> class. Generates a random seed.
         /// </summary>
@@ -70,15 +66,18 @@ namespace TheWorkforce
             ChunkLoadedByPlayers = new Dictionary<Vector2, List<int>>();
             PlayerLoadedChunks = new Dictionary<int, List<Vector2>>();
         }
-        #endregion
 
-        #region Public Methods
         public void UpdatePlayerChunks(int playerId, IEnumerable<Vector2> chunks)
         {
             SetChunksLoadedByPlayers(playerId, chunks);
             SetPlayerLoadedChunks(playerId, chunks);
         }
 
+        /// <summary>
+        /// Finds all chunk positions that are directly loaded for the player identified by the given Id.
+        /// </summary>
+        /// <param name="playerId">The player Id to get chunk positions for</param>
+        /// <returns>A collection of chunk positions that are loaded by `playerId`</returns>
         public List<Vector2> GetPlayerLoadedChunkPositions(int playerId)
         {
             List<Vector2> positions;
@@ -90,10 +89,17 @@ namespace TheWorkforce
             return new List<Vector2>();
         }
 
+        /// <summary>
+        /// Finds all chunks that are directly loaded for the player identified by the given Id.
+        /// </summary>
+        /// <param name="playerId">The player Id to get chunk positions for</param>
+        /// <returns>A collection of chunks that are loaded by `playerId`</returns>
         public List<Chunk> GetPlayerLoadedChunks(int playerId)
         {
             List<Chunk> chunks = new List<Chunk>();
 
+            // Get all of the chunk positions then use the position to access their mapped value in the 
+            // dictionary
             var positions = GetPlayerLoadedChunkPositions(playerId);
             foreach(var position in positions)
             {
@@ -168,6 +174,10 @@ namespace TheWorkforce
         //    return notLoaded.ToArray();
         //}
     
+        /// <summary>
+        /// Iterates over a list of chunk positions and removes any position that is loaded in the world
+        /// </summary>
+        /// <param name="chunkPositions">The collection of chunk positions to filter</param>
         public void FilterLoadedChunks(List<Vector2> chunkPositions)
         {
             for (int i = chunkPositions.Count - 1; i >= 0; i--)
@@ -326,7 +336,6 @@ namespace TheWorkforce
         //    loadResult.AddRange(GameFileIO.LoadChunks(existingChunks));
         //    chunkPositions = nonExistentChunks;
         //}
-        #endregion
         private void SetChunksLoadedByPlayers(int playerId, IEnumerable<Vector2> chunks)
         {
 
@@ -361,7 +370,9 @@ namespace TheWorkforce
         {
             // No chunks loaded so none to look up
             if (ChunksLoaded.Count == 0)
+            {
                 return;
+            }
     
             // Loop through the LoadedChunks and add any chunks that have a position specified 
             // within the chunkPositions list to the lookupResult list, remove the position also

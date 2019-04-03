@@ -2,18 +2,15 @@ using System;
 
 namespace TheWorkforce.Game_State
 {
-    public class ApplicationStateArgs : EventArgs
+    public class ApplicationStateChangeArgs : EventArgs
     {
-        private readonly EApplicationState _previous;
-        private readonly EApplicationState _current;
+        public EApplicationState Previous { get; }
+        public EApplicationState Current { get; }
 
-        public EApplicationState Previous => _previous;
-        public EApplicationState Current => _current;
-        
-        public ApplicationStateArgs(EApplicationState previous, EApplicationState current)
+        public ApplicationStateChangeArgs(EApplicationState previous, EApplicationState current)
         {
-            _previous = previous;
-            _current = current;
+            Previous = previous;
+            Current = current;
         }
     }
 }

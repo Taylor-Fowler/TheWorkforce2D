@@ -6,7 +6,27 @@ namespace TheWorkforce
     [System.Serializable]
     public class Chunk
     {
-        #region Static Methods
+        /// <summary>
+        /// The width and height of each Chunk (in number of tiles).
+        /// </summary>
+        public const int SIZE = 8;
+
+        /// <summary>
+        /// The area of each Chunk (number of tiles per chunk).
+        /// </summary>
+        public const int AREA = SIZE * SIZE;
+
+        /// <summary>
+        /// The default number of Chunks to keep loaded in both the x and y direction,
+        /// so the actual default number of chunks to keep loaded is KEEP_LOADED^2.
+        /// </summary>
+        public const int KEEP_LOADED = 5;
+
+        /// <summary>
+        /// Calculates whether the given tile offset is valid.
+        /// </summary>
+        /// <param name="tileOffset">The tile offset to validate</param>
+        /// <returns>True if both axes are positive and less than the defined Chunk.SIZE</returns>
         public static bool ValidTileOffset(Vector2 tileOffset)
         {
             return tileOffset.x < SIZE && tileOffset.x >= 0 
@@ -15,7 +35,7 @@ namespace TheWorkforce
 
 
         /// <summary>
-        ///     Calculates the Chunk that the given `worldPosition` resides in.
+        /// Calculates the Chunk that the given `worldPosition` resides in.
         /// </summary>
         /// <param name="worldPosition">The world position.</param>
         /// <returns>The Chunk that the `worldPosition` belongs in.</returns>
@@ -29,9 +49,9 @@ namespace TheWorkforce
         }
 
         /// <summary>
-        ///     Calculates the World Position from a given Chunk position, the returned World
-        ///     Position represents where the Chunk starts in the World (i.e bottom left corner
-        ///     of the Chunk.
+        /// Calculates the World Position from a given Chunk position, the returned World
+        /// Position represents where the Chunk starts in the World (i.e bottom left corner
+        /// of the Chunk.
         /// </summary>
         /// <param name="chunkPosition">The position of a Chunk.</param>
         /// <returns>The World Position of the Chunk.</returns>
@@ -41,7 +61,7 @@ namespace TheWorkforce
         }
 
         /// <summary>
-        ///     Unpacks NetworkChunks into regular Chunks.
+        /// Unpacks NetworkChunks into regular Chunks.
         /// </summary>
         /// <param name="networkChunks">The NetworkChunks to unpack.</param>
         /// <returns></returns>
@@ -58,8 +78,8 @@ namespace TheWorkforce
         }
 
         /// <summary>
-        ///     Calculates the chunks that surround a position in the world (including the
-        ///     Chunk occupied by the `worldPosition`).
+        /// Calculates the chunks that surround a position in the world (including the
+        /// Chunk occupied by the `worldPosition`).
         /// </summary>
         /// <param name="worldPosition">The world position to find local Chunks for.</param>
         /// <returns>An array of Chunk positions that surround the `worldPosition`.</returns>
@@ -94,27 +114,7 @@ namespace TheWorkforce
 
             return chunkPositionsToLoad;
         }
-        #endregion
 
-        #region Public Constants
-        /// <summary>
-        /// The width and height of each Chunk (in number of tiles).
-        /// </summary>
-        public const int SIZE = 8;
-    
-        /// <summary>
-        /// The area of each Chunk (number of tiles per chunk).
-        /// </summary>
-        public const int AREA = SIZE * SIZE;
-    
-        /// <summary>
-        /// The default number of Chunks to keep loaded in both the x and y direction,
-        /// so the actual default number of chunks to keep loaded is KEEP_LOADED^2.
-        /// </summary>
-        public const int KEEP_LOADED = 5;
-        #endregion
-
-        #region Public Properties    
         /// <summary>
         ///     Gets a value indicating whether the chunk should stay loaded regardless of
         ///     player vicinity.
@@ -123,9 +123,7 @@ namespace TheWorkforce
         ///     <c>true</c> if [keep loaded]; otherwise, <c>false</c>.
         /// </value>
         public bool KeepLoaded { get; }
-        #endregion
 
-        #region Public Members
         /// <summary>
         /// The position of the Chunk in the chunk grid, not to be confused with world position.
         /// E.G. Chunk.Position(1, 1) = World.Position(1 * Chunk.SIZE, 1 * Chunk.SIZE)
@@ -137,9 +135,7 @@ namespace TheWorkforce
         /// second position being the y axis position.
         /// </summary>
         public Tile[,] Tiles;
-        #endregion
 
-        #region Constructors
         /// <summary>
         /// Initialises a new instance of the <see cref="Chunk" /> class. Allocates memory
         /// for the `Tiles` array, sets the Chunk `Position`and initialises KeepLoaded to
@@ -166,9 +162,7 @@ namespace TheWorkforce
                 Tiles[x, y] = new Tile(networkChunk.NetworkTiles[x * SIZE + y], new Vector2(x, y));
             }
         }
-        #endregion
 
-        #region Public Methods
         public Tile GetTile(Vector2 tileOffset)
         {
             Tile tile = null;
@@ -191,6 +185,5 @@ namespace TheWorkforce
         {
             return Position * SIZE;
         }
-        #endregion
     }    
 }

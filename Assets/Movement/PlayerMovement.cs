@@ -6,16 +6,16 @@ namespace TheWorkforce
     public class PlayerMovement : AnimatedMovement
     {
         private readonly int _id;
-        private readonly Action<int, Vector2> _chunkChange;
+        private readonly Action<Vector2> _chunkChange;
         private Vector2 _chunkPositionWhenRequestedGeneration;
         private Vector2 _worldPositionWhenRequestedGeneration;
 
-        public PlayerMovement(int id, float speed, Animator animator, Action<int, Vector2> chunkChange, Transform transform) : base(speed, animator)
+        public PlayerMovement(int id, float speed, Animator animator, Action<Vector2> chunkChange, Transform transform) : base(speed, animator)
         {
             _id = id;
             _chunkChange = chunkChange;
             CapturePosition(transform);
-            _chunkChange(_id, transform.position);
+            _chunkChange(transform.position);
         }
 
         public override void Move(int horizontal, int vertical, Transform transform)
@@ -32,7 +32,7 @@ namespace TheWorkforce
 
                 if (Mathf.Abs(difference.x) >= Chunk.SIZE || Mathf.Abs(difference.y) >= Chunk.SIZE)
                 {
-                    _chunkChange(_id, worldPosition);
+                    _chunkChange(worldPosition);
                     CapturePosition(transform.position, currentChunk);
                 }
             }

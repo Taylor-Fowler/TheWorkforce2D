@@ -1,8 +1,9 @@
 using UnityEngine;
-using TheWorkforce.Game_State;
 
 namespace TheWorkforce.Testing
 {
+    using Game_State; using Interfaces;
+
     public class DebugController : MonoBehaviour, IManager
     {
         public GameManager GameManager { get; private set; }
@@ -34,13 +35,13 @@ namespace TheWorkforce.Testing
         }
 
         #region Custom Event Responses
-        private void GameManager_OnApplicationStateChange(object source, ApplicationStateArgs applicationStateArgs)
+        private void GameManager_OnApplicationStateChange(ApplicationStateChangeArgs applicationStateArgs)
         {
             if(applicationStateArgs.Current == EApplicationState.Ingame)
             {
                 GameManager.WorldController.OnWorldPlayerPositionUpdate += _debugPlayerDetails.DrawLines;
                 _debugPlayerDetails.Initialise(GameManager.PlayerController);
-                _debugPlayerDetails.DrawLines(this, GameManager.PlayerController.transform.position);
+                _debugPlayerDetails.DrawLines(GameManager.PlayerController.transform.position);
 
                 // NOTE: Added before the resource generation was added
                 // StartCoroutine(WaitToSpawn());

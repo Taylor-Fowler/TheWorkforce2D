@@ -20,6 +20,7 @@ namespace TheWorkforce.UI
 
             gameManager.OnApplicationStateChange += GameManager_OnApplicationStateChange;
             gameObject.SetActive(false);
+
             _hostPlayButton.onClick.AddListener(delegate 
             {
                 gameManager.NetworkManager.StartHost();
@@ -31,7 +32,7 @@ namespace TheWorkforce.UI
         }
         #endregion
 
-        private void GameManager_OnApplicationStateChange(object source, ApplicationStateArgs applicationStateArgs)
+        private void GameManager_OnApplicationStateChange(ApplicationStateChangeArgs applicationStateArgs)
         {    
             // Transition to menu state, this could be due to just launching the application or due to just closing the game
             if(applicationStateArgs.Current == EApplicationState.Menu)

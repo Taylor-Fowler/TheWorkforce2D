@@ -1,17 +1,17 @@
-﻿using TheWorkforce.Entities;
-using TheWorkforce.Entities.Interactions;
-using TheWorkforce.Interfaces;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace TheWorkforce
 {
+    using Entities; using Entities.Interactions; using Interfaces;
+
     public class MouseController : MonoBehaviour
     {
-        #region Static Members
+        /// <summary>
+        /// Get a reference to the mouse controller instance
+        /// </summary>
         public static MouseController Instance => _instance;
         private static MouseController _instance;
-        #endregion
 
         #region Private Members
         [SerializeField] private Sprite _outlineSprite;
@@ -39,41 +39,52 @@ namespace TheWorkforce
             {
                 DestroyImmediate(this);
             }
+
             _instance = this;
             _entityInteractionDisplay = FindObjectOfType<EntityInteractionDisplay>();
             _outlineSprite = Resources.Load<Sprite>("UI/64x64 Outline");
             _outlinerRenderer = new GameObject("Outline Renderer").AddComponent<SpriteRenderer>();
             _outlinerRenderer.sprite = _outlineSprite;
             _outlinerRenderer.gameObject.SetActive(false);
+
+            _entityCollection = EntityCollection.Instance();
+        }
+
+        private void OnDestroy()
+        {
+            // Reset the instance reference
+            if(_instance == this)
+            {
+                _instance = null;
+            }
         }
         #endregion
 
-        #region Simple Setters
-        public void SetPlayer(Player player)
+        public void Initialise(Player player, Camera camera, WorldController worldController, EntityView entityView)
         {
             _player = player;
-        }
-
-        public void SetCamera(Camera camera)
-        {
             _personalCamera = camera;
-        }
-
-        public void SetEntityCollection(EntityCollection entityCollection)
-        {
-            _entityCollection = entityCollection;
-        }
-
-        public void SetWorldController(WorldController worldController)
-        {
             _worldController = worldController;
-        }
-
-        public void SetEntityView(EntityView entityView)
-        {
             _entityView = entityView;
         }
-        #endregion
+
+        public void UpdateController()
+        {
+            UpdateMouseOverTile();
+
+            // If the mouse is over a UI object then stop displaying the entity that
+            // the mouse was over previously
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                NullifyEntityReference();
+            }
+            // The mouse is not over UI so update which entity it is over
+            else
+            {
+                UpdateMouseOverEntity();
+            }
+            UpdateInteraction();
+        }
 
         public Vector2 CalculateWorldPosition()
         {
@@ -107,27 +118,18 @@ namespace TheWorkforce
             return itemStack;
         }
 
-        public void UpdateMouseOver()
-        {
-            UpdateMouseOverTile();
-
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
-                NullifyEntityReference();
-            }
-            else
-            {
-                UpdateMouseOverEntity();
-            }
-            UpdateInteraction();
-        }
-
+        /// <summary>
+        /// Calculates the chunk and tile position of where the mouse currently is and then
+        /// retrieves the tile at that location from the world controller
+        /// </summary>
         private void UpdateMouseOverTile()
         {
             Vector2 chunkPosition = Chunk.CalculateResidingChunk(_worldPosition);
             Vector2 tilePosition = Tile.TilePositionInRelationToChunk(_worldPosition);
 
-            _activeTile = _worldController.RequestTile(chunkPosition, tilePosition);
+            TileController tileController = _worldController[chunkPosition, tilePosition];
+
+            _activeTile = tileController?.GetTile();
         }
 
         private void UpdateMouseOverEntity()
@@ -185,6 +187,9 @@ namespace TheWorkforce
             _activeInteraction?.Display(_entityInteractionDisplay);
         }
 
+        /// <summary>
+        /// Checks
+        /// </summary>
         private void StartNewInteraction()
         {
             IInteract interact = (_activeInstance == null) ? null : _activeInstance as IInteract;
@@ -195,12 +200,21 @@ namespace TheWorkforce
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void NullifyEntityReference()
         {
             _activeInstance = null;
             _entityView.SetEntity(_activeInstance);
         }
 
+        /// <summary>
+        /// Checks if there is an active interaction and if so:
+        /// - Hides the interaction display
+        /// - Stops listening for when the interaction is destroyed/finished
+        /// - Removes the reference to the interaction
+        /// </summary>
         private void ResetInteraction()
         {
             if(_activeInteraction != null)
@@ -211,6 +225,9 @@ namespace TheWorkforce
             }
         }
 
+        /// <summary>
+        /// Displays an outline shape around the entity that the mouse is currently over
+        /// </summary>
         private void SetOutline()
         {
             if (_activeInstance != null)

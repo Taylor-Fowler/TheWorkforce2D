@@ -1,20 +1,14 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace TheWorkforce
 {
-    using Game_State;
-    using Inventory;
-    using Crafting;
-    using Entities;
-    using SOs.References;
-
-    public delegate void PlayerControllerStartup(object source, PlayerController playerController);
+    using Game_State; using Inventory; using Interfaces; using Crafting; using Entities; using SOs.References;
 
     /*
-     * https://docs.unity3d.com/Manual/NetworkBehaviourCallbacks.html
-     * 
-     * 
+     * IMPORTANT REFERENCES:
+     *                      - https://docs.unity3d.com/Manual/NetworkBehaviourCallbacks.html
      */
 
     /// <summary>
@@ -25,16 +19,19 @@ namespace TheWorkforce
         /// <summary>
         /// An event that is invoked when the local player starts
         /// </summary>
-        public static event PlayerControllerStartup OnLocalPlayerControllerStartup;
+        public static event Action<PlayerController> OnLocalPlayerControllerStartup;
+
+        // The local player controller, the local controller has a reference to the game manager
         private static PlayerController Local;
+
+        public event Action<Vector2> OnPlayerChunkUpdate;
 
         public int Id;
         public Player Player { get; protected set; }
         public GameManager GameManager { get; private set; }
         public Vector2 MouseWorldPosition { get; protected set; }
+
         // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
-        // The local player controller, the local controller has a reference to the game manager
-        private bool _hasStarted = false;
 
         [SerializeField] private GameObject _cameraPrefab;
         [SerializeField] private EntityViewLink _entityViewLink;
@@ -46,13 +43,24 @@ namespace TheWorkforce
         //private ToolbeltDisplay _toolbeltDisplay;
 
         #region NetworkBehaviour Overrides
+        /// <summary>
+        /// Called when the local player starts, sets the local player controller reference and invokes the 
+        /// local player controller startup event
+        /// </summary>
         public override void OnStartLocalPlayer()
         {
             Local = this;
-            PlayerControllerStartup();
+            OnLocalPlayerControllerStartup?.Invoke(this);
         }
         #endregion
 
+        /// <summary>
+        /// Should only be called on the local player, from the game manager, this is because the method requires a valid reference to the game manager
+        /// and because it relies on the game manager to be in a certain state (i.e. with public members initialised)
+        /// 
+        /// Creates the local player and initialises UI components that rely on the player's attributes (inventory, crafting etc)
+        /// </summary>
+        /// <param name="gameManager"></param>
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
@@ -63,11 +71,9 @@ namespace TheWorkforce
             gameObject.AddComponent<PlayerCrafting>().Initialise(_craftingDisplayRef.Get(), _recipeQueueDisplayRef.Get(), Player.Inventory);
 
             _mouseController = gameObject.AddComponent<MouseController>();
-            _mouseController.SetPlayer(Player);
-            _mouseController.SetEntityView(_entityViewLink.View);
-            _mouseController.SetCamera(Instantiate(_cameraPrefab, transform).GetComponent<Camera>());
-            _mouseController.SetEntityCollection(GameManager.EntityCollection);
-            _mouseController.SetWorldController(GameManager.WorldController);
+            _mouseController.Initialise(Player, Instantiate(_cameraPrefab, transform).GetComponent<Camera>(), GameManager.WorldController, _entityViewLink.View);
+
+            GameTime.SubscribeToPostUpdate(UpdateController);
             CmdStartAll();
             // All other players on the client should listen for when the player is ready and then initialise themselves also.
             // Local Player tells other players on this client (who are already in game) that they should initialise
@@ -95,21 +101,17 @@ namespace TheWorkforce
                 }
             }
         }
+        #endregion
 
-        private void Update()
+        /// <summary>
+        /// Update method that does not rely on Unity callbacks. 
+        /// Processes keyboard and mouse actions.
+        /// </summary>
+        private void UpdateController()
         {
-            // Dont update if...
-            //  - Not the local player
-            //  - The game manager hasnt been initialised yet
-            //  - The game hasnt started
-            if (!isLocalPlayer || GameManager == null || !_hasStarted)
-            {
-                return;
-            }
             HandleKeyboard();
             HandleMouse();
         }
-        #endregion
 
         private void HandleKeyboard()
         {
@@ -139,19 +141,29 @@ namespace TheWorkforce
         private void HandleMouse()
         {
             MouseWorldPosition = _mouseController.CalculateWorldPosition();
-            _mouseController.UpdateMouseOver();
+            _mouseController.UpdateController();
         }
 
         private void CreateLocalPlayer()
         {
             Player = new Player(this, new SlotCollection(45), new PlayerMovement(
                         Id,
-                        3f,
+                        15f,
                         GetComponent<Animator>(),
-                        Local.GameManager.WorldController.RequestPlayerChunkUpdate,
+                        PlayerChunkUpdate,
                         transform
                     )
                 );
+        }
+
+        private void PlayerChunkUpdate(Vector2 position)
+        {
+            OnPlayerChunkUpdate?.Invoke(position);
+
+            if(isServer)
+            {
+                Local.GameManager.WorldController.OnServerPlayerChunkUpdate(this, position);
+            }
         }
 
         private void CreateRemotePlayer()
@@ -160,10 +172,6 @@ namespace TheWorkforce
         }
 
         #region Custom Event Invoking
-        private void PlayerControllerStartup()
-        {
-            OnLocalPlayerControllerStartup?.Invoke(this, this);
-        }
         #endregion
 
         #region Custom Network Messages
@@ -193,7 +201,6 @@ namespace TheWorkforce
         {
             Id = playerControllerId;
             MouseWorldPosition = Vector2.zero;
-            _hasStarted = true;
         }
         #endregion
     }

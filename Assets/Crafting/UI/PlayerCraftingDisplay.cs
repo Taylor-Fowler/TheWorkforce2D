@@ -77,7 +77,6 @@ namespace TheWorkforce.Crafting
         #region IDisplay Implementation
         public void Display()
         {
-            //gameObject.SetActive(true);
             _canvas.enabled = true;
         }
 

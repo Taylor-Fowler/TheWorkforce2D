@@ -1,20 +1,19 @@
-﻿using TheWorkforce.Entities;
-using TheWorkforce.Interfaces;
-using TheWorkforce.Inventory;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace TheWorkforce
 {
+    using Entities;
+    using Interfaces;
+    using Inventory;
+
     public class Player : EntityInstance, IInventory
     {
         //public readonly int Id;
-        #region Public Properties
         public SlotCollection Inventory { get; private set; }
         public Movement Movement { get; private set; }
         //public Toolbelt Toolbelt { get; private set; }
-        #endregion
 
-        protected PlayerController _controller { get; private set; }
+        protected readonly PlayerController _controller;
 
         //public Player(PlayerController playerController, SlotCollection inventory, Toolbelt toolbelt, Movement movement)
         public Player(PlayerController playerController, SlotCollection inventory, Movement movement) : base((uint)playerController.Id, 0, 0, null)

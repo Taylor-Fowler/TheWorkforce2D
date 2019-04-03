@@ -2,7 +2,7 @@ using System;
 
 namespace TheWorkforce.Game_State
 {
-    public class GameStateArgs : EventArgs
+    public class GameStateChangeArgs : EventArgs
     {
         private readonly EGameState _previous;
         private readonly EGameState _current;
@@ -10,7 +10,7 @@ namespace TheWorkforce.Game_State
         public EGameState Previous => _previous;
         public EGameState Current => _current;
         
-        public GameStateArgs(EGameState previous, EGameState current)
+        public GameStateChangeArgs(EGameState previous, EGameState current)
         {
             _previous = previous;
             _current = current;

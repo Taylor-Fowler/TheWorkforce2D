@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using TheWorkforce.Entities;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace TheWorkforce
 {
     [RequireComponent(typeof(SpriteRenderer))]
-    public class TileController : NetworkBehaviour
+    public class TileController : MonoBehaviour
     {
         private Tile _tile;
         private Tuple<GameObject, EntityInstance> _entityOnTile;

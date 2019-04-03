@@ -6,7 +6,6 @@ namespace TheWorkforce
     public class Generatable
     {
         public float MaximumMoisture => _maximumMoisture;
-
         [Range(0, 1), SerializeField] private float _maximumMoisture;
 
         public float MinimumMoisture => _minimumMoisture;

@@ -1,28 +1,49 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using TheWorkforce.Crafting;
-using TheWorkforce.Testing;
-using TheWorkforce.Network;
-using TheWorkforce.Entities;
 
 namespace TheWorkforce.Game_State
-{
-    public delegate void GameStateChangeHandler(object source, GameStateArgs gameStateArgs);
-    public delegate void ApplicationStateChangeHandler(object source, ApplicationStateArgs applicationStateArgs);
-    public delegate void DirtyHandler(object source);
-    public delegate void DestroyHandler();
-    
+{    
+    using Crafting; using Testing; using Network; using Entities;
+
     public class GameManager : MonoBehaviour
     {
-        public event GameStateChangeHandler OnGameStateChange;
-        public event ApplicationStateChangeHandler OnApplicationStateChange;
+        /// <summary>
+        /// Event that notifies subscribers a change in the state of the game
+        /// and contains the old and new game states.
+        /// </summary>
+        public event Action<GameStateChangeArgs> OnGameStateChange;
 
+        /// <summary>
+        /// Event that notifies subscribers a change in the state of the application
+        /// and contains the old and new application states.
+        /// </summary>
+        public event Action<ApplicationStateChangeArgs> OnApplicationStateChange;
+
+        /// <summary>
+        /// The application's local player controller, only set whilst in a game
+        /// </summary>
         public PlayerController PlayerController { get; private set; }
+
+        /// <summary>
+        /// The application's local world controller, only set whilst in a game
+        /// </summary>
         public WorldController WorldController { get; private set; }
+
+        /// <summary>
+        /// The application's network manager
+        /// </summary>
         public CustomNetworkManager NetworkManager => _networkManager;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public EntityCollection EntityCollection => _entityCollection;
-        public Recipes Recipes => _recipes;
+
+        /// <summary>
+        /// The current game state
+        /// </summary>
+        public EGameState GameState => _currentGameState;
 
         [SerializeField] private EntityCollection _entityCollection;
         [SerializeField] private EApplicationState _currentApplicationState;
@@ -33,45 +54,49 @@ namespace TheWorkforce.Game_State
         [SerializeField] private DebugController _debugController;
         
         #region Unity API
+        /// <summary>
+        /// Initialises the application, game state and assets. 
+        /// Also starts listening for startup messages from the world and player.
+        /// </summary>
         private void Awake()
         {
             _currentApplicationState = EApplicationState.Launching;
             _currentGameState = EGameState.NotLoaded;
 
+            // GameManager needs to listen for responses from both the world controller and local player controller
             WorldController.OnWorldControllerStartup += WorldController_OnWorldControllerStartup;
             PlayerController.OnLocalPlayerControllerStartup += PlayerController_OnLocalPlayerControllerStartup;
 
             StartCoroutine(InitialiseAssets());
         }
 
+        /// <summary>
+        /// Clean up
+        /// </summary>
         private void OnDestroy()
         {
-            Recipes.Clear();
+            _recipes.Clear();
         }
         #endregion
 
         private IEnumerator InitialiseAssets()
         {
-            _entityCollection.Initialise();
             TerrainTileSet.InitialiseTileSets();
-            Recipes.Initialise();
+            _entityCollection.Initialise();
+            _recipes.Initialise();
 
             _networkManager.Startup(this);
-            _networkManager.SetLoadGameAction(delegate 
-            {
-                ApplicationStateChange(EApplicationState.Loading);
-            });
-            
-            #if (DEBUG)
             _debugController.Startup(this);
-            #endif
 
+            _networkManager.Initialise(OpenConnection, BeginLoading, PauseGame, ResumeGame);
+            
             yield return new WaitForSeconds(1f);
             ApplicationStateChange(EApplicationState.Menu);
         }
 
         private void StartupIngameControllers()
         {
+            // If both local controllers are initialised, start the world controller and try to initialise the connection
             if(WorldController != null && PlayerController != null)
             {
                 WorldController.Startup(this);
@@ -98,13 +123,36 @@ namespace TheWorkforce.Game_State
             }
         }
 
+        #region State Changes
+        private void OpenConnection()
+        {
+            ApplicationStateChange(EApplicationState.Connecting);
+        }
+
+        private void BeginLoading()
+        {
+            ApplicationStateChange(EApplicationState.Loading);
+            GameStateChange(EGameState.Waking);
+        }
+
+        private void PauseGame()
+        {
+            GameStateChange(EGameState.Paused);
+        }
+
+        private void ResumeGame()
+        {
+            GameStateChange(EGameState.Active);
+        }
+        #endregion
+
         #region Custom Event Invoking
         private void ApplicationStateChange(EApplicationState newState)
         {
             EApplicationState previous = _currentApplicationState;
             _currentApplicationState = newState;
 
-            OnApplicationStateChange?.Invoke(this, new ApplicationStateArgs(previous, _currentApplicationState));
+            OnApplicationStateChange?.Invoke(new ApplicationStateChangeArgs(previous, _currentApplicationState));
         }
 
         private void GameStateChange(EGameState newState)
@@ -112,18 +160,18 @@ namespace TheWorkforce.Game_State
             EGameState previous = _currentGameState;
             _currentGameState = newState;
             
-            OnGameStateChange?.Invoke(this, new GameStateArgs(previous, _currentGameState));
+            OnGameStateChange?.Invoke(new GameStateChangeArgs(previous, _currentGameState));
         }
         #endregion
 
         #region Custom Event Response
-        private void WorldController_OnWorldControllerStartup(object source, WorldController controller)
+        private void WorldController_OnWorldControllerStartup(WorldController controller)
         {
             WorldController = controller;
             StartupIngameControllers();
         }
 
-        private void PlayerController_OnLocalPlayerControllerStartup(object source, PlayerController playerController)
+        private void PlayerController_OnLocalPlayerControllerStartup(PlayerController playerController)
         {
             PlayerController = playerController;
             StartupIngameControllers();

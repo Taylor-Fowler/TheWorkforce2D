@@ -9,7 +9,7 @@ namespace TheWorkforce.Crafting
 
     public class PlayerCrafting : MonoBehaviour
     {
-        // Crafing order
+        // Crafting order
         // 1: Click on the crafting recipe icon
         // 2: Check if there are enough items in the inventory
         // 3: Remove the items from the inventory

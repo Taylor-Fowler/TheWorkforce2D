@@ -3,16 +3,14 @@ using System.Collections.Generic;
 
 namespace TheWorkforce.Inventory
 {
-    using Game_State;
     using Interfaces;
     using Entities;
     using System;
 
     public class SlotCollection
     {
-        #region Custom Event Declaratations
-        public event DirtyHandler OnDirty;
-        #endregion
+        public event Action<SlotCollection> OnDirty;
+
         /// <summary>
         /// The size of the inventory
         /// </summary>
@@ -151,11 +149,19 @@ namespace TheWorkforce.Inventory
             //int[] transactions = new int[editorItemStacks.Length * 3];
             bool success = true;
 
+            // Go through each required item
             foreach(var itemStack in editorItemStacks)
             {
+                // Track how many of the item we still need
                 ushort count = itemStack.Count;
 
+                // Find all of the slots that contain the item we are looking for
                 var slots = GetSlotsForItem(itemStack.Item.Id);
+
+                // If there are slots with the item we need then:
+                //      - Loop over each slot
+                //          - Remove as many items from the slot as we can (never removing more than we need)
+                //          - 
                 if(slots != null)
                 {
                     foreach (var slotIndex in slots)
@@ -164,22 +170,26 @@ namespace TheWorkforce.Inventory
                         ushort slotCount = slot.ItemStack.Count;
                         ItemStack removed = null;
 
+                        // If there are more in the slot than we need, remove the exact amount we need
                         if (slotCount > count)
                         {
                             removed = slot.Remove(count);
-                            slotCount = count;
+                            slotCount = count; // reuse the variable to track how many we removed
                         }
                         else
                         {
+                            // NOTE: This is where the current error is branching to before executing
                             removed = slot.Remove();
                         }
 
+                        // If there was an item to remove, track the transaction as (slot affected, number of items removed)
                         if (removed != null)
                         {
                             transactions.Add(new Tuple<int, ItemStack>((int)slotIndex, removed));
                         }
+                        // Reduce the count by the amount of items we just removed from the current slot
                         count -= slotCount;
-                        // Don't need to remove any more items from the inventory
+                        // If we have removed all of the items we need, then stop looping over the slots with the item we needed
                         if (count == 0)
                         {
                             break;
@@ -187,7 +197,7 @@ namespace TheWorkforce.Inventory
                     }
                 }
                 
-
+                // Now that we have either looped over all the slots for the item we currently need, check if we removed the correct amount
                 if(count > 0)
                 {
                     success = false;
