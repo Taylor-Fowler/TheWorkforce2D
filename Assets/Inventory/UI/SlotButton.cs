@@ -59,7 +59,7 @@ namespace TheWorkforce
         #region Unity API
         private void Start()
         {
-            EmptySlot();
+            UpdateDisplay();
         }
         #endregion
 

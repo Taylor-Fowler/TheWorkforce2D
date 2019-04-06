@@ -23,7 +23,7 @@ namespace TheWorkforce.Testing
             if(_playerController != null)
             {
                 Vector2 position = new Vector2(Mathf.FloorToInt(_playerController.transform.position.x), Mathf.FloorToInt(_playerController.transform.position.y));
-                Vector2 mousePosition = _playerController.MouseWorldPosition;
+                Vector2 mousePosition = MouseController.Instance.WorldPosition;
                 //_playerChunkPosition.text = "Player Chunk \n" + Chunk.CalculateResidingChunk(_playerController.transform.position).ToString();
                 _playerChunkPosition.text = 
                     position.ToString() + "\n"

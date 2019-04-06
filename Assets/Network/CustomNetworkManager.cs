@@ -20,9 +20,15 @@ namespace TheWorkforce.Network
     /// </summary>
     public class CustomNetworkManager : NetworkManager, IManager
     {
-        public GameManager GameManager { get; private set; }
-
+        /// <summary>
+        /// Identifier for the game state change message
+        /// </summary>
         public const short MsgGameStateChange = MsgType.Highest + 1;
+
+        /// <summary>
+        /// Reference to the game manager
+        /// </summary>
+        public GameManager GameManager { get; private set; }
 
         private List<NetworkConnection> _playerConnections;
         private Dictionary<NetworkConnection, PlayerController> _playerControllers;
@@ -31,6 +37,8 @@ namespace TheWorkforce.Network
         private Action _onBeginLoading;
         private Action _onPause;
         private Action _onResume;
+
+
 
         public void Startup(GameManager gameManager)
         {
@@ -53,13 +61,13 @@ namespace TheWorkforce.Network
         /// </summary>
         public override void OnStartServer()
         {
-            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStartServer()");
-            base.OnStartServer();
-
-            if(GameSave.CreateGame("Testing"))
+            if(GameFile.CreateGame("Testing"))
             {
-
+                Debug.Log("Saved Testing");
             }
+
+            base.OnStartServer();
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStartServer()");
         }
 
         /// <summary>
@@ -101,6 +109,12 @@ namespace TheWorkforce.Network
             base.OnServerReady(conn);
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="playerControllerId"></param>
         public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
         {
             Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnServerAddPlayer(NetworkConnection, short)");
@@ -130,8 +144,8 @@ namespace TheWorkforce.Network
         /// <param name="client"></param>
         public override void OnStartClient(NetworkClient client)
         {
-            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStartClient(NetworkClient)");
             base.OnStartClient(client);
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStartClient(NetworkClient)");
         }
 
         /// <summary>
@@ -140,10 +154,17 @@ namespace TheWorkforce.Network
         /// <param name="conn"></param>
         public override void OnClientConnect(NetworkConnection conn)
         {
-            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnClientConnect(NetworkConnection)");
-
             client.RegisterHandler(MsgGameStateChange, OnClientUpdateGameState);
             base.OnClientConnect(conn);
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnClientConnect(NetworkConnection)");
+        }
+
+        public override void OnClientSceneChanged(NetworkConnection conn)
+        {
+            Debug.Log(client.connection.clientOwnedObjects.Count);
+
+            base.OnClientSceneChanged(conn);
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnClientSceneChanged(NetworkConnection)");
         }
         #endregion
 

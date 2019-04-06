@@ -29,15 +29,9 @@ namespace TheWorkforce
         public int Id;
         public Player Player { get; protected set; }
         public GameManager GameManager { get; private set; }
-        public Vector2 MouseWorldPosition { get; protected set; }
 
         // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
-
-        [SerializeField] private GameObject _cameraPrefab;
-        [SerializeField] private EntityViewLink _entityViewLink;
-        [SerializeField] private PlayerCraftingDisplayRef _craftingDisplayRef;
-        [SerializeField] private PlayerInventoryDisplayRef _inventoryDisplayRef;
-        [SerializeField] private PlayerRecipeQueueDisplayRef _recipeQueueDisplayRef;
+        [SerializeField] private PlayerSetup _playerSetup;
 
         private MouseController _mouseController;
         //private ToolbeltDisplay _toolbeltDisplay;
@@ -65,13 +59,7 @@ namespace TheWorkforce
         {
             GameManager = gameManager;
             CreateLocalPlayer();
-
-            _inventoryDisplayRef.Get().SetInventory(Player.Inventory);
-            _inventoryDisplayRef.Get().Hide();
-            gameObject.AddComponent<PlayerCrafting>().Initialise(_craftingDisplayRef.Get(), _recipeQueueDisplayRef.Get(), Player.Inventory);
-
-            _mouseController = gameObject.AddComponent<MouseController>();
-            _mouseController.Initialise(Player, Instantiate(_cameraPrefab, transform).GetComponent<Camera>(), GameManager.WorldController, _entityViewLink.View);
+            _mouseController = _playerSetup.AddComponents(this, gameManager.WorldController);
 
             GameTime.SubscribeToPostUpdate(UpdateController);
             CmdStartAll();
@@ -110,7 +98,7 @@ namespace TheWorkforce
         private void UpdateController()
         {
             HandleKeyboard();
-            HandleMouse();
+            _mouseController.UpdateController();
         }
 
         private void HandleKeyboard()
@@ -136,12 +124,6 @@ namespace TheWorkforce
             }
 
             CmdMove(horizontal, vertical);
-        }
-
-        private void HandleMouse()
-        {
-            MouseWorldPosition = _mouseController.CalculateWorldPosition();
-            _mouseController.UpdateController();
         }
 
         private void CreateLocalPlayer()
@@ -200,7 +182,6 @@ namespace TheWorkforce
         private void RpcStart()
         {
             Id = playerControllerId;
-            MouseWorldPosition = Vector2.zero;
         }
         #endregion
     }

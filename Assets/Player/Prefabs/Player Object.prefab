@@ -153,6 +153,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Id: 0
+  _playerSetup:
+    CameraPrefab: {fileID: 1840921609967512, guid: 252cfe03d1a455c47b7cd7afc4424982,
+      type: 2}
+    MouseControllerPrefab: {fileID: 1533520127260648, guid: 417bb25d514fed5468ec58fc2d7e9143,
+      type: 2}
+    PlayerCraftingPrefab: {fileID: 1939267317909338, guid: bb0eecf0825c212409fca1d9b61a648b,
+      type: 2}
+    EntityViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}
+    PlayerInventoryDisplayRef: {fileID: 11400000, guid: e66db6f68e9e32c42a88c53824148fe5,
+      type: 2}
   _cameraPrefab: {fileID: 1840921609967512, guid: 252cfe03d1a455c47b7cd7afc4424982,
     type: 2}
   _entityViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}

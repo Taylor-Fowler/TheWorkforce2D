@@ -13,23 +13,26 @@ namespace TheWorkforce
         public static MouseController Instance => _instance;
         private static MouseController _instance;
 
+        public Vector2 WorldPosition => _worldPosition;
+        private Vector2 _worldPosition;
+
         #region Private Members
-        [SerializeField] private Sprite _outlineSprite;
+        [SerializeField] private SpriteRenderer _outlinerRenderer;
+        [SerializeField] private EntityCollection _entityCollection;
+        [SerializeField] private EntityInteractionDisplay _entityInteractionDisplay;
+
         private EntityView _entityView;
         private Player _player;
         private Camera _personalCamera;
-        private EntityCollection _entityCollection;
-        private EntityInteractionDisplay _entityInteractionDisplay;
         private WorldController _worldController;
+
         private Vector2 _screenPosition;
-        private Vector2 _worldPosition;
 
         private Tile _activeTile;
         private EntityInstance _activeInstance;
         private Interaction _activeInteraction;
         private ItemStack _itemInHand;
 
-        private SpriteRenderer _outlinerRenderer;
         #endregion
 
         #region Unity API
@@ -42,17 +45,13 @@ namespace TheWorkforce
 
             _instance = this;
             _entityInteractionDisplay = FindObjectOfType<EntityInteractionDisplay>();
-            _outlineSprite = Resources.Load<Sprite>("UI/64x64 Outline");
-            _outlinerRenderer = new GameObject("Outline Renderer").AddComponent<SpriteRenderer>();
-            _outlinerRenderer.sprite = _outlineSprite;
-            _outlinerRenderer.gameObject.SetActive(false);
-
-            _entityCollection = EntityCollection.Instance();
         }
 
+        /// <summary>
+        /// Resets the mouse controller singleton instance
+        /// </summary>
         private void OnDestroy()
         {
-            // Reset the instance reference
             if(_instance == this)
             {
                 _instance = null;
@@ -70,6 +69,7 @@ namespace TheWorkforce
 
         public void UpdateController()
         {
+            CalculateWorldPosition();
             UpdateMouseOverTile();
 
             // If the mouse is over a UI object then stop displaying the entity that
@@ -86,7 +86,7 @@ namespace TheWorkforce
             UpdateInteraction();
         }
 
-        public Vector2 CalculateWorldPosition()
+        public void CalculateWorldPosition()
         {
             _screenPosition = Input.mousePosition;
             
@@ -94,8 +94,6 @@ namespace TheWorkforce
             mousePosition.z = 10f;
 
             _worldPosition = _personalCamera.ScreenToWorldPoint(mousePosition);
-
-            return _worldPosition;
         }
 
         public ItemStack AddItemStackToHand(ItemStack itemStack)

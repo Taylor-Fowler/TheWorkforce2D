@@ -79,6 +79,11 @@ namespace TheWorkforce.Game_State
         }
         #endregion
 
+        public void Quit()
+        {
+            Application.Quit();
+        }
+
         private IEnumerator InitialiseAssets()
         {
             TerrainTileSet.InitialiseTileSets();

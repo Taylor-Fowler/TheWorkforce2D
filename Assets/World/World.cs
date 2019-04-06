@@ -13,8 +13,6 @@ namespace TheWorkforce
     [Serializable]
     public class World
     {
-        public const uint REGION_SIZE = 32;
-
         public readonly int Seed;
         public readonly int NegativeXSeed;
         public readonly int NegativeYSeed;
@@ -155,25 +153,6 @@ namespace TheWorkforce
             return result;
         }
     
-        //public Vector2[] FilterChunksThatAreLoaded(Vector2[] chunksToLoad)
-        //{
-        //    if (ChunksLoaded.Count == 0)
-        //    {
-        //        return chunksToLoad;
-        //    }
-    
-        //    List<Vector2> notLoaded = new List<Vector2>();
-    
-        //    foreach (var chunk in chunksToLoad)
-        //    {
-        //        if (!ChunksLoaded.ContainsKey(chunk))
-        //        {
-        //            notLoaded.Add(chunk);
-        //        }
-        //    }
-        //    return notLoaded.ToArray();
-        //}
-    
         /// <summary>
         /// Iterates over a list of chunk positions and removes any position that is loaded in the world
         /// </summary>
@@ -187,34 +166,7 @@ namespace TheWorkforce
                     chunkPositions.RemoveAt(i);
                 }
             }
-        }
-    
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="chunkPositions"></param>
-        ///// <returns></returns>
-        //public virtual List<Chunk> GetChunks(List<Vector2> chunkPositions)
-        //{
-        //    // 1. Loop through chunk positions
-        //    // 2. If chunk position is loaded, add directly to list
-        //    // 3. If chunk position is not loaded but is already generated, load the chunk
-        //    //    from the save file, add the chunk to the loaded chunks list and add to return list
-        //    // 4. If chunk position is not loaded or generated, return the list of found chunks
-        //    //    and the list of positions will contain chunks that need to be generated which will be
-        //    //    handled by the server and distributed accordingly
-        //    List<Chunk> retrievedChunks = new List<Chunk>();
-    
-        //    LookupLoadedChunks(chunkPositions, retrievedChunks);
-        //    if (chunkPositions.Count == 0)
-        //    {
-        //        return retrievedChunks;
-        //    }
-    
-        //    retrievedChunks.AddRange(GameFileIO.LoadChunks(chunkPositions));
-    
-        //    return retrievedChunks;
-        //}
+        }  
     
         public virtual bool CanUnloadChunk(Vector2 chunkPositionToUnload)
         {
@@ -301,41 +253,6 @@ namespace TheWorkforce
             return false;
         }
 
-        /// <summary>
-        ///     Loads any chunks, from file, that exist with the corresponding position specified
-        ///     in the chunkPositions list.
-        /// </summary>
-        /// <param name="chunkPositions">The chunk positions to try and load.</param>
-        /// <param name="loadResult">The list of chunks to concatenate the load result with.</param>
-        //public void LoadGeneratedChunks(IEnumerable<Vector2> chunkPositions, List<Chunk> loadResult)
-        //{
-        //    // Loops through the requested chunk positions and adds any that are known to exist to a list
-        //    // and adds the others that do not yet exist to a separate list. The known list is then loaded
-        //    // from file and finally the requested chunk positions list is replaced with the non-existant chunk
-        //    // list.
-        //    //if (ChunksGenerated.Count == 0)
-        //    //{
-        //    //    return;
-        //    //}
-
-        //    List<Vector2> existingChunks = new List<Vector2>();
-        //    List<Vector2> nonExistentChunks = new List<Vector2>();
-
-        //    foreach (var chunkPosition in chunkPositions)
-        //    {
-        //        if (ChunksGenerated.Contains(chunkPosition))
-        //        {
-        //            existingChunks.Add(chunkPosition);
-        //        }
-        //        else
-        //        {
-        //            nonExistentChunks.Add(chunkPosition);
-        //        }
-        //    }
-
-        //    loadResult.AddRange(GameFileIO.LoadChunks(existingChunks));
-        //    chunkPositions = nonExistentChunks;
-        //}
         private void SetChunksLoadedByPlayers(int playerId, IEnumerable<Vector2> chunks)
         {
 

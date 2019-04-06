@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace TheWorkforce.Crafting
 {
-    using Game_State;
-    using Inventory;
+    using Game_State; using Inventory; using SOs.References;
 
     public class PlayerCrafting : MonoBehaviour
     {
@@ -16,15 +15,19 @@ namespace TheWorkforce.Crafting
         // 4: Begin processing
         // 5: At the end of the process, add the resulting item to the inventory
 
+        [SerializeField] private PlayerCraftingDisplayRef _playerCraftingDisplayRef;
+        [SerializeField] private PlayerRecipeQueueDisplayRef _playerRecipeQueueDisplayRef;
+
         private PlayerCraftingDisplay _playerCraftingDisplay;
         private PlayerRecipeQueueDisplay _playerRecipeQueueDisplay;
         private RecipeProcessorQueue _recipeProcessorQueue;
         private SlotCollection _inventory;
 
-        public void Initialise(PlayerCraftingDisplay playerCraftingDisplay, PlayerRecipeQueueDisplay playerRecipeQueueDisplay, SlotCollection inventory)
+        public void Initialise(SlotCollection inventory)
         {
-            _playerCraftingDisplay = playerCraftingDisplay;
-            _playerRecipeQueueDisplay = playerRecipeQueueDisplay;
+
+            _playerCraftingDisplay = _playerCraftingDisplayRef.Get();
+            _playerRecipeQueueDisplay = _playerRecipeQueueDisplayRef.Get();
             _inventory = inventory;
             _recipeProcessorQueue = new RecipeProcessorQueue();
 
