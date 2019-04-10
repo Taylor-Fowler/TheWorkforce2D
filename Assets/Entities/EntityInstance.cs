@@ -3,21 +3,22 @@ using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
-    public delegate void EntityDestroyHandler();
+    using Interfaces;
 
+    [Serializable]
     public abstract class EntityInstance : IEntityDisplay
     {
         public event Action DirtyHandler;
-        public event EntityDestroyHandler OnEntityDestroy;
+        public event Action OnEntityDestroy;
         public readonly int X;
         public readonly int Y;
+        public readonly uint Id;
 
-        private readonly uint _id;
         private readonly Action<uint> _onDestroy;
 
         public EntityInstance(uint id, int x, int y, Action<uint> onDestroy)
         {
-            _id = id;
+            Id = id;
             X = x;
             Y = y;
             _onDestroy = onDestroy;
@@ -32,15 +33,10 @@ namespace TheWorkforce.Entities
 
         public abstract void Display(EntityView entityView);
 
-        public uint GetId()
-        {
-            return _id;
-        }
-
         public void Destroy()
         {
             OnEntityDestroy?.Invoke();
-            _onDestroy(_id);
+            _onDestroy(Id);
         }
 
         protected void OnDirty()

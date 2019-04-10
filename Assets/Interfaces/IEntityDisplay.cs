@@ -1,7 +1,7 @@
-﻿using TheWorkforce.Entities;
-
-namespace TheWorkforce
+﻿namespace TheWorkforce.Interfaces
 {
+    using Entities;
+
     public interface IEntityDisplay
     {
         void Display(EntityView enityView);

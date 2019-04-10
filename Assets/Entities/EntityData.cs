@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
+    using Interfaces;
+    
     public abstract class EntityData : ScriptableObject, IEntityDisplay
     {
         public ushort Id;

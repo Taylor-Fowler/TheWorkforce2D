@@ -28,6 +28,7 @@ namespace TheWorkforce
                 chunks.Add(chunk);
     
                 for (int x = 0; x < Chunk.SIZE; x++)
+                { 
                     for (int y = 0; y < Chunk.SIZE; y++)
                     {
                         Vector2 worldChunkPosition = chunk.WorldPosition();
@@ -43,7 +44,9 @@ namespace TheWorkforce
                         GenerateGeneratableItems(tile, worldChunkPosition);
                         chunk.Tiles[x, y] = tile;
                     }
+                }
             }
+
             return chunks;
         }
 
@@ -66,7 +69,6 @@ namespace TheWorkforce
                     Vector2 worldPosition = tile.Position + chunkWorldPosition;
                     tile.PlaceEntity(Entities.EntityCollection.Instance().CreateEntity(generatables[index].ItemId, (int)worldPosition.x, (int)worldPosition.y));
                 }
-
             }
         }
     

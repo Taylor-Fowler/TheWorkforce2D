@@ -20,7 +20,7 @@ namespace TheWorkforce
             _paddingObjects = new List<GameObject>();
             _spriteRenderer = GetComponent<SpriteRenderer>();
 
-            _paddingAnchor = new GameObject();
+            _paddingAnchor = new GameObject("Padding");
             _paddingAnchor.transform.SetParent(transform);
         }
         #endregion
@@ -71,7 +71,7 @@ namespace TheWorkforce
             foreach (var sprite in sprites)
             {
                 GameObject paddingObject = new GameObject();
-                paddingObject.transform.SetParent(transform);
+                paddingObject.transform.SetParent(_paddingAnchor.transform);
                 paddingObject.AddComponent<SpriteRenderer>().sprite = sprite;
                 paddingObject.transform.position = transform.position -
                                                    new Vector3(0f, 0f, TerrainTileSet.LoadedTileSets[tileSetId].Precedence);

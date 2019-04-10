@@ -74,6 +74,7 @@ namespace TheWorkforce
         /// <param name="gameManager"></param>
         public void Startup(GameManager gameManager)
         {
+            // take a reference to the game file and use it for the world creation
             GameManager = gameManager;
 
             _world = new World(784893570);
@@ -186,6 +187,7 @@ namespace TheWorkforce
             var generatedChunks = _worldGeneration.GenerateChunks(chunksNeededForPlayer);
             RpcReceiveChunksWithDependencies(NetworkChunk.ChunkListToNetworkChunkArray(generatedChunks), playerId, chunksNeededForPlayerArray);
 
+            Debug.Log("[WorldController] - RequestPlayerChunkUpdate(int, Vector2)");
             //UpdateChunkControllers(_world.GetPlayerLoadedChunks(playerId), chunksPreviouslyLoaded.Intersect(chunksNeededForPlayer).ToList());
         }
     
@@ -394,7 +396,7 @@ namespace TheWorkforce
                     bytesLeft = 1400 - sizeof(bool);
                 }
 
-                entityIds.Add(entityInstance.GetId());
+                entityIds.Add(entityInstance.Id);
                 dataIds.Add(entityData.Id);
                 payload.AddRange(entityInstance.GetPacket());
 

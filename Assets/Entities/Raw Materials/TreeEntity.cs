@@ -1,22 +1,24 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
     using Interactions; using Interfaces;
 
-    public class OreEntity : EntityInstance, IInteract
+    public class TreeEntity : EntityInstance, IInteract
     {
         public ushort Amount;
-        private readonly OreData _data;
+        private readonly TreeData _data;
 
-        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data, ushort amount) : base(id, x, y, onDestroy)
+        public TreeEntity(uint id, int x, int y, Action<uint> onDestroy, TreeData data, ushort amount) : base(id, x, y, onDestroy)
         {
             Amount = amount;
             _data = data;
         }
 
-        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data) 
+        public TreeEntity(uint id, int x, int y, Action<uint> onDestroy, TreeData data)
             : this(id, x, y, onDestroy, data, 10)
         {
         }
@@ -50,23 +52,23 @@ namespace TheWorkforce.Entities
         public Interaction Interact(EntityInstance initiator)
         {
             IInventory inventory = initiator as IInventory;
-            if(inventory != null)
+            if (inventory != null)
             {
-                return new HarvestInteraction(this, _data, DecreaseAmount, inventory, _data.TicksToHarvest);
+                return new HarvestInteraction(this, _data.Drop, DecreaseAmount, inventory, _data.TicksToHarvest);
             }
             return null;
         }
 
         private bool DecreaseAmount()
         {
-            if(Amount == 0)
+            if (Amount == 0)
             {
                 return false;
             }
             --Amount;
             OnDirty();
 
-            if(Amount == 0)
+            if (Amount == 0)
             {
                 Destroy();
             }

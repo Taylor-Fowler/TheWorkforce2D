@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace TheWorkforce.Entities
 {
-    using Interfaces;
-
-    [CreateAssetMenu(fileName = "Ore Data", menuName = "Entity Data/Raw Materials/Ore")]
-    public class OreData : EntityData, ISlotDisplay
+    [CreateAssetMenu(fileName = "Tree Data", menuName = "Entity Data/Raw Materials/Tree")]
+    public class TreeData : EntityData
     {
         public EntityViewLink ViewLink;
-        public Generatable Generatable; // Generation reference that stores how much stone would be generated in a single vein
+        public Generatable Generatable;
+        
+        public WoodenLogData Drop => _drop;
+        [SerializeField] private WoodenLogData _drop;
 
         public ushort TicksToHarvest => _ticksToHarvest;
         [SerializeField] private ushort _ticksToHarvest = 120;
@@ -43,17 +47,13 @@ namespace TheWorkforce.Entities
 
         public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy)
         {
-            return new OreEntity(id, x, y, onDestroy, this);
+            return new TreeEntity(id, x, y, onDestroy, this);
         }
 
         public override EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy, byte[] arr)
         {
-            return new OreEntity(id, x, y, onDestroy, this, BitConverter.ToUInt16(arr, 0));
-        }
-
-        public void Display(SlotButton slotButton)
-        {
-            slotButton.SetItemImage(Sprite);
+            return new TreeEntity(id, x, y, onDestroy, this, BitConverter.ToUInt16(arr, 0));
         }
     }
+
 }

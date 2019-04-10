@@ -53,9 +53,18 @@ namespace TheWorkforce.Entities
             EntityData value = null;
             if(DataMappedToId.TryGetValue(dataIdKey, out value))
             {
+                _entityIdCounter++;
+
                 EntityInstance instance = value.CreateInstance(_entityIdCounter, x, y, DestroyEntity);
                 ActiveEntities.Add(instance);
-                InstanceMappedToId.Add(++_entityIdCounter, instance);
+                InstanceMappedToId.Add(_entityIdCounter, instance);
+
+                if(x == -13 && y == -7)
+                {
+                    Debug.Log("fuck");
+                }
+                Debug.Log("[EntityCollection] - CreateEntity(ushort, int, int) \n" +
+                            "X: " + x.ToString() + ", Y: " + y.ToString());
                 return _entityIdCounter;
             }
             return 0;
@@ -79,6 +88,14 @@ namespace TheWorkforce.Entities
                 EntityInstance entityInstance = value.CreateInstance(entityId, x, y, DestroyEntity, arr);
                 ActiveEntities.Add(entityInstance);
                 InstanceMappedToId.Add(entityId, entityInstance);
+
+                if (x == -13 && y == -7)
+                {
+                    Debug.Log("fuck");
+                }
+
+                Debug.Log("[EntityCollection] - CreateEntity(ushort, int, int) \n" +
+                            "X: " + x.ToString() + ", Y: " + y.ToString());
             }
         }
 
@@ -105,7 +122,7 @@ namespace TheWorkforce.Entities
         {
             foreach (var entity in EntitiesToDestroy)
             {
-                InstanceMappedToId.Remove(entity.GetId());
+                InstanceMappedToId.Remove(entity.Id);
                 ActiveEntities.Remove(entity);
             }
             EntitiesToDestroy.Clear();

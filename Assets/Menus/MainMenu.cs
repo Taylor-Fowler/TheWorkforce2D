@@ -36,10 +36,14 @@ namespace TheWorkforce.UI
         [SerializeField] private Button _loadFileButton;
         private Button[] _loadFileButtons;
         private Button _selectedButton;
-
         #endregion
-        [SerializeField] private Button _hostPlayButton;
-        [SerializeField] private Button _clientPlayButton;
+
+        #region Create Game Panel Objects
+        [SerializeField] private Button _createGameButton;
+        [SerializeField] private TextMeshProUGUI _worldNameInput;
+        [SerializeField] private TextMeshProUGUI _worldSeedInput;
+        #endregion
+
         [SerializeField] private Button _backButton;
 
         #region Unity API
@@ -53,30 +57,30 @@ namespace TheWorkforce.UI
             _loadFileButtons = new Button[saveDirectories.Length];
 
             // Create a new load save button for each save game on the client
-            for (int i = 0; i < saveDirectories.Length; i++)
+            for (int i = 0; i < saveDirectories.Length; ++i)
             {
                 Button loadFileButton = Instantiate(LoadFileButtonPrefab, _saveFilesScrollView);
+                int e = i;
                 loadFileButton.onClick.AddListener(delegate
                 {
-                    SelectFileButton(loadFileButton, saveDirectories[i]);
+                    SelectFileButton(loadFileButton, saveDirectories[e]);
                 });
 
                 loadFileButton.GetComponentInChildren<TextMeshProUGUI>().text = saveDirectories[i].Name;
                 RectTransform rect = (RectTransform)loadFileButton.transform;
-                rect.anchoredPosition += new Vector2(0, -i * 64.0f);
+                rect.anchoredPosition += new Vector2(0, -i * 128.0f);
 
                 _loadFileButtons[i] = loadFileButton;
             }
-            
 
-            _hostPlayButton.onClick.AddListener(delegate 
+            _createGameButton.onClick.AddListener(delegate
             {
-                _gameManager.NetworkManager.StartHost();
+                CreateGame();
             });
-            _clientPlayButton.onClick.AddListener(delegate
-            {
-                _gameManager.NetworkManager.StartClient();
-            });
+            //_clientPlayButton.onClick.AddListener(delegate
+            //{
+            //    _gameManager.NetworkManager.StartClient();
+            //});
         }
         #endregion
 
@@ -99,7 +103,6 @@ namespace TheWorkforce.UI
             if(_selectedButton)
             {
                 DeselectFileButton(_selectedButton);
-
             }
             _selectedButton = button;
             // Show some text etc for the button
@@ -108,6 +111,32 @@ namespace TheWorkforce.UI
         private void DeselectFileButton(Button button)
         {
 
+        }
+
+        private void CreateGame()
+        {
+            string worldName = _worldNameInput.text;
+            // Validate world name
+            if(worldName == null || worldName == string.Empty)
+            {
+                // error message, text cannot be null
+                return;
+            }
+
+            if(!GameFile.CreateGame(worldName))
+            {
+                // error message, cannot create file (save exists, disk full etc)
+                return;
+            }
+
+            string worldSeed = _worldSeedInput.text;
+            int seed = 784893570;
+            if(worldSeed != null && worldSeed != string.Empty)
+            {
+                // turn the string into an int
+            }
+
+            _gameManager.NetworkManager.StartHost();
         }
 
         #region Public Methods for Button Events

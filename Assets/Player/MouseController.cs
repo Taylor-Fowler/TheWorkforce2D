@@ -36,6 +36,9 @@ namespace TheWorkforce
         #endregion
 
         #region Unity API
+        /// <summary>
+        /// Initialises the singleton reference and gets a reference to the entity interaction display
+        /// </summary>
         private void Awake()
         {
             if(_instance != null)
@@ -44,7 +47,9 @@ namespace TheWorkforce
             }
 
             _instance = this;
+
             _entityInteractionDisplay = FindObjectOfType<EntityInteractionDisplay>();
+            _outlinerRenderer.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -59,6 +64,13 @@ namespace TheWorkforce
         }
         #endregion
 
+        /// <summary>
+        /// Assigns references to the dependencies
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="camera"></param>
+        /// <param name="worldController"></param>
+        /// <param name="entityView"></param>
         public void Initialise(Player player, Camera camera, WorldController worldController, EntityView entityView)
         {
             _player = player;
@@ -126,13 +138,12 @@ namespace TheWorkforce
             Vector2 tilePosition = Tile.TilePositionInRelationToChunk(_worldPosition);
 
             TileController tileController = _worldController[chunkPosition, tilePosition];
-
             _activeTile = tileController?.GetTile();
         }
 
         private void UpdateMouseOverEntity()
         {
-            uint currentEntityId = (_activeInstance == null) ? 0 : _activeInstance.GetId();
+            uint currentEntityId = (_activeInstance == null) ? 0 : _activeInstance.Id;
 
             // hovering over a tile
             if (_activeTile != null)
@@ -143,11 +154,13 @@ namespace TheWorkforce
                 // the new entity is not the current one
                 if (currentEntityId != entity)
                 {
+                    Debug.Log("Previous Entity: " + currentEntityId);
                     NullifyEntityReference();
                     _activeInstance = _entityCollection.GetEntity(entity);
                     _entityView.SetEntity(_activeInstance);
 
                     SetOutline();
+                    Debug.Log("New Entity: " + entity);
                 }
             }
         }
