@@ -6,6 +6,7 @@ namespace TheWorkforce.Game_State
     public static class GameTime
     {
         public static uint Time { get; private set; }
+        public static uint BackgroundTime { get; private set; }
 
         private static List<Action> _tickActions = new List<Action>();
         private static List<Action> _tickActionsToRemove = new List<Action>();
@@ -114,6 +115,11 @@ namespace TheWorkforce.Game_State
                 }
                 _specificPostTickActions.Remove(Time);
             }
+        }
+
+        public static void UpdateBackgroundTimer()
+        {
+            ++BackgroundTime;
         }
     } 
 }

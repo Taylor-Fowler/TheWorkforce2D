@@ -81,8 +81,8 @@ namespace TheWorkforce
 
         public void UpdateController()
         {
-            CalculateWorldPosition();
-            UpdateMouseOverTile();
+            CalculateWorldPosition(); // find the world position of the mouse
+            UpdateMouseOverTile(); // get the tile at the mouse world position
 
             // If the mouse is over a UI object then stop displaying the entity that
             // the mouse was over previously
@@ -143,24 +143,27 @@ namespace TheWorkforce
 
         private void UpdateMouseOverEntity()
         {
-            uint currentEntityId = (_activeInstance == null) ? 0 : _activeInstance.Id;
+            // get the entity id that we were previously moused over (if any)
+            uint previousEntityId = (_activeInstance == null) ? 0 : _activeInstance.Id;
 
-            // hovering over a tile
+            // hovering over a tile and not UI
             if (_activeTile != null)
             {
-                // find id of tile entity
-                uint entity = _activeTile.StaticEntityInstanceId;
+                // find id of the entity on the tile we are actively moused over
+                uint currentEntityId = _activeTile.StaticEntityInstanceId;
 
-                // the new entity is not the current one
-                if (currentEntityId != entity)
+                // we are now looking at a different entity
+                if (previousEntityId != currentEntityId)
                 {
-                    Debug.Log("Previous Entity: " + currentEntityId);
-                    NullifyEntityReference();
-                    _activeInstance = _entityCollection.GetEntity(entity);
+                    _activeInstance = _entityCollection.GetEntity(currentEntityId);
                     _entityView.SetEntity(_activeInstance);
 
                     SetOutline();
-                    Debug.Log("New Entity: " + entity);
+                }
+                // we are looking at the same entity, just need to reset the outline
+                else if(currentEntityId != 0)
+                {
+                    SetOutline();
                 }
             }
         }

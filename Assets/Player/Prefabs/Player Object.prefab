@@ -26,6 +26,7 @@ GameObject:
   - component: {fileID: 114287458830173330}
   - component: {fileID: 61789029422206108}
   - component: {fileID: 50744225262150418}
+  - component: {fileID: 114706126201996208}
   m_Layer: 0
   m_Name: Player Object
   m_TagString: Untagged
@@ -163,15 +164,6 @@ MonoBehaviour:
     EntityViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}
     PlayerInventoryDisplayRef: {fileID: 11400000, guid: e66db6f68e9e32c42a88c53824148fe5,
       type: 2}
-  _cameraPrefab: {fileID: 1840921609967512, guid: 252cfe03d1a455c47b7cd7afc4424982,
-    type: 2}
-  _entityViewLink: {fileID: 11400000, guid: 52aeacf9551cceb4fbb6e08d0641ebd9, type: 2}
-  _craftingDisplayRef: {fileID: 11400000, guid: 7982323cf1c942143b9131aa02fb7971,
-    type: 2}
-  _inventoryDisplayRef: {fileID: 11400000, guid: e66db6f68e9e32c42a88c53824148fe5,
-    type: 2}
-  _recipeQueueDisplayRef: {fileID: 11400000, guid: b3811b866b3d3434783cab53e8412e47,
-    type: 2}
 --- !u!114 &114287458830173330
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -181,6 +173,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 12aac34bcf3d2824eb13086a3313fca6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114706126201996208
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1704434750061360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33f4e4a19de88c74d8eb74045a8e593f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!212 &212778733170385946

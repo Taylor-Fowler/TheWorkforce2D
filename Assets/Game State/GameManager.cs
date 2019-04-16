@@ -44,10 +44,10 @@ namespace TheWorkforce.Game_State
         /// The current game state
         /// </summary>
         public EGameState GameState => _currentGameState;
+        private EGameState _currentGameState;
 
         [SerializeField] private EntityCollection _entityCollection;
         [SerializeField] private EApplicationState _currentApplicationState;
-        [SerializeField] private EGameState _currentGameState;
 
         [SerializeField] private CustomNetworkManager _networkManager;
         [SerializeField] private Recipes _recipes;
@@ -93,7 +93,7 @@ namespace TheWorkforce.Game_State
             _networkManager.Startup(this);
             _debugController.Startup(this);
 
-            _networkManager.Initialise(OpenConnection, BeginLoading, PauseGame, ResumeGame);
+            _networkManager.Initialise(StartConnecting, BeginLoading, Pause, Resume);
             
             yield return new WaitForSeconds(1f);
             ApplicationStateChange(EApplicationState.Menu);
@@ -110,6 +110,8 @@ namespace TheWorkforce.Game_State
                     PlayerController.Startup(this);
                     ApplicationStateChange(EApplicationState.Ingame);
                     GameStateChange(EGameState.Active);
+
+
                     StartCoroutine(IncrementTickTime());
                 }));
             }
@@ -128,10 +130,21 @@ namespace TheWorkforce.Game_State
             }
         }
 
+        private IEnumerator IncrementBackgroundTime()
+        {
+            while(_currentApplicationState == EApplicationState.Ingame || _currentApplicationState == EApplicationState.Connecting
+                    || _currentApplicationState == EApplicationState.Loading)
+            {
+                GameTime.UpdateBackgroundTimer();
+                yield return new WaitForFixedUpdate();
+            }
+        }
+
         #region State Changes
-        private void OpenConnection()
+        private void StartConnecting()
         {
             ApplicationStateChange(EApplicationState.Connecting);
+            StartCoroutine(IncrementBackgroundTime());
         }
 
         private void BeginLoading()
@@ -140,12 +153,12 @@ namespace TheWorkforce.Game_State
             GameStateChange(EGameState.Waking);
         }
 
-        private void PauseGame()
+        private void Pause()
         {
             GameStateChange(EGameState.Paused);
         }
 
-        private void ResumeGame()
+        private void Resume()
         {
             GameStateChange(EGameState.Active);
         }

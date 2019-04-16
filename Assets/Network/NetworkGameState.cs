@@ -15,4 +15,9 @@ namespace TheWorkforce.Network
         /// </summary>
         public uint Time;
     }
+
+    public class NetworkStateConfirmation : MessageBase
+    {
+        public EGameState NewState;
+    }
 }

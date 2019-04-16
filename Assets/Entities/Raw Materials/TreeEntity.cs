@@ -59,6 +59,16 @@ namespace TheWorkforce.Entities
             return null;
         }
 
+        public Interaction Interact(Player initiator)
+        {
+            IInventory inventory = initiator as IInventory;
+            if (inventory != null)
+            {
+                return new HarvestInteraction(this, _data.Drop, DecreaseAmount, inventory, _data.TicksToHarvest);
+            }
+            return null;
+        }
+
         private bool DecreaseAmount()
         {
             if (Amount == 0)

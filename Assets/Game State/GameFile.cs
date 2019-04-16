@@ -4,12 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using UnityEngine;
 
 namespace TheWorkforce.Game_State
 {
     public class GameFile
     {
+        #region Constants + Statics
         /// <summary>
         /// Get the singleton instance of GameFile
         /// </summary>
@@ -24,6 +26,8 @@ namespace TheWorkforce.Game_State
         /// The directory name that stores all the save files
         /// </summary>
         private const string SavesDirectoryName = "Saves";
+        private const string TemporaryCopyDirectoryName = "Temp";
+
 
         /// <summary>
         /// The region file name, the region file stores all regions that have been generated and links them to
@@ -37,9 +41,7 @@ namespace TheWorkforce.Game_State
         private const string ChunksDirectoryName = "Chunks";
         private const string PlayersDirectoryName = "Players";
         private const string FileFormat = ".dat";
-        private const string TemporaryCopyDirectoryName = "Temp";
 
-        private readonly DirectoryInfo _saveDirectory;
 
         /// <summary>
         /// Finds all valid save directories within the main save directory and then returns them.
@@ -62,10 +64,11 @@ namespace TheWorkforce.Game_State
         public static bool CreateGame(string gameName)
         {
             // The activate game must be unloaded before a new game can be created
-            if(_instance != null || gameName == null || gameName == "")
+            if(_instance != null)
             {
                 return false;
             }
+
             string savesDirectoryPath = Path.Combine(Application.persistentDataPath, SavesDirectoryName);
             GetSavesDirectory(savesDirectoryPath);
 
@@ -82,10 +85,44 @@ namespace TheWorkforce.Game_State
             DirectoryInfo chunksDirectory = Directory.CreateDirectory(Path.Combine(newSaveDirectoryPath, ChunksDirectoryName));
 
             // Initialise the instance of game save
-            _instance = new GameFile(saveDirectory);
+            _instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
 
             return true;
         }
+
+        public static bool CreateTemporaryGame(string gameName)
+        {
+            // The activate game must be unloaded before a new game can be created
+            if (_instance != null)
+            {
+                return false;
+            }
+
+            string savesDirectoryPath = Path.Combine(Application.persistentDataPath, TemporaryCopyDirectoryName);
+            GetSavesDirectory(savesDirectoryPath);
+
+            string newSaveDirectoryPath = Path.Combine(savesDirectoryPath, gameName);
+
+            // If the new save game directory path exists, delete it as it is only temporary anyways
+            // this will most likely happen with disconnects followed by reconnects OR default game names
+            if (Directory.Exists(newSaveDirectoryPath))
+            {
+                // Delete the folder and its contents recursively
+                var directoryInfo = new DirectoryInfo(newSaveDirectoryPath);
+                directoryInfo.Delete(true);
+            }
+
+            // Recreate the folders
+            DirectoryInfo saveDirectory = Directory.CreateDirectory(newSaveDirectoryPath);
+            DirectoryInfo playersDirectory = Directory.CreateDirectory(Path.Combine(newSaveDirectoryPath, PlayersDirectoryName));
+            DirectoryInfo chunksDirectory = Directory.CreateDirectory(Path.Combine(newSaveDirectoryPath, ChunksDirectoryName));
+
+            // Initialise the instance of game save
+            _instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
+
+            return true;
+        }
+
 
         private static DirectoryInfo GetSavesDirectory(string path)
         {
@@ -97,13 +134,40 @@ namespace TheWorkforce.Game_State
             return new DirectoryInfo(path);
         }
 
+        private static FileInfo SearchForFile(DirectoryInfo directoryInfo, string fileName)
+        {
+            foreach(var fileInfo in directoryInfo.GetFiles())
+            {
+                if(fileInfo.Name == fileName)
+                {
+                    return fileInfo;
+                }
+            }
+
+            return null;
+        }
+        #endregion
+
+        /// <summary>
+        /// Get the game save name
+        /// </summary>
+        public string Name => _saveDirectory.Name;
+
+        public int GetPlayerId(FileInfo fileInfo) => Int32.Parse(fileInfo.Name.Split('.')[0]);
+
+        private readonly DirectoryInfo _saveDirectory;
+        private readonly DirectoryInfo _playersDirectory;
+        private readonly DirectoryInfo _chunksDirectory;
+
         /// <summary>
         /// Private constructor, only the static methods of the class are able to create the game
         /// </summary>
         /// <param name="directoryInfo"></param>
-        private GameFile(DirectoryInfo directoryInfo)
+        private GameFile(DirectoryInfo saveDirectory, DirectoryInfo playersDirectory, DirectoryInfo chunksDirectory)
         {
-            _saveDirectory = directoryInfo;
+            _saveDirectory = saveDirectory;
+            _playersDirectory = playersDirectory;
+            _chunksDirectory = chunksDirectory;
         }
 
         public void SaveWorld(World world)
@@ -112,6 +176,72 @@ namespace TheWorkforce.Game_State
             {
 
             }
+        }
+
+        public void SavePlayer(int playerId, byte[] playerData)
+        {
+            string playerFileName = playerId.ToString() + FileFormat;
+            FileInfo playerFile = SearchForFile(_playersDirectory, playerFileName);
+
+            // If the player file does not exist then create it
+            if(playerFile == null)
+            {
+                playerFile = new FileInfo(_playersDirectory.FullName + "\\" + playerFileName);
+            }
+
+            using (FileStream fs = playerFile.OpenWrite())
+            {
+                fs.Write(playerData, 0, playerData.Length);
+            }
+        }
+
+        /// <summary>
+        /// Checks if the player with the given Id exists and when true, gives the player data
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public bool PlayerExists(int playerId, out byte[] data)
+        {
+            string playerFileName = playerId.ToString() + FileFormat;
+            FileInfo playerFile = SearchForFile(_saveDirectory, playerFileName);
+
+            // Player file does not exist
+            if (playerFile == null)
+            {
+                data = null;
+                return false;
+            }
+
+            data = File.ReadAllBytes(playerFile.FullName);
+            return true;
+
+        }
+
+        public List<Tuple<int, byte[]>> GetPlayerData()
+        {
+            var playerFiles = _saveDirectory.GetFiles();
+
+            // If there are no player files
+            // This should not happen!
+            if (playerFiles.Length == 0)
+            {
+                return null;
+            }
+
+            List<Tuple<int, byte[]>> playerData = new List<Tuple<int, byte[]>>();
+
+            foreach(var fileInfo in playerFiles)
+            {
+                byte[] fileData = File.ReadAllBytes(fileInfo.FullName);
+                // TODO: Better error checking...or any!
+                // Filename is in the format of playerId.dat e.g. 1.dat
+                //      Split at the period, will give [ "1", "dat" ]
+                int playerId = GetPlayerId(fileInfo);
+                playerData.Add(new Tuple<int, byte[]>(playerId, fileData));
+            }
+
+            return playerData;
         }
 
         public void ExitGame()

@@ -160,6 +160,11 @@ namespace TheWorkforce.Entities
             throw new NotImplementedException();
         }
 
+        public Interaction Interact(Player initiator)
+        {
+            throw new NotImplementedException();
+        }
+
         public override EntityData GetData()
         {
             return _data;

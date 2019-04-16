@@ -1,0 +1,27 @@
+The Workforce:
+    Server Start New Game:
+        ✔ Create working game directory @done(19-04-13 14:22) @MainMenu.cs
+            Create the save directory if this is the first save
+            Check that the new game name is free to use (no duplicates)
+            Create the new game directory
+        ☐ Start the game server
+        ☐ Generate player data, save to file and initialise local player
+            ☐ Player Identifier
+            ☐ Inventory Items
+            ☐ World Position
+        ☐ Generate world data around player start position and save to file
+
+    New Player Join Server:
+        ☐ Server notifies all connected clients to pause at time `t`
+            All clients must pause at the same game tick so that the server can send an up-to-date version of the game
+            to the new player
+        ☐ Server sends temporary game save to new client when all clients have paused
+            A new player joining should not force the server to overwrite the working game save, a temporary save is used to store
+            all important world updates.
+        ☐ Server generates new player data, don't send to clients yet
+            Dont send the player data until after the world data
+        ☐ Server generates new world data, don't send to clients yet
+        ☐ Server creates player instance, the instance loads the data just generated
+        ☐ Server tells all clients (including itself) to update temporary file with new player and world data
+        ☐ Clients notify server that they are ready
+        ☐ Upon all clients ready, server tells all clients to resume

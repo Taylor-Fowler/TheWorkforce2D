@@ -69,6 +69,18 @@ namespace TheWorkforce
             //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
         }
 
+        public void LoadPlayer(byte[] playerData)
+        {
+
+        }
+
+        public byte[] SavePlayer()
+        {
+            byte[] data = new byte[30];
+
+            return data;
+        }
+
         #region Unity API
         private void Start()
         {

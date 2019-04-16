@@ -12,7 +12,7 @@ namespace TheWorkforce.UI
 
     public class MainMenu : MonoBehaviour
     {
-        public Button LoadFileButtonPrefab;
+        public Button SelectFilePrefab;
 
         [SerializeField] private GameManager _gameManager;
 
@@ -31,51 +31,33 @@ namespace TheWorkforce.UI
         private GameObject _activePanel = null;
         #endregion
 
-        #region Load Panel Objects
-        [SerializeField] private Transform _saveFilesScrollView;
-        [SerializeField] private Button _loadFileButton;
-        private Button[] _loadFileButtons;
-        private Button _selectedButton;
-        #endregion
-
         #region Create Game Panel Objects
         [SerializeField] private Button _createGameButton;
         [SerializeField] private TextMeshProUGUI _worldNameInput;
         [SerializeField] private TextMeshProUGUI _worldSeedInput;
         #endregion
 
+        #region Join Game Panel Objects
+        [SerializeField] private Button _joinGameButton;
+        #endregion
+
         [SerializeField] private Button _backButton;
 
         #region Unity API
-        private void Start()
+        private void Awake()
         {
             gameObject.SetActive(false);
             _backButton.gameObject.SetActive(false);
             _gameManager.OnApplicationStateChange += GameManager_OnApplicationStateChange;
 
-            var saveDirectories = GameFile.GetSaveDirectories();
-            _loadFileButtons = new Button[saveDirectories.Length];
-
-            // Create a new load save button for each save game on the client
-            for (int i = 0; i < saveDirectories.Length; ++i)
-            {
-                Button loadFileButton = Instantiate(LoadFileButtonPrefab, _saveFilesScrollView);
-                int e = i;
-                loadFileButton.onClick.AddListener(delegate
-                {
-                    SelectFileButton(loadFileButton, saveDirectories[e]);
-                });
-
-                loadFileButton.GetComponentInChildren<TextMeshProUGUI>().text = saveDirectories[i].Name;
-                RectTransform rect = (RectTransform)loadFileButton.transform;
-                rect.anchoredPosition += new Vector2(0, -i * 128.0f);
-
-                _loadFileButtons[i] = loadFileButton;
-            }
-
             _createGameButton.onClick.AddListener(delegate
             {
                 CreateGame();
+            });
+
+            _joinGameButton.onClick.AddListener(delegate
+            {
+                _gameManager.NetworkManager.StartClient();
             });
             //_clientPlayButton.onClick.AddListener(delegate
             //{
@@ -84,6 +66,12 @@ namespace TheWorkforce.UI
         }
         #endregion
 
+        /// <summary>
+        /// Displays and hides canvas elements for the main menu when the application state changes
+        /// 
+        /// Any state -> Menu = Display the main menu canvas
+        /// </summary>
+        /// <param name="applicationStateArgs"></param>
         private void GameManager_OnApplicationStateChange(ApplicationStateChangeArgs applicationStateArgs)
         {    
             // Transition to menu state, this could be due to just launching the application or due to just closing the game
@@ -98,21 +86,11 @@ namespace TheWorkforce.UI
             }
         }
 
-        private void SelectFileButton(Button button, DirectoryInfo directory)
-        {
-            if(_selectedButton)
-            {
-                DeselectFileButton(_selectedButton);
-            }
-            _selectedButton = button;
-            // Show some text etc for the button
-        }
+        
 
-        private void DeselectFileButton(Button button)
-        {
-
-        }
-
+        /// <summary>
+        /// Creates a game with the user input game-name then proceeds to start the network host
+        /// </summary>
         private void CreateGame()
         {
             string worldName = _worldNameInput.text;
@@ -131,6 +109,7 @@ namespace TheWorkforce.UI
 
             string worldSeed = _worldSeedInput.text;
             int seed = 784893570;
+
             if(worldSeed != null && worldSeed != string.Empty)
             {
                 // turn the string into an int

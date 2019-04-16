@@ -39,11 +39,10 @@ namespace TheWorkforce.Crafting
 
         private void Awake()
         {
-            Hide();
-            _recipes.OnInitialised += this._recipes_OnInitialised;
+            _recipes.OnInitialised += Recipes_OnInitialised;
         }
 
-        private void _recipes_OnInitialised()
+        private void Recipes_OnInitialised()
         {
             // generate the buttons
             foreach(var recipe in _recipes.AllRecipes)
