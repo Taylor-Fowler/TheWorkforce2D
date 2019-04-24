@@ -14,6 +14,10 @@ namespace TheWorkforce.Entities
 
         public TreeEntity(uint id, int x, int y, Action<uint> onDestroy, TreeData data, ushort amount) : base(id, x, y, onDestroy)
         {
+            //if(Amount != 10)
+            //{
+            //    Debug.Log("[TreeEntity] - TreeEntity()\nAmount is not 10!");
+            //}
             Amount = amount;
             _data = data;
         }
@@ -30,6 +34,18 @@ namespace TheWorkforce.Entities
             Array.Copy(BitConverter.GetBytes(Y), 0, bytes, 4, sizeof(int));
             Array.Copy(BitConverter.GetBytes(Amount), 0, bytes, 8, sizeof(ushort));
             return bytes;
+        }
+
+        public override byte[] GetSaveData()
+        {
+            //Debug.Log($"[TreeEntity] - GetSaveData()\nAmount: {Amount.ToString()}");
+            // EntityId + Amount + DataId
+            byte[] bytes = new byte[sizeof(uint) + sizeof(ushort) * 2];
+            Array.Copy(BitConverter.GetBytes(Id), bytes, sizeof(uint));
+            Array.Copy(BitConverter.GetBytes(_data.Id), 0, bytes, sizeof(uint), sizeof(ushort));
+            Array.Copy(BitConverter.GetBytes(Amount), 0, bytes, sizeof(uint) + sizeof(ushort), sizeof(ushort));
+
+            return BitConverter.GetBytes(Amount);
         }
 
         public override uint GetDataTypeId()

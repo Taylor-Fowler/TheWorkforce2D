@@ -7,23 +7,23 @@ namespace TheWorkforce
     {
         private readonly int _id;
         private readonly Action<Vector2> _chunkChange;
-        private Vector2 _chunkPositionWhenRequestedGeneration;
-        private Vector2 _worldPositionWhenRequestedGeneration;
+        private Vector2Int _chunkPositionWhenRequestedGeneration;
+        private Vector2Int _worldPositionWhenRequestedGeneration;
 
         public PlayerMovement(int id, float speed, Animator animator, Action<Vector2> chunkChange, Transform transform) : base(speed, animator)
         {
             _id = id;
             _chunkChange = chunkChange;
             CapturePosition(transform);
-            _chunkChange(transform.position);
+            _chunkChange(transform.position.Vec2Int());
         }
 
         public override void Move(int horizontal, int vertical, Transform transform)
         {
             base.Move(horizontal, vertical, transform);
 
-            Vector2 worldPosition = transform.position;
-            Vector2 currentChunk = Chunk.CalculateResidingChunk(worldPosition);
+            Vector2Int worldPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y);
+            Vector2Int currentChunk = Chunk.CalculateResidingChunk(worldPosition);
 
             // Check whether the player has moved to a new chunk
             if(_chunkPositionWhenRequestedGeneration != currentChunk)
@@ -33,18 +33,19 @@ namespace TheWorkforce
                 if (Mathf.Abs(difference.x) >= Chunk.SIZE || Mathf.Abs(difference.y) >= Chunk.SIZE)
                 {
                     _chunkChange(worldPosition);
-                    CapturePosition(transform.position, currentChunk);
+                    CapturePosition(worldPosition, currentChunk);
                 }
             }
         }
 
         private void CapturePosition(Transform transform)
         {
-            _chunkPositionWhenRequestedGeneration = Chunk.CalculateResidingChunk(transform.position);
-            _worldPositionWhenRequestedGeneration = transform.position;
+            Vector2Int position = new Vector2Int((int)transform.position.x, (int)transform.position.y);
+            _chunkPositionWhenRequestedGeneration = Chunk.CalculateResidingChunk(position);
+            _worldPositionWhenRequestedGeneration = position;
         }
 
-        private void CapturePosition(Vector2 worldPosition, Vector2 chunkPosition)
+        private void CapturePosition(Vector2Int worldPosition, Vector2Int chunkPosition)
         {
             _chunkPositionWhenRequestedGeneration = chunkPosition;
             _worldPositionWhenRequestedGeneration = worldPosition;

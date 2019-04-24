@@ -52,6 +52,11 @@ namespace TheWorkforce.Entities
             throw new NotImplementedException();
         }
 
+        public override byte[] GetSaveData()
+        {
+            throw new NotImplementedException();
+        }
+
         public override uint GetDataTypeId()
         {
             return _data.Id;

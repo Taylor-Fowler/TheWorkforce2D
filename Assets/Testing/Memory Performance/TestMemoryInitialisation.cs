@@ -31,14 +31,14 @@ namespace TheWorkforce.Testing
 
         private void InitialiseMonos()
         {
-            List<Vector2> ChunkPositions = new List<Vector2>();
+            List<Vector2Int> ChunkPositions = new List<Vector2Int>();
             List<ChunkController> ChunkControllers = new List<ChunkController>();
 
             for (int x = 0; x < 20; ++x)
             {
                 for (int z = 0; z < 20; ++z)
                 {
-                    ChunkPositions.Add(new Vector2(x, z));
+                    ChunkPositions.Add(new Vector2Int(x, z));
                     var chunkController = new GameObject("Chunk Controller: " + x + ", " + z).AddComponent<ChunkController>();
                     chunkController.transform.SetParent(WorldGameObject.transform);
                     ChunkControllers.Add(chunkController);
@@ -54,14 +54,14 @@ namespace TheWorkforce.Testing
 
         private void InitialiseNonMonos()
         {
-            List<Vector2> ChunkPositions = new List<Vector2>();
+            List<Vector2Int> ChunkPositions = new List<Vector2Int>();
             List<ChunkController> ChunkControllers = new List<ChunkController>();
 
             for (int x = 0; x < 25; ++x)
             {
                 for (int z = 0; z < 25; ++z)
                 {
-                    ChunkPositions.Add(new Vector2(x, z));
+                    ChunkPositions.Add(new Vector2Int(x, z));
                 }
             }
             var Chunks = WorldGeneration.GenerateChunks(ChunkPositions);

@@ -101,11 +101,6 @@ namespace TheWorkforce.UI
                 return;
             }
 
-            if(!GameFile.CreateGame(worldName))
-            {
-                // error message, cannot create file (save exists, disk full etc)
-                return;
-            }
 
             string worldSeed = _worldSeedInput.text;
             int seed = 784893570;
@@ -113,6 +108,12 @@ namespace TheWorkforce.UI
             if(worldSeed != null && worldSeed != string.Empty)
             {
                 // turn the string into an int
+            }
+
+            if(!GameFile.CreateGame(worldName, seed))
+            {
+                // error message, cannot create file (save exists, disk full etc)
+                return;
             }
 
             _gameManager.NetworkManager.StartHost();

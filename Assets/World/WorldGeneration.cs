@@ -18,7 +18,7 @@ namespace TheWorkforce
             NegativeYSeed = negativeYSeed;
         }
     
-        public List<Chunk> GenerateChunks(IEnumerable<Vector2> positionsOfChunksToGenerate)
+        public List<Chunk> GenerateChunks(IEnumerable<Vector2Int> positionsOfChunksToGenerate)
         {
             List<Chunk> chunks = new List<Chunk>();
     
@@ -39,7 +39,7 @@ namespace TheWorkforce
                             (byte)(noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2),
                             GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y, noise),
                             noise,
-                            new Vector2(x, y));
+                            new Vector2Int(x, y));
 
                         GenerateGeneratableItems(tile, worldChunkPosition);
                         chunk.Tiles[x, y] = tile;
@@ -57,7 +57,7 @@ namespace TheWorkforce
             {
                 List<Generatable> generatables = Generation.GetGeneratables(tile.Moisture, tile.Elevation);
 
-                if(generatables.Count != 0)
+                if (generatables.Count != 0)
                 {
                     // Noise is between 1f and 0.666f, find out its value between 0 and 0.333f
                     //noise = 1f - noise;
@@ -66,6 +66,14 @@ namespace TheWorkforce
 
                     float weightPerItem = 1f / generatables.Count;
                     int index = Mathf.FloorToInt(noise / weightPerItem);
+                    //Debug.Log($"Index: {index}, Count: {generatables.Count}, Noise: {noise} ");
+                    // TODO: Find a better approach to this fix
+                    // There are occasions where the noise value is 1, when this happens, the index is oob
+                    if (index >= generatables.Count)
+                    {
+                        index = generatables.Count - 1;
+                    }
+
                     Vector2 worldPosition = tile.Position + chunkWorldPosition;
                     tile.PlaceEntity(Entities.EntityCollection.Instance().CreateEntity(generatables[index].ItemId, (int)worldPosition.x, (int)worldPosition.y));
                 }
@@ -93,7 +101,7 @@ namespace TheWorkforce
                 //yModifier *= 0.666f;
             }
             yModifier *= 0.5f;
-            return Mathf.PerlinNoise(x * xModifier, y * yModifier);
+            return Mathf.Clamp(Mathf.PerlinNoise(x * xModifier, y * yModifier), 0.0f, 1.0f);
         }
 
         private float GetNoise(int x, int y, float modifier)
@@ -113,7 +121,7 @@ namespace TheWorkforce
                 yModifier *= 0.5f;
             }
             yModifier *= 0.5f * modifier * (modifier * 0.98163f);
-            return Mathf.PerlinNoise(x * xModifier, y * yModifier);
+            return Mathf.Clamp(Mathf.PerlinNoise(x * xModifier, y * yModifier), 0.0f, 1.0f);
         }
     }
 }

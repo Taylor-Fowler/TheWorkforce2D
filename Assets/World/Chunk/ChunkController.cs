@@ -18,7 +18,7 @@ namespace TheWorkforce
         #endregion
 
         #region Public Indexers
-        public TileController this[Vector2 tilePosition]
+        public TileController this[Vector2Int tilePosition]
         {
             get
             {
@@ -26,7 +26,7 @@ namespace TheWorkforce
                 {
                     return null;
                 }
-                return _tileControllers[(int)tilePosition.x * Chunk.SIZE + (int)tilePosition.y];
+                return _tileControllers[tilePosition.x * Chunk.SIZE + tilePosition.y];
             }
         }
         #endregion
@@ -72,7 +72,7 @@ namespace TheWorkforce
         {
 
             Chunk = chunk;
-            transform.position = Chunk.Position * Chunk.SIZE;
+            transform.position = (Vector2)Chunk.Position * Chunk.SIZE;
             transform.position += transform.parent.position;
             name = "Chunk Controller: " + Chunk.Position.x + ", " + Chunk.Position.y;
 

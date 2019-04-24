@@ -7,7 +7,7 @@ using TMPro;
 
 namespace TheWorkforce.UI
 {
-    using Game_State;
+    using Game_State; using Network;
 
     public class LoadMenu : MonoBehaviour, IDisplay
     {
@@ -16,6 +16,7 @@ namespace TheWorkforce.UI
         public TextMeshProUGUI SelectedFileNameText;
         public Button SelectFileButtonPrefab;
 
+        [SerializeField] private CustomNetworkManager _customNetworkManager;
         [SerializeField] private Transform _selectFileScrollView;
         [SerializeField] private Button _loadButton;
         [SerializeField] private Button _deleteButton;
@@ -51,6 +52,7 @@ namespace TheWorkforce.UI
             _loadButton.gameObject.SetActive(false);
             _deleteButton.gameObject.SetActive(false);
 
+            _loadButton.onClick.AddListener(LoadFile);
             _deleteButton.onClick.AddListener(DeleteFile);
         }
 
@@ -83,6 +85,15 @@ namespace TheWorkforce.UI
 
         }
 
+        private void LoadFile()
+        {
+            if(_selectedFileDirectory != null)
+            {
+                GameFile.LoadGame(_selectedFileDirectory);
+                _customNetworkManager.StartHost();
+            }
+        }
+
         private void DeleteFile()
         {
             _loadButton.enabled = false;
@@ -104,7 +115,7 @@ namespace TheWorkforce.UI
             }
         }
 
-
+        #region IDisplay Implementation
         public void Display()
         {
             gameObject.SetActive(true);
@@ -114,5 +125,6 @@ namespace TheWorkforce.UI
         {
             gameObject.SetActive(false);
         }
+        #endregion
     } 
 }

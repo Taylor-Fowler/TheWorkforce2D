@@ -3,9 +3,7 @@ using System.Collections.Generic;
 
 namespace TheWorkforce.Inventory
 {
-    using Interfaces;
-    using Entities;
-    using System;
+    using Interfaces; using Entities;
 
     public class SlotCollection
     {
@@ -35,6 +33,45 @@ namespace TheWorkforce.Inventory
                 _slots.Add(slot);
                 slot.OnDirty += Slot_OnDirty;
             }
+        }
+
+        public SlotCollection(uint size, List<Tuple<ushort, ushort>> items)
+        {
+            Size = size;
+            _slots = new List<ISlot>((int)Size);
+
+            for (uint i = 0; i < Size; ++i)
+            {
+                var slot = new Slot();
+                _slots.Add(slot);
+                slot.OnDirty += Slot_OnDirty;
+
+                // Add the collection of items to the new slot collection
+                ushort itemCount = items[(int)i].Item2;
+                if(itemCount > 0)
+                {
+                    ItemStack item = new ItemStack(EntityCollection.Instance().DataMappedToId[items[(int)i].Item1], itemCount);
+                    slot.Add(item);
+                }
+            }
+        }
+
+        public List<Tuple<ushort, ushort>> GetSaveData()
+        {
+            List<Tuple<ushort, ushort>> saveData = new List<Tuple<ushort, ushort>>((int)Size);
+            Tuple<ushort, ushort> emptySlot = new Tuple<ushort, ushort>(0, 0);
+
+            foreach(var slot in _slots)
+            {
+                // If the slot is empty, add the empty slot data, otherwise add the slot's item data
+                saveData.Add
+                (
+                    slot.IsEmpty ?
+                        emptySlot : new Tuple<ushort, ushort>(slot.ItemStack.Item.Id, slot.ItemStack.Count)
+                );
+            }
+
+            return saveData;
         }
 
         public ISlot GetSlot(int index)

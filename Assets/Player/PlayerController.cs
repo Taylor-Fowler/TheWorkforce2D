@@ -16,21 +16,26 @@ namespace TheWorkforce
     /// </summary>
     public class PlayerController : NetworkBehaviour, IManager
     {
-        /// <summary>
-        /// An event that is invoked when the local player starts
-        /// </summary>
-        public static event Action<PlayerController> OnLocalPlayerControllerStartup;
+        #region Constants + Statics
+        private const int PlayerInventorySize = 45;
 
-        // The local player controller, the local controller has a reference to the game manager
-        private static PlayerController Local;
+        /// <summary>
+        /// An event that is invoked when a Player Controller starts
+        /// </summary>
+        public static event Action<PlayerController> OnPlayerControllerStartup;
+
+        /// <summary>
+        /// The local PlayerController for the current client
+        /// </summary>
+        public static PlayerController Local { get; private set; }
+        #endregion
 
         public event Action<Vector2> OnPlayerChunkUpdate;
 
-        public int Id;
-        public Player Player { get; protected set; }
+        public int Id { get; private set; }
+        public Player Player { get; private set; }
         public GameManager GameManager { get; private set; }
 
-        // TODO: Move inventory prefab, toolbelt prefab, item inspector prefab to one prefab and get components off of it
         [SerializeField] private PlayerSetup _playerSetup;
 
         private MouseController _mouseController;
@@ -43,8 +48,9 @@ namespace TheWorkforce
         /// </summary>
         public override void OnStartLocalPlayer()
         {
-            Local = this;
-            OnLocalPlayerControllerStartup?.Invoke(this);
+            // TODO: Move to startup
+            //Local = this;
+            //GameTime.SubscribeToPostUpdate(UpdateController);
         }
         #endregion
 
@@ -58,51 +64,88 @@ namespace TheWorkforce
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
-            CreateLocalPlayer();
-            _mouseController = _playerSetup.AddComponents(this, gameManager.WorldController);
+                
+            if(isLocalPlayer)
+            {
+                Local = this;
+                OnPlayerControllerStartup?.Invoke(this);
+                GameTime.SubscribeToPostUpdate(UpdateController);
+            }
+            // CreateLocalPlayer();
+            // _mouseController = _playerSetup.AddComponents(this, gameManager.WorldController);
 
-            GameTime.SubscribeToPostUpdate(UpdateController);
-            CmdStartAll();
+            
+            // CmdStartAll();
             // All other players on the client should listen for when the player is ready and then initialise themselves also.
             // Local Player tells other players on this client (who are already in game) that they should initialise
-
-            //_toolbeltDisplay.SetToolbelt(Player.Toolbelt);
         }
 
-        public void LoadPlayer(byte[] playerData)
+        public void OnClientInitialise(PlayerData playerData)
         {
-
-        }
-
-        public byte[] SavePlayer()
-        {
-            byte[] data = new byte[30];
-
-            return data;
-        }
-
-        #region Unity API
-        private void Start()
-        {
-            // A player is initialised on their local client in OnStartLocalPlayer, all other clients will initialise the player
-            // later during the start method
-            if (!isLocalPlayer)
+            // Add the local player components (new camera, mouse controller etc)
+            if (isLocalPlayer)
             {
-                // The server should treat all player controllers as local players in terms of initialisation
-                // This is so that when ANY player moves, the server will process the move and be able to 
-                // update chunk dependencies based on the movement
-                if (isServer)
-                {
-                    CreateLocalPlayer();
-                }
-                else
-                {
-                    CreateRemotePlayer();
-                }
+                _mouseController = _playerSetup.AddComponents(this, GameManager.WorldController);
             }
         }
-        #endregion
 
+        /// <summary>
+        /// Called on the server to initialise the player.
+        /// </summary>
+        /// <param name="playerData"></param>
+        public void OnServerInitialise(PlayerData playerData)
+        {
+            Id = playerData.Id;
+            transform.position = new Vector3(playerData.X, playerData.Y, transform.position.z);
+
+            SlotCollection inventorySlots;
+            if(playerData.InventoryItems == null)
+            {
+                inventorySlots = new SlotCollection(PlayerInventorySize);
+            }
+            else
+            {
+                inventorySlots = new SlotCollection(PlayerInventorySize, playerData.InventoryItems);
+            }
+            
+            // As soon as the player is created, the world area is also created
+            // Because PlayerChunkUpdate is called which requests up-to-date world information
+            Player = new Player(this, inventorySlots, new PlayerMovement(
+                        Id,
+                        15f,
+                        GetComponent<Animator>(),
+                        PlayerChunkUpdate,
+                        transform
+                    )
+                );
+
+            // Add the local player components (new camera, mouse controller etc)
+            if(isLocalPlayer)
+            {
+                _mouseController = _playerSetup.AddComponents(this, GameManager.WorldController);
+            }
+        }
+
+        public void LoadPlayer()
+        {
+
+        }
+
+        public void CreatePlayer()
+        {
+
+        }
+
+        public PlayerData GetPlayerData()
+        {
+            return new PlayerData(Id, transform.position.x, transform.position.y)
+            {
+                InventoryItems = Player.Inventory.GetSaveData()
+            };
+        }
+
+
+        #region Keyboard and Mouse controls
         /// <summary>
         /// Update method that does not rely on Unity callbacks. 
         /// Processes keyboard and mouse actions.
@@ -137,10 +180,11 @@ namespace TheWorkforce
 
             CmdMove(horizontal, vertical);
         }
+        #endregion
 
         private void CreateLocalPlayer()
         {
-            Player = new Player(this, new SlotCollection(45), new PlayerMovement(
+            Player = new Player(this, new SlotCollection(PlayerInventorySize), new PlayerMovement(
                         Id,
                         15f,
                         GetComponent<Animator>(),
@@ -165,15 +209,13 @@ namespace TheWorkforce
             Player = new Player(this, new SlotCollection(45), new AnimatedMovement(3f, GetComponent<Animator>()));
         }
 
+
         #region Custom Event Invoking
         #endregion
 
         #region Custom Network Messages
         [Command]
-        private void CmdMove(int horizontal, int vertical)
-        {
-            RpcMove(horizontal, vertical);
-        }
+        private void CmdMove(int horizontal, int vertical) => RpcMove(horizontal, vertical);
 
         [ClientRpc]
         private void RpcMove(int horizontal, int vertical)
@@ -182,18 +224,6 @@ namespace TheWorkforce
             {
                 Player.Movement.Move(horizontal, vertical, transform);            
             }
-        }
-
-        [Command]
-        private void CmdStartAll()
-        {
-            RpcStart();
-        }
-
-        [ClientRpc]
-        private void RpcStart()
-        {
-            Id = playerControllerId;
         }
         #endregion
     }

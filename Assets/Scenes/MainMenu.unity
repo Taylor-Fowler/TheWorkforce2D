@@ -5221,8 +5221,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 205c962a9dd3b134cb6848a199689181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _entityCollection: {fileID: 11400000, guid: b22593f4d22b8d04cb83f35173fdb974, type: 2}
+  _currentGameState: 0
   _currentApplicationState: 0
+  _entityCollection: {fileID: 11400000, guid: b22593f4d22b8d04cb83f35173fdb974, type: 2}
   _networkManager: {fileID: 346675080}
   _recipes: {fileID: 11400000, guid: 475a752739ef83148a4a0ac28c86ad7c, type: 2}
   _debugController: {fileID: 1864749840}
@@ -13894,7 +13895,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!1 &1035685819
 GameObject:
@@ -16177,6 +16178,7 @@ MonoBehaviour:
   SelectedFileNameText: {fileID: 1877478034}
   SelectFileButtonPrefab: {fileID: 114046108322224580, guid: 9993febbed176ab42aff72d4bdf60c57,
     type: 2}
+  _customNetworkManager: {fileID: 346675080}
   _selectFileScrollView: {fileID: 2085499885}
   _loadButton: {fileID: 1657413618}
   _deleteButton: {fileID: 562040870}
@@ -23869,7 +23871,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 1
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0

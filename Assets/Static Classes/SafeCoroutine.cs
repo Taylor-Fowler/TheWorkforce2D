@@ -18,4 +18,17 @@ namespace TheWorkforce
             callback();
         }
     }
+
+    public static class Vector2Conversions
+    {
+        public static Vector2Int Vec2Int(this Vector2 vector2)
+        {
+            return new Vector2Int((int)vector2.x, (int)vector2.y);
+        }
+
+        public static Vector2Int Vec2Int(this Vector3 vector3)
+        {
+            return new Vector2Int((int)vector3.x, (int)vector3.y);
+        }
+    }
 }

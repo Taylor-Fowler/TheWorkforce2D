@@ -59,15 +59,28 @@ namespace TheWorkforce.Entities
                 ActiveEntities.Add(instance);
                 InstanceMappedToId.Add(_entityIdCounter, instance);
 
-                if(x == -13 && y == -7)
-                {
-                    Debug.Log("fuck");
-                }
-                Debug.Log("[EntityCollection] - CreateEntity(ushort, int, int) \n" +
-                            "X: " + x.ToString() + ", Y: " + y.ToString());
+                //Debug.Log("[EntityCollection] - CreateEntity(ushort, int, int) \n" +
+                //            "X: " + x.ToString() + ", Y: " + y.ToString());
                 return _entityIdCounter;
             }
             return 0;
+        }
+
+        public void LoadEntity(ushort dataIdKey, uint entityId, int x, int y, byte[] saveData, int offset)
+        {
+            EntityData value = null;
+            if (DataMappedToId.TryGetValue(dataIdKey, out value))
+            {
+                byte[] entityData = new byte[saveData.Length - offset];
+                Array.Copy(saveData, offset, entityData, 0, entityData.Length);
+
+                EntityInstance entityInstance = value.CreateInstance(entityId, x, y, DestroyEntity, entityData);
+                ActiveEntities.Add(entityInstance);
+                InstanceMappedToId.Add(entityId, entityInstance);
+
+                Debug.Log("[EntityCollection] - LoadEntity(ushort, uint, int, int) \n" +
+                            "X: " + x.ToString() + ", Y: " + y.ToString());
+            }
         }
 
         public void CreateEntity(ushort dataIdKey, uint entityId, byte[] payload, ref int offset)
@@ -88,11 +101,6 @@ namespace TheWorkforce.Entities
                 EntityInstance entityInstance = value.CreateInstance(entityId, x, y, DestroyEntity, arr);
                 ActiveEntities.Add(entityInstance);
                 InstanceMappedToId.Add(entityId, entityInstance);
-
-                if (x == -13 && y == -7)
-                {
-                    Debug.Log("fuck");
-                }
 
                 Debug.Log("[EntityCollection] - CreateEntity(ushort, int, int) \n" +
                             "X: " + x.ToString() + ", Y: " + y.ToString());

@@ -18,8 +18,8 @@ namespace TheWorkforce
             _harvestBackground.SetActive(true);
             float amount = 1.0f - ((float)ticksLeft / ticksTotal);
             _harvestCurrentAmount.fillAmount = amount;
-            Debug.Log("[EntityInteractionDisplay] - DisplayHarvest(ushort, ushort) \n"
-                    + "amount: " + amount.ToString());
+            //Debug.Log("[EntityInteractionDisplay] - DisplayHarvest(ushort, ushort) \n"
+            //        + "amount: " + amount.ToString());
         }
 
         public void HideHarvest()

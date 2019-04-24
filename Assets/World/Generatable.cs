@@ -18,16 +18,7 @@ namespace TheWorkforce
         [Range(0, 1), SerializeField] private float _minimumElevation;
 
         public ushort ItemId => _itemId;
-        private ushort _itemId;
-
-        //public Generatable(float maximumMoisture, float minimumMoisture, float maximumElevation, float minimumElevation, ushort itemId)
-        //{
-        //    _maximumMoisture = maximumMoisture;
-        //    _minimumMoisture = minimumMoisture;
-        //    _maximumElevation = maximumElevation;
-        //    _minimumElevation = minimumElevation;
-        //    _itemId = itemId;
-        //}
+        [SerializeField, ReadOnly] private ushort _itemId;
 
         public void Initialise(ushort itemId)
         {

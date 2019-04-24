@@ -30,6 +30,17 @@ namespace TheWorkforce.Entities
             return bytes;
         }
 
+        public override byte[] GetSaveData()
+        {
+            // EntityId + Amount + DataId
+            byte[] bytes = new byte[sizeof(uint) + sizeof(ushort) * 2];
+            Array.Copy(BitConverter.GetBytes(Id), bytes, sizeof(uint));
+            Array.Copy(BitConverter.GetBytes(_data.Id), 0, bytes, sizeof(uint), sizeof(ushort));
+            Array.Copy(BitConverter.GetBytes(Amount), 0, bytes, sizeof(uint) + sizeof(ushort), sizeof(ushort));
+
+            return BitConverter.GetBytes(Amount);
+        }
+
         public override uint GetDataTypeId()
         {
             return _data.Id;

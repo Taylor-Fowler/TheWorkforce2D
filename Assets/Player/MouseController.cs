@@ -15,6 +15,7 @@ namespace TheWorkforce
 
         public Vector2 WorldPosition => _worldPosition;
         private Vector2 _worldPosition;
+        private Vector2Int _worldPositionInt;
 
         #region Private Members
         [SerializeField] private SpriteRenderer _outlinerRenderer;
@@ -106,6 +107,8 @@ namespace TheWorkforce
             mousePosition.z = 10f;
 
             _worldPosition = _personalCamera.ScreenToWorldPoint(mousePosition);
+            _worldPositionInt.x = (int)_worldPosition.x;
+            _worldPositionInt.y = (int)_worldPosition.y;
         }
 
         public ItemStack AddItemStackToHand(ItemStack itemStack)
@@ -134,8 +137,8 @@ namespace TheWorkforce
         /// </summary>
         private void UpdateMouseOverTile()
         {
-            Vector2 chunkPosition = Chunk.CalculateResidingChunk(_worldPosition);
-            Vector2 tilePosition = Tile.TilePositionInRelationToChunk(_worldPosition);
+            Vector2Int chunkPosition = Chunk.CalculateResidingChunk(_worldPositionInt);
+            Vector2Int tilePosition = Tile.TilePositionInRelationToChunk(_worldPositionInt);
 
             TileController tileController = _worldController[chunkPosition, tilePosition];
             _activeTile = tileController?.GetTile();

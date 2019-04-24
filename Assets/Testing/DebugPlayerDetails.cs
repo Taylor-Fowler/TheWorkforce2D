@@ -22,16 +22,18 @@ namespace TheWorkforce.Testing
         {
             if(_playerController != null)
             {
-                Vector2 position = new Vector2(Mathf.FloorToInt(_playerController.transform.position.x), Mathf.FloorToInt(_playerController.transform.position.y));
+                Vector2Int position = new Vector2Int(Mathf.FloorToInt(_playerController.transform.position.x), Mathf.FloorToInt(_playerController.transform.position.y));
                 Vector2 mousePosition = MouseController.Instance.WorldPosition;
+                Vector2Int mousePositionInt = new Vector2Int((int)mousePosition.x, (int)mousePosition.y);
+
                 //_playerChunkPosition.text = "Player Chunk \n" + Chunk.CalculateResidingChunk(_playerController.transform.position).ToString();
                 _playerChunkPosition.text = 
                     position.ToString() + "\n"
                     + Chunk.CalculateResidingChunk(position).ToString() + "\n"
                     + Tile.TilePositionInRelationToChunk(position).ToString() + "\n"
                     + mousePosition.ToString() + "\n"
-                    + Chunk.CalculateResidingChunk(mousePosition).ToString() + "\n"
-                    + Tile.TilePositionInRelationToChunk(mousePosition).ToString() + "\n";
+                    + Chunk.CalculateResidingChunk(mousePositionInt).ToString() + "\n"
+                    + Tile.TilePositionInRelationToChunk(mousePositionInt).ToString() + "\n";
             }
         }
 
@@ -40,7 +42,7 @@ namespace TheWorkforce.Testing
             const int numberOfChunks = Chunk.KEEP_LOADED;
             const int halfNumberOfChunks = numberOfChunks / 2;
 
-            Vector2 chunk = Chunk.CalculateResidingChunk(position);
+            Vector2 chunk = Chunk.CalculateResidingChunk(position.Vec2Int());
             int chunkXInt = (int)chunk.x;
             int chunkYInt = (int)chunk.y;
             int left = (chunkXInt - halfNumberOfChunks) * Chunk.SIZE;

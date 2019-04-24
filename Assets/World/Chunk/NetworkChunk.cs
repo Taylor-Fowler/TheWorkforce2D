@@ -5,12 +5,13 @@ namespace TheWorkforce
 {
     public struct NetworkChunk
     {
-        public Vector2 Position; // 8 bytes
+        public int X, Y; // 8 bytes
         public NetworkTile[] NetworkTiles; // sizeof(NetworkTile) * Chunk.AREA (256 * 13 = 2560 + 3 * 256 = 2560 + 768)
 
         public NetworkChunk(Chunk chunk)
         {
-            Position = chunk.Position;
+            X = chunk.Position.x;
+            Y = chunk.Position.y;
             NetworkTiles = new NetworkTile[Chunk.AREA];
 
             for (int x = 0; x < Chunk.SIZE; x++)

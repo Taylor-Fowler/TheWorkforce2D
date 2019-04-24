@@ -6,6 +6,7 @@ namespace TheWorkforce
     [System.Serializable]
     public class Chunk
     {
+        #region Constants + Statics
         /// <summary>
         /// The width and height of each Chunk (in number of tiles).
         /// </summary>
@@ -27,7 +28,7 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="tileOffset">The tile offset to validate</param>
         /// <returns>True if both axes are positive and less than the defined Chunk.SIZE</returns>
-        public static bool ValidTileOffset(Vector2 tileOffset)
+        public static bool ValidTileOffset(Vector2Int tileOffset)
         {
             return tileOffset.x < SIZE && tileOffset.x >= 0 
                 && tileOffset.y < SIZE && tileOffset.y >= 0;
@@ -39,13 +40,14 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="worldPosition">The world position.</param>
         /// <returns>The Chunk that the `worldPosition` belongs in.</returns>
-        public static Vector2 CalculateResidingChunk(Vector2 worldPosition)
+        public static Vector2Int CalculateResidingChunk(Vector2Int worldPosition)
         {
-            Vector2 current = worldPosition / SIZE;
-            current.x = Mathf.Floor(current.x);
-            current.y = Mathf.Floor(current.y);
+            //Vector2 current = worldPosition / SIZE;
+            //current.x = Mathf.Floor(current.x);
+            //current.y = Mathf.Floor(current.y);
 
-            return current;
+            //return current;
+            return new Vector2Int(worldPosition.x / SIZE, worldPosition.y / SIZE);
         }
 
         /// <summary>
@@ -55,7 +57,7 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="chunkPosition">The position of a Chunk.</param>
         /// <returns>The World Position of the Chunk.</returns>
-        public static Vector2 CalculateWorldPosition(Vector2 chunkPosition)
+        public static Vector2Int CalculateWorldPosition(Vector2Int chunkPosition)
         {
             return chunkPosition * SIZE;
         }
@@ -83,37 +85,38 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="worldPosition">The world position to find local Chunks for.</param>
         /// <returns>An array of Chunk positions that surround the `worldPosition`.</returns>
-        public static Vector2[] SurroundingChunksOfWorldPosition(Vector2 worldPosition)
+        public static Vector2Int[] SurroundingChunksOfWorldPosition(Vector2Int worldPosition)
         {
-            Vector2 currentChunk = CalculateResidingChunk(worldPosition);
-            Vector2[] chunksToLoad = new Vector2[KEEP_LOADED * KEEP_LOADED];
+            Vector2Int currentChunk = CalculateResidingChunk(worldPosition);
+            Vector2Int[] chunksToLoad = new Vector2Int[KEEP_LOADED * KEEP_LOADED];
 
             int halfLoaded = Mathf.FloorToInt(KEEP_LOADED * 0.5f);
 
             for (int x = 0; x < KEEP_LOADED; x++)
                 for (int y = 0; y < KEEP_LOADED; y++)
                 {
-                    chunksToLoad[x * KEEP_LOADED + y] = currentChunk + new Vector2(x - halfLoaded, y - halfLoaded);
+                    chunksToLoad[x * KEEP_LOADED + y] = currentChunk + new Vector2Int(x - halfLoaded, y - halfLoaded);
                 }
 
             return chunksToLoad;
         }
 
-        public static List<Vector2> ListOfSurroundingChunksOfWorldPosition(Vector2 worldPosition)
+        public static List<Vector2Int> ListOfSurroundingChunksOfWorldPosition(Vector2Int worldPosition)
         {
-            Vector2 currentChunkPosition = CalculateResidingChunk(worldPosition);
-            List<Vector2> chunkPositionsToLoad = new List<Vector2>(SIZE * SIZE);
+            Vector2Int currentChunkPosition = CalculateResidingChunk(worldPosition);
+            List<Vector2Int> chunkPositionsToLoad = new List<Vector2Int>(SIZE * SIZE);
 
             int halfLoaded = Mathf.FloorToInt(KEEP_LOADED * 0.5f);
 
             for (int x = 0; x < KEEP_LOADED; x++)
                 for (int y = 0; y < KEEP_LOADED; y++)
                 {
-                    chunkPositionsToLoad.Add(currentChunkPosition + new Vector2(x - halfLoaded, y - halfLoaded));
+                    chunkPositionsToLoad.Add(currentChunkPosition + new Vector2Int(x - halfLoaded, y - halfLoaded));
                 }
 
             return chunkPositionsToLoad;
         }
+        #endregion
 
         /// <summary>
         ///     Gets a value indicating whether the chunk should stay loaded regardless of
@@ -128,13 +131,13 @@ namespace TheWorkforce
         /// The position of the Chunk in the chunk grid, not to be confused with world position.
         /// E.G. Chunk.Position(1, 1) = World.Position(1 * Chunk.SIZE, 1 * Chunk.SIZE)
         /// </summary>
-        public Vector2 Position;
+        public Vector2Int Position { get; }
     
         /// <summary>
         /// The tiles stored in the chunk, the first dimension being the x axis position and the
         /// second position being the y axis position.
         /// </summary>
-        public Tile[,] Tiles;
+        public Tile[,] Tiles { get; }
 
         /// <summary>
         /// Initialises a new instance of the <see cref="Chunk" /> class. Allocates memory
@@ -142,7 +145,7 @@ namespace TheWorkforce
         /// false.
         /// </summary>
         /// <param name="position">The position of the Chunk.</param>
-        public Chunk(Vector2 position)
+        public Chunk(Vector2Int position)
         {
             Position = position;
             Tiles = new Tile[SIZE, SIZE];
@@ -154,16 +157,16 @@ namespace TheWorkforce
         /// initialising Chunks that have been sent across the Network.
         /// </summary>
         /// <param name="networkChunk">The network chunk.</param>
-        public Chunk(NetworkChunk networkChunk) : this(networkChunk.Position)
+        public Chunk(NetworkChunk networkChunk) : this(new Vector2Int(networkChunk.X, networkChunk.Y))
         {
             for (int x = 0; x < SIZE; x++)
             for (int y = 0; y < SIZE; y++)
             {
-                Tiles[x, y] = new Tile(networkChunk.NetworkTiles[x * SIZE + y], new Vector2(x, y));
+                Tiles[x, y] = new Tile(networkChunk.NetworkTiles[x * SIZE + y], new Vector2Int(x, y));
             }
         }
 
-        public Tile GetTile(Vector2 tileOffset)
+        public Tile GetTile(Vector2Int tileOffset)
         {
             Tile tile = null;
             if(ValidTileOffset(tileOffset))
@@ -181,7 +184,7 @@ namespace TheWorkforce
         /// Chunk.
         /// </summary>
         /// <returns>The World Position of the Chunk.</returns>
-        public Vector2 WorldPosition()
+        public Vector2Int WorldPosition()
         {
             return Position * SIZE;
         }

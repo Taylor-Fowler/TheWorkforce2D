@@ -14,6 +14,15 @@ namespace TheWorkforce.Network
 
         private List<Tuple<int, List<byte>>> _playerFiles;
         private List<Tuple<string, List<byte>>> _regionFiles;
+        private Action _successfulTransfer;
+
+        // Create a list of network connections that track which clients have confirmed the transfer
+
+        [Command]
+        private void CmdConfirmFileTransfer()
+        {
+            _successfulTransfer?.Invoke();
+        }
 
         /// <summary>
         /// A server-only method that transfers the game file to a specified client.
@@ -31,7 +40,7 @@ namespace TheWorkforce.Network
 
             yield return new WaitForFixedUpdate();
             // Transfer files
-            var playerData = GameFile.Instance.GetPlayerData();
+            var playerData = GameFile.Instance.LoadPlayerData();
 
             int currentPlayer = 0;
 
@@ -133,6 +142,7 @@ namespace TheWorkforce.Network
         private void TargetClientInitiateGameFileTransfer(NetworkConnection conn, string gameName)
         {
             Debug.Log("<color=#FF0000><b>[FileTransfer]</b></color> - TargetClientInitiateGameFileTransfer(NetworkConnection, string)");
+
             GameFile.CreateTemporaryGame(gameName);
 
             _playerFiles = new List<Tuple<int, List<byte>>>();
@@ -144,11 +154,12 @@ namespace TheWorkforce.Network
         {
             foreach(var pair in _playerFiles)
             {
-                GameFile.Instance.SavePlayer(pair.Item1, pair.Item2.ToArray());
+                GameFile.Instance.Save(pair.Item1, pair.Item2.ToArray());
             }
             _playerFiles = null;
 
             // tell the network manager that we are ready to play...
+            CmdConfirmFileTransfer();
         }
 
         [TargetRpc(channel = (int)QosType.ReliableSequenced)]

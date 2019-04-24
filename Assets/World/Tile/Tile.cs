@@ -6,17 +6,17 @@ namespace TheWorkforce
     [Serializable]
     public class Tile
     {
-        public const int PX_SIZE = 32;
+        public const int PIXEL_SIZE = 32;
 
-        public readonly byte TileSetId;
-        public readonly float Moisture;
-        public readonly float Elevation;
-        public readonly Vector2 Position;
+        public byte TileSetId { get; }
+        public float Moisture { get; }
+        public float Elevation { get; }
+        public Vector2Int Position { get; }
 
         public uint StaticEntityInstanceId;
 
 
-        public Tile(NetworkTile networkTile, Vector2 position)
+        public Tile(NetworkTile networkTile, Vector2Int position)
         {
             TileSetId = networkTile.TileSetId;
 
@@ -26,7 +26,7 @@ namespace TheWorkforce
             Position = position;
         }
 
-        public Tile(byte tileSetId, float moisture, float elevation, Vector2 position)
+        public Tile(byte tileSetId, float moisture, float elevation, Vector2Int position)
         {
             TileSetId = tileSetId;
             Moisture = moisture;
@@ -39,13 +39,35 @@ namespace TheWorkforce
             StaticEntityInstanceId = entityInstanceId;
         }
 
-        public Vector3 GetWorldPosition(Vector2 chunkPosition)
+        public byte[] GetByteArray()
+        {
+            const int floatSize = sizeof(float);
+
+            int byteOffset = 0;
+
+            // tilesetId + (elevation, moisture)
+            // NOTE: No need to save tile position, can be deduced from position in file
+            // NOTE: No need to save entity Id, this will be re-initialised on each game start
+            byte[] bytes = new byte[1 + (floatSize * 2)];
+
+            bytes[byteOffset] = TileSetId;
+            ++byteOffset;
+
+            Array.Copy(BitConverter.GetBytes(Moisture), 0, bytes, byteOffset, floatSize);
+            byteOffset += floatSize;
+
+            Array.Copy(BitConverter.GetBytes(Elevation), 0, bytes, byteOffset, floatSize);
+
+            return bytes;
+        }
+
+        public Vector3 GetWorldPosition(Vector2Int chunkPosition)
         {
             chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
             return new Vector3(chunkPosition.x + Position.x, chunkPosition.y + Position.y, 1f);
         }
 
-        public Vector3 GetWorldPositionPrecedence(Vector2 chunkPosition, int paddingTileSetId)
+        public Vector3 GetWorldPositionPrecedence(Vector2Int chunkPosition, int paddingTileSetId)
         {
             Vector3 position = GetWorldPosition(chunkPosition);
             position.z -= TerrainTileSet.LoadedTileSets[paddingTileSetId].Precedence;
@@ -58,13 +80,13 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="worldPosition">The world position to calculate from</param>
         /// <returns>A tile position relative to its chunk, ranging from: 0 -> (Chunk.SIZE-1)</returns>
-        public static Vector2 TilePositionInRelationToChunk(Vector2 worldPosition)
+        public static Vector2Int TilePositionInRelationToChunk(Vector2Int worldPosition)
         {
             worldPosition.x %= Chunk.SIZE;
             worldPosition.y %= Chunk.SIZE;
 
-            worldPosition.x = Mathf.Floor(worldPosition.x);
-            worldPosition.y = Mathf.Floor(worldPosition.y);
+            //worldPosition.x = Mathf.Floor(worldPosition.x);
+            //worldPosition.y = Mathf.Floor(worldPosition.y);
 
             // The world position's x co-ordinate is in the negative axis therefore we remap the range
             // Original x: (-1, -2, -3...-15, 0) -> Remapped x: (15 to 0) 

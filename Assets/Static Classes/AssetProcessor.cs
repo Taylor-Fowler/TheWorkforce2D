@@ -32,9 +32,9 @@ namespace TheWorkforce.Static_Classes
                 
                 TerrainTileSetSettings tileSetSettings = JsonConvert.DeserializeObject<TerrainTileSetSettings>(settingsFileContents);
                 FileInfo textureFile = directory.GetFiles("*.png")[0];
-                Texture2D texture = LoadTexture(textureFile, Tile.PX_SIZE * 6, Tile.PX_SIZE * 6);
+                Texture2D texture = LoadTexture(textureFile, Tile.PIXEL_SIZE * 6, Tile.PIXEL_SIZE * 6);
 
-                tileSets.Add(new TerrainTileSet(texture, Tile.PX_SIZE, Tile.PX_SIZE, tileSetSettings));
+                tileSets.Add(new TerrainTileSet(texture, Tile.PIXEL_SIZE, Tile.PIXEL_SIZE, tileSetSettings));
                 
                 // NOTE: Commented logging of Tile Precedence
                 // Debug.Log(tileSetSettings.Id + " Precedence: " + tileSetSettings.Precedence);
@@ -45,12 +45,12 @@ namespace TheWorkforce.Static_Classes
         #endregion
 
         #region Sprite & Texture Utility Functions
-        private static Sprite LoadSpriteFromTexture(Texture2D texture, int width = Tile.PX_SIZE, int height = Tile.PX_SIZE, int pixelsPerUnit = Tile.PX_SIZE, int x = 0, int y = 0)
+        private static Sprite LoadSpriteFromTexture(Texture2D texture, int width = Tile.PIXEL_SIZE, int height = Tile.PIXEL_SIZE, int pixelsPerUnit = Tile.PIXEL_SIZE, int x = 0, int y = 0)
         {
             return Sprite.Create(texture, new Rect(x, y, width, height), _texturePivot, pixelsPerUnit, 0, SpriteMeshType.FullRect);
         }
 
-        private static Texture2D LoadTexture(FileInfo textureFile, int width = Tile.PX_SIZE, int height = Tile.PX_SIZE)
+        private static Texture2D LoadTexture(FileInfo textureFile, int width = Tile.PIXEL_SIZE, int height = Tile.PIXEL_SIZE)
         {
             Texture2D texture = new Texture2D(width, height);
             texture.LoadImage(File.ReadAllBytes(textureFile.FullName));

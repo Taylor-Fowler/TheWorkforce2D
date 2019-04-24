@@ -26,6 +26,8 @@ namespace TheWorkforce.Entities
 
         public abstract byte[] GetPacket();
 
+        public abstract byte[] GetSaveData();
+
         public abstract EntityData GetData();
         public abstract uint GetDataTypeId();
 
