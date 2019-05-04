@@ -6,7 +6,7 @@ namespace TheWorkforce.Game_State
     public enum EGameState
     {
         /// <summary>
-        /// The game is not running, i.e. the application is in the menu or disconnecting
+        /// The game is not running, i.e. the application is in the menu
         /// </summary>
         NotLoaded,
 

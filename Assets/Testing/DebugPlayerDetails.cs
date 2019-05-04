@@ -8,8 +8,6 @@ namespace TheWorkforce.Testing
     {
         #region Private Members
         [SerializeField] private TextMeshProUGUI _playerChunkPosition;
-        [SerializeField] private TextMeshProUGUI _playerWorldPosition;
-        [SerializeField] private TextMeshProUGUI _playerTilePosition;
         private PlayerController _playerController;
         #endregion
 

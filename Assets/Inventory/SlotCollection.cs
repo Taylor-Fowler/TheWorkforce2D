@@ -50,7 +50,7 @@ namespace TheWorkforce.Inventory
                 ushort itemCount = items[(int)i].Item2;
                 if(itemCount > 0)
                 {
-                    ItemStack item = new ItemStack(EntityCollection.Instance().DataMappedToId[items[(int)i].Item1], itemCount);
+                    ItemStack item = new ItemStack(EntityCollection.Instance.DataMappedToId[items[(int)i].Item1], itemCount);
                     slot.Add(item);
                 }
             }

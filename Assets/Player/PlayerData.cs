@@ -33,18 +33,25 @@ namespace TheWorkforce
             Y = BitConverter.ToSingle(fileData, byteOffset);
             byteOffset += sizeof(float);
 
-            InventoryItems = new List<Tuple<ushort, ushort>>();
-
-            // Loop through the rest of the file reading the itemId and itemCount for each item
-            for (; byteOffset < fileData.Length;)
+            if (fileData.Length > byteOffset)
             {
-                ushort itemId = BitConverter.ToUInt16(fileData, byteOffset);
-                byteOffset += sizeof(ushort);
+                InventoryItems = new List<Tuple<ushort, ushort>>();
 
-                ushort itemCount = BitConverter.ToUInt16(fileData, byteOffset);
-                byteOffset += sizeof(ushort);
+                // Loop through the rest of the file reading the itemId and itemCount for each item
+                for (; byteOffset < fileData.Length;)
+                {
+                    ushort itemId = BitConverter.ToUInt16(fileData, byteOffset);
+                    byteOffset += sizeof(ushort);
 
-                InventoryItems.Add(new Tuple<ushort, ushort>(itemId, itemCount));
+                    ushort itemCount = BitConverter.ToUInt16(fileData, byteOffset);
+                    byteOffset += sizeof(ushort);
+
+                    InventoryItems.Add(new Tuple<ushort, ushort>(itemId, itemCount));
+                }
+            }
+            else
+            {
+                InventoryItems = null;
             }
         }
 

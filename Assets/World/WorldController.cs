@@ -20,7 +20,7 @@ using URandom = UnityEngine.Random;
 
 namespace TheWorkforce
 {
-    using Game_State; using Interfaces; using Entities;
+    using Game_State; using Interfaces; using Entities; using Network;
 
     public class WorldController : NetworkBehaviour, IManager
     {
@@ -28,8 +28,6 @@ namespace TheWorkforce
         public static event Action<WorldController> OnWorldControllerStartup;
         public static WorldController Local { get; private set; }
         #endregion
-
-        public event Action<Vector2> OnWorldPlayerPositionUpdate;
 
         /// <summary>
         /// A list of chunk controllers that are used to display the local area to the player
@@ -42,10 +40,8 @@ namespace TheWorkforce
         public GameManager GameManager { get; private set; }
         public World World { get; private set; }
 
+        public bool HasInitialised { get; private set; }
 
-        // private List<ChunkController> _availableChunkControllers;
-        private bool _hasInitialised = false;
-        private Dictionary<Vector2Int, List<int>> _allChunksLoadedByPlayerPositions;
         private WorldGeneration _worldGeneration;
         private GameObject _gameWorldAnchorObject;
 
@@ -69,30 +65,30 @@ namespace TheWorkforce
             }
         }
 
-        //#region Network Behaviour Overrides
-        ///// <summary>
-        ///// Initialises the local player reference and attempts to startup this controller
-        ///// </summary>
-        //public override void OnStartLocalPlayer()
-        //{
-        //    Local = this;
-        //}
-        //#endregion
-
+        #region Startup and Initialisation
         /// <summary>
         /// Stores the game manager reference
         /// </summary>
         /// <param name="gameManager"></param>
         public void Startup(GameManager gameManager)
         {
-            // take a reference to the game file and use it for the world creation
             GameManager = gameManager;
             if (isLocalPlayer)
             {
                 Local = this;
-                OnWorldControllerStartup?.Invoke(this); 
+                OnWorldControllerStartup?.Invoke(this);
+                GameManager.OnGameStateChange += GameManager_OnGameStateChange;
             }
-            Debug.Log("[WorldController] - Startup(GameManager)");
+        }
+
+        private void GameManager_OnGameStateChange(GameStateChangeArgs gameStartChangeArgs)
+        {
+            if(gameStartChangeArgs.Current == EGameState.Disconnecting)
+            {
+                Local = null;
+                Destroy(_gameWorldAnchorObject);
+                _gameWorldAnchorObject = null;
+            }
         }
 
         public void OnLocalClientInitialise(World world)
@@ -105,7 +101,6 @@ namespace TheWorkforce
 
             // Set the z position to 1, this is important for ordering of tiles
             _gameWorldAnchorObject.transform.position = new Vector3(0f, 0f, 1f);
-            _allChunksLoadedByPlayerPositions = new Dictionary<Vector2Int, List<int>>();
 
             // Initialise all the chunk controllers that we will ever need
             for (int i = 0; i < Chunk.KEEP_LOADED * Chunk.KEEP_LOADED; ++i)
@@ -114,46 +109,15 @@ namespace TheWorkforce
                 chunkObject.transform.SetParent(_gameWorldAnchorObject.transform);
                 ChunkControllers.Add(chunkObject.AddComponent<ChunkController>());
             }
+            HasInitialised = true;
         }
 
         public void OnServerClientInitialise(World world)
         {
             OnLocalClientInitialise(world);
-            // The server controls the world generation and so it should be the only player that creates world generation
-            _worldGeneration = new WorldGeneration(World.Seed, World.NegativeXSeed, World.NegativeYSeed);
+            _worldGeneration = new WorldGeneration(World.Seed, World.NegativeXSeed, World.NegativeYSeed); // The server controls the world generation and so it should be the only player that creates world generation
         }
-
-        public IEnumerator InitialiseConnection(Action callback)
-        {
-            // Server does not need to worry about hearing from the other players as it is the first player
-            if(isServer)
-            {
-                callback();
-                yield break;
-            }
-
-            // Before we can say we are safely initialised, we must request all of the loaded chunks
-            CmdRequestAllLoadedChunks();
-
-            while(!_hasInitialised)
-            {
-                yield return null;
-            }
-
-            // We will reuse this going further so reset it
-            _hasInitialised = false;
-
-            // We must know of all the enitities that are actively processing in the world before we can resume gameplay on all clients
-            CmdRequestAllEntities();
-
-            while(!_hasInitialised)
-            {
-                yield return null;
-            }
-
-            // Connection has been initialised, inform the listener/s
-            callback();
-        }
+        #endregion
 
         #region Server Only methods - called on the server by the server
         /// <summary>
@@ -161,266 +125,227 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="playerController"></param>
         /// <param name="position"></param>
-        [Server]
         public void OnServerPlayerChunkUpdate(PlayerController playerController, Vector2 position)
         {
-            // What happens when a player moves to a new chunk?
-            //    // 3 players: A (host), B and C (regular clients)
-            //    // Players A and B are in the same chunk
-            //    // Player C moves into a new chunk:
-            //    // 1. Tell the Host about the chunks that were kept loaded by Player C
-            //    //    that are no longer needed to be loaded and also about the new chunks that player
-            //    //    C is keeping loaded
-            //    // 2. The Host checks if any other player needs the chunks that have been asked to
-            //    //    be unloaded by player C. The Host notifies all clients to unload said chunks.
-            //    // 3. The Host then tells all clients to load the chunks requested by player C.
-            //    // 4. Finally, the Host generates the chunks requested by player C and sends the data
-            //    //    to all clients
+            var playerId = playerController.Id;
+            Vector2Int playerPositionInt = new Vector2Int((int)position.x, (int)position.y);
 
-            // Find all the chunks around the current player position, these are the new player dependant chunks
-            //var chunksRequired = Chunk.SurroundingChunksOfWorldPosition(position);
-
-            //var chunksPreviouslyRequired = World.GetPlayerLoadedChunkPositions(playerController.Id);
-
-            RequestPlayerChunkUpdate(playerController.Id, position);
-
-            Debug.Log("[WorldController] - OnServerPlayerChunkUpdate(PlayerController, Vector2)");
-        }
-
-        [Server]
-        public Vector3 GeneratePlayerPosition()
-        {
-            var position = URandom.insideUnitSphere * URandom.Range(0, 10000);
-            position.z = 0f;
-            return position;
-        }
-        #endregion
-
-        // This is called when a player object on the server moves enough to request a chunk update
-        // This should only be called on the server
-        public void RequestPlayerChunkUpdate(int playerId, Vector2 playerPosition)
-        {
-            Vector2Int playerPositionInt = new Vector2Int((int)playerPosition.x, (int)playerPosition.y);
-            // Find all of the chunks loaded for the player
-            var chunksPreviouslyLoaded = World.GetPlayerLoadedChunkPositions(playerId);
             // Find the chunks needed for the player based on their new position
             var chunksNeededForPlayer = Chunk.ListOfSurroundingChunksOfWorldPosition(playerPositionInt);
-            var chunksNeededForPlayerArray = Chunk.SurroundingChunksOfWorldPosition(playerPositionInt);
 
-            
+            // Find all of the chunks loaded for the player, 
+            // E.G. 
+            //          Previous    -> 5, 6, 7, 8, 9
+            //          Needed      -> 7, 8, 9, 10, 11
+            //
+            //          Previous should become -> 5, 6
+            var chunksLoadedForPlayer = World.GetPlayerLoadedChunkPositions(playerId);
+
+            var chunksToUnloadForPlayer = chunksLoadedForPlayer.Except(chunksNeededForPlayer).ToList();
+            var newChunksNeededForPlayer = chunksNeededForPlayer.Except(chunksLoadedForPlayer).ToList();
+
+            var chunksToRemove = World.RemoveChunks(playerId, chunksToUnloadForPlayer);
+            GameFile.Instance.Save(chunksToRemove);
+
+            chunksToUnloadForPlayer.Clear();
+            foreach(var chunk in chunksToRemove)
+            {
+                chunk.Unload();
+                chunksToUnloadForPlayer.Add(chunk.Position);
+            }
+
             // Tell the world about the chunks that the player now depends upon
-            World.UpdatePlayerChunks(playerId, chunksNeededForPlayer);
-            // Remove any loaded chunks from our collection, they do not need to be loaded
-            World.FilterLoadedChunks(chunksNeededForPlayer);
+            World.UpdatePlayerChunks(playerId, newChunksNeededForPlayer);
+            // If the chunks are already loaded then we can forget about them
+            World.FilterLoadedChunks(newChunksNeededForPlayer);
 
             // Load chunks from file
-            var chunksToLoad = World.FilterKnownChunks(chunksNeededForPlayer);
-            Debug.Log("[WorldController] - RequestPlayerChunkUpdate(int, Vector2)\n" +
+            var chunksToLoad = World.FilterKnownChunks(newChunksNeededForPlayer);
+            Debug.Log("[WorldController] - OnServerPlayerChunkUpdate(PlayerController, Vector2)\n" +
                         $"ChunksToLoad Count: {chunksToLoad.Count}");
-            RpcReceiveLoadChunks(playerId, Vector2IntsToBytes(chunksToLoad));
+
+            // If there are more players than just the server client, do this call..
+            var chunks = GameFile.Instance.LoadChunks(chunksToLoad);
+            World.AddChunks(chunks);
 
             // Generate the new chunks
-            var generatedChunks = _worldGeneration.GenerateChunks(chunksNeededForPlayer);
-            RpcReceiveChunksWithDependencies(NetworkChunk.ChunkListToNetworkChunkArray(generatedChunks), playerId, Vector2IntsToBytes(chunksNeededForPlayerArray));
+            var generatedChunks = _worldGeneration.GenerateChunks(newChunksNeededForPlayer);
+            World.AddChunks(generatedChunks);
 
-            Debug.Log("[WorldController] - RequestPlayerChunkUpdate(int, Vector2)");
-            //UpdateChunkControllers(World.GetPlayerLoadedChunks(playerId), chunksPreviouslyLoaded.Intersect(chunksNeededForPlayer).ToList());
+            foreach(var chunk in generatedChunks)
+            {
+                chunk.Initialise();
+            }
+
+            if (GameManager.NetworkManager.NumberOfClientControllers > 1)
+            {
+                var chunksToLoadBytes = Vector2IntsToBytes(chunksToLoad);
+                var chunksToUnloadBytes = Vector2IntsToBytes(chunksToUnloadForPlayer);
+                NetworkChunk[] generatedNetworkChunks = (generatedChunks.Count > 0) ? NetworkChunk.ChunkListToNetworkChunkArray(generatedChunks) : null;
+
+                List<NetworkConnection> sendEntitiesTo = new List<NetworkConnection>();
+
+                foreach(var clientController in GameManager.NetworkManager.ClientControllers)
+                {
+                    if (clientController.IsActive && clientController.WorldController != this)
+                    {
+
+                        TargetUpdateChunks(clientController.Connection, chunksToLoadBytes, chunksToUnloadBytes);
+
+                        if (generatedNetworkChunks != null)
+                        {
+                            sendEntitiesTo.Add(clientController.Connection);
+                            TargetReceiveChunks(clientController.Connection, generatedNetworkChunks);
+                        }
+
+                        if (clientController.PlayerController.Id == playerId)
+                        {
+                            TargetUpdateChunkControllers(clientController.Connection);
+                        }
+                    }
+                }
+
+                if(sendEntitiesTo.Count > 0)
+                {
+                    StartCoroutine(SendEntities(sendEntitiesTo, generatedChunks));
+                }
+            }
+
+            if(playerId == GameManager.PlayerController.Id)
+            {
+                StartCoroutine(UpdateChunkControllers(World.GetPlayerLoadedChunks(playerId)));
+            }
         }
-    
-        //public void UpdatePlayerPosition(Vector2 playerPosition)
-        //{
-        //    // What happens when a player moves to a new chunk?
-        //    // 3 players: A (host), B and C (regular clients)
-        //    // Players A and B are in the same chunk
-        //    // Player C moves into a new chunk:
-        //    // 1. Tell the Host about the chunks that were kept loaded by Player C
-        //    //    that are no longer needed to be loaded and also about the new chunks that player
-        //    //    C is keeping loaded
-        //    // 2. The Host checks if any other player needs the chunks that have been asked to
-        //    //    be unloaded by player C. The Host notifies all clients to unload said chunks.
-        //    // 3. The Host then tells all clients to load the chunks requested by player C.
-        //    // 4. Finally, the Host generates the chunks requested by player C and sends the data
-        //    //    to all clients
-    
-        //    // Get all the chunks in the vicinity of the player
-        //    List<Vector2> chunksToGenerate = Chunk.ListOfSurroundingChunksOfWorldPosition(playerPosition);
-    
-        //    // Find the chunks that need to be loaded, which are all the generated chunks,
-        //    // minus all of the chunks that are already loaded
-        //    List<Vector2> chunksToLoad = chunksToGenerate.Except(World.ChunksSurroundingLocalPlayer).ToList();
-    
-        //    // Find the chunks that are no longer in the vicinity of the player,
-        //    // Previously surrounding chunks - chunks that are currently surrounding
-        //    // = chunks no longer surrounding
-        //    var chunksToUnload = World.ChunksSurroundingLocalPlayer.Except(chunksToGenerate).ToArray();
-    
-        //    // Update the chunks surrounding the player now that we know what has changed
-        //    World.SetChunksSurroundingLocalPlayer(chunksToGenerate);
-    
-        //    // Remove all the chunks that are loaded from our list of chunks to generate
-        //    World.FilterLoadedChunks(chunksToGenerate);
-    
-    
-        //    chunksToLoad = chunksToLoad.Except(chunksToGenerate).ToList();
-    
-        //    CmdPlayerChunkUpdate(chunksToUnload, chunksToLoad.ToArray(), chunksToGenerate.ToArray(),
-        //        playerControllerId);
-
-        //    WorldPlayerPositionUpdate(playerPosition);
-        //}
-
-        private void UpdateChunkControllers(List<Chunk> chunksToDisplay, List<Vector2> chunksToKeepDisplayed)
+        #endregion
+ 
+        private IEnumerator UpdateChunkControllers(List<Chunk> chunksToDisplay)
         {
             // 1. Get a collection of the chunks needed displaying
             // 2. Remove chunks that are already being displayed from both the
             //    chunk controllers collection and needed to display collection
             // 3. Loop through the remaining controllers and assign a chunk from 
             //    the need to display collection        
-            List<ChunkController> chunkControllersToSet = ChunkControllers;
+            List<ChunkController> chunkControllersToSet = new List<ChunkController>(ChunkControllers);
+            for(int i = chunkControllersToSet.Count - 1; i >= 0; --i)
+            {
+                if(chunkControllersToSet[i].Chunk == null || !chunksToDisplay.Contains(chunkControllersToSet[i].Chunk))
+                {
+                    continue;
+                }
 
-            // if(chunksToKeepDisplayed.Count != 0)
-            // {
-            //     chunkControllersToSet = ChunkControllers
-            //         .Where(value => chunksToKeepDisplayed.Contains(value.Chunk.Position) != true)
-            //         .ToList();
-            // }
+                chunksToDisplay.Remove(chunkControllersToSet[i].Chunk);
+                chunkControllersToSet.RemoveAt(i);
+            }
 
             for (int i = 0; i < chunksToDisplay.Count; i++)
             {
-                chunkControllersToSet[i].SetChunk(chunksToDisplay[i], World);
-            }
-
-            Debug.Log("[WorldController] - UpdateChunkControllers(List<Chunk>, List<Vector2>)");
-        }
-    
-        private List<Vector2Int> UpdateChunksLoadedByPlayer(Vector2Int[] chunkPositions, int playerId)
-        {
-            List<Vector2Int> chunksNewlyLoaded = new List<Vector2Int>();
-    
-            foreach (var chunkPosition in chunkPositions)
-                if (_allChunksLoadedByPlayerPositions.ContainsKey(chunkPosition))
+                if (chunksToDisplay[i].IsInitialised)
                 {
-                    _allChunksLoadedByPlayerPositions[chunkPosition].Add(playerId);
+                    chunkControllersToSet[i].SetChunk(chunksToDisplay[i], World);
+                    yield return null;
                 }
                 else
                 {
-                    _allChunksLoadedByPlayerPositions.Add(chunkPosition, new List<int> {playerId});
-                    chunksNewlyLoaded.Add(chunkPosition);
-                }
-    
-            return chunksNewlyLoaded;
-        }
-    
-        private List<Vector2Int> UpdateChunksUnloadedByPlayer(Vector2Int[] chunkPositions, int playerId)
-        {
-            List<Vector2Int> chunksSuccessfullyUnloaded = new List<Vector2Int>();
-    
-            foreach (var chunkPosition in chunkPositions)
-            {
-                if (_allChunksLoadedByPlayerPositions.ContainsKey(chunkPosition))
-                {
-                    if (_allChunksLoadedByPlayerPositions[chunkPosition].Count == 1)
+                    ChunkController chunkController = chunkControllersToSet[i];
+                    chunksToDisplay[i].OnInitialise += (chunk) =>
                     {
-                        _allChunksLoadedByPlayerPositions.Remove(chunkPosition);
-                        chunksSuccessfullyUnloaded.Add(chunkPosition);
-                    }
-                    else
-                    {
-                        _allChunksLoadedByPlayerPositions[chunkPosition].Remove(playerId);
-                    }
+                        chunkController.SetChunk(chunk, World);
+                    };
                 }
             }
-    
-            return chunksSuccessfullyUnloaded;
+            Debug.Log("[WorldController] - UpdateChunkControllers(List<Chunk>, List<Vector2>)");
         }
 
-        #region Custom Event Invoking
-        private void WorldPlayerPositionUpdate(Vector2 position)
+        private IEnumerator SendEntities(List<NetworkConnection> targets, List<Chunk> chunks)
         {
-            OnWorldPlayerPositionUpdate?.Invoke(position);
-        }
-        #endregion
+            int bytesLeft = 1400;
+            int bufferSize = 16;
 
-        #region Commands - Methods called on the server from a client
-        [Command]
-        private void CmdRequestAllLoadedChunks()
-        {
-            const int packetBufferSize = 16;
-
-            int chunksLeft = Local.World.LoadedChunks.Count;
-            int chunksProcessed = 0;
-            List<Chunk> chunksToSend = new List<Chunk>(packetBufferSize);
-
-            foreach (var chunkPair in Local.World.LoadedChunks)
-            {
-                chunksToSend.Add(chunkPair.Value);
-
-                --chunksLeft;
-                bool lastSend = chunksLeft == 0;
-                if(++chunksProcessed == packetBufferSize || lastSend)
-                {
-                    chunksProcessed = 0;
-                    TargetReceiveChunks(connectionToClient, NetworkChunk.ChunkListToNetworkChunkArray(chunksToSend), lastSend);
-                    chunksToSend.Clear();
-                }
-            }
-
-            Debug.Log("[WorldController] - CmdRequestAllLoadedChunks()");
-        }
-
-        [Command]
-        private void CmdRequestAllEntities()
-        {
-            int bytesLeft = 1400 - sizeof(bool); // packet size - bool
-            
             List<uint> entityIds = new List<uint>();
             List<ushort> dataIds = new List<ushort>();
             List<byte> payload = new List<byte>();
 
-            int numberOfEntities = EntityCollection.Instance().ActiveEntities.Count;
-            for(int i = 0; i < numberOfEntities; ++i)
+            foreach(var chunk in chunks)
             {
-                EntityInstance entityInstance = EntityCollection.Instance().ActiveEntities[i];
-                EntityData entityData = entityInstance.GetData();
-                bytesLeft -= sizeof(uint); // The EntityInstanceId
-                bytesLeft -= sizeof(ushort); // The EntityDataId
-                bytesLeft -= entityData.PacketSize(); // Payload
-
-                // Cannot accomodate this entity within the packet
-                if (bytesLeft < 0)
+                foreach(var tile in chunk.Tiles)
                 {
-                    TargetReceiveEntities(connectionToClient, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray(), false);
-                    entityIds.Clear();
-                    dataIds.Clear();
-                    payload.Clear();
-                    bytesLeft = 1400 - sizeof(bool);
-                }
+                    if(tile.StaticEntityInstanceId == 0)
+                    {
+                        continue;
+                    }
 
-                entityIds.Add(entityInstance.Id);
-                dataIds.Add(entityData.Id);
-                payload.AddRange(entityInstance.GetPacket());
+                    EntityInstance entityInstance = EntityCollection.Instance.GetEntity(tile.StaticEntityInstanceId);
+                    EntityData entityData = entityInstance.GetData();
+                    bytesLeft -= sizeof(uint); // The EntityInstanceId
+                    bytesLeft -= sizeof(ushort); // The EntityDataId
+                    bytesLeft -= entityData.PacketSize(); // Payload
 
-                // Last Entity to add
-                if(i == numberOfEntities - 1)
-                {
-                    TargetReceiveEntities(connectionToClient, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray(), true);
-                    entityIds.Clear();
-                    dataIds.Clear();
-                    payload.Clear();
+                    // Cannot accomodate this entity within the packet
+                    if (bytesLeft < 0)
+                    {
+                        foreach(var target in targets)
+                        {
+                            TargetReceiveEntities(target, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray());
+                        }
+                        bufferSize--;
+
+                        if(bufferSize == 0)
+                        {
+                            yield return new WaitForSeconds(0.15f);
+                            bufferSize = 16;
+                        }
+                        entityIds.Clear();
+                        dataIds.Clear();
+                        payload.Clear();
+                        bytesLeft = 1400;
+                    }
+
+                    entityIds.Add(entityInstance.Id);
+                    dataIds.Add(entityData.Id);
+                    payload.AddRange(entityInstance.GetPacket());
                 }
             }
-        }
-        #endregion
 
+            if(entityIds.Count != 0)
+            {
+                foreach (var target in targets)
+                {
+                    TargetReceiveEntities(target, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray());
+                }
+                entityIds.Clear();
+                dataIds.Clear();
+                payload.Clear();
+            }
+
+
+            List<Vector2Int> chunkPositions = new List<Vector2Int>(chunks.Count);
+            foreach(var chunk in chunks)
+            {
+                chunkPositions.Add(chunk.Position);
+            }
+
+            var chunkPositionBytes = Vector2IntsToBytes(chunkPositions);
+            
+            foreach(var target in targets)
+            {
+                TargetInitialiseChunks(target, chunkPositionBytes);
+            }
+        }
 
         #region Target RPC's - Message sent to a single client
         [TargetRpc]
-        private void TargetReceiveChunks(NetworkConnection conn, NetworkChunk[] networkChunks, bool finished)
+        private void TargetReceiveChunks(NetworkConnection conn, NetworkChunk[] networkChunks)
         {
             Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
-            World.AddChunks(unpackedChunks);
-            _hasInitialised = finished;
+            Local.World.AddChunks(unpackedChunks);
             Debug.Log("[WorldController] - TargetReceiveChunks(NetworkConnection, NetworkChunk[])");
+        }
+
+        [TargetRpc]
+        private void TargetUpdateChunkControllers(NetworkConnection conn)
+        {
+            var chunks = Local.World.GetChunks(Chunk.ListOfSurroundingChunksOfWorldPosition(Local.transform.position.Vec2Int()));
+            StartCoroutine(Local.UpdateChunkControllers(chunks));
         }
 
 
@@ -433,85 +358,55 @@ namespace TheWorkforce
         /// <param name="entityPayload">The data required to populate every entity in the packet</param>
         /// <param name="finished">Identifies whether this is the final packet of entity data from the request</param>
         [TargetRpc]
-        private void TargetReceiveEntities(NetworkConnection conn, uint[] entityIds, ushort[] dataIds, byte[] entityPayload, bool finished)
+        private void TargetReceiveEntities(NetworkConnection conn, uint[] entityIds, ushort[] dataIds, byte[] entityPayload)
         {
             int offset = 0;
 
             for(int i = 0; i < entityIds.Length; ++i)
             {
-                EntityCollection.Instance().CreateEntity(dataIds[i], entityIds[i], entityPayload, ref offset);
+                EntityCollection.Instance.CreateEntity(dataIds[i], entityIds[i], entityPayload, ref offset);
             }
-            _hasInitialised = finished;
         }
-        #endregion
 
-        #region Client RPC's - Message sent to all clients
-        ///// <summary>
-        ///// Rpc informing all clients to remove the chunks provided from their list of loaded chunks
-        ///// </summary>
-        ///// <param name="chunksOrderedToUnload">A collection of chunk positions to unload</param>
-        //[ClientRpc]
-        //private void RpcUnloadChunks(Vector2Int[] chunksOrderedToUnload)
-        //{
-        //    foreach (var chunk in chunksOrderedToUnload)
-        //    {
-        //        World.LoadedChunks.Remove(chunk);
-        //    }
-        //}
-    
-        //[ClientRpc]
-        //private void RpcReceiveChunkDependencies(int playerId, Vector2Int[] chunkPositions)
-        //{
-        //    if(!isServer)
-        //    {
-        //        Local.World.UpdatePlayerChunks(playerId, chunkPositions);
-        //    }
-        //}
-
-        //[ClientRpc]
-        //private void RpcReceiveChunks(NetworkChunk[] networkChunks, int playerId)
-        //{
-        //    var unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks);
-        //    Local.World.AddChunks(unpackedChunks);
-
-        //    if (!isServer)
-        //    {
-        //        List<Vector2Int> chunkPositions = new List<Vector2Int>();
-        //        foreach(var chunk in unpackedChunks)
-        //        {
-        //            chunkPositions.Add(chunk.Position);
-        //        }
-        //        Local.World.UpdatePlayerChunks(playerId, chunkPositions);
-        //    }
-        //    if (Local.GameManager.PlayerController.Id == playerId)
-        //    {
-        //        Local.UpdateChunkControllers(Local.World.GetPlayerLoadedChunks(playerId), null);
-        //    }
-        //}
-
-        [ClientRpc]
-        private void RpcReceiveLoadChunks(int playerId, byte[] chunkPositionBytes)
+        [TargetRpc]
+        private void TargetInitialiseChunks(NetworkConnection conn, byte[] chunkPositionBytes)
         {
             Vector2Int[] chunkPositions = BytesToVector2Ints(chunkPositionBytes);
+            foreach(var chunkPosition in chunkPositions)
+            {
+                Local.World.GetChunk(chunkPosition).Initialise();
+            }
+        }
 
-            var chunks = GameFile.Instance.LoadChunks(chunkPositions);
+        [TargetRpc]
+        public void TargetFinishInitialisation(NetworkConnection conn, byte[]chunkPositionBytes)
+        {
+            OnLocalClientInitialise(GameFile.Instance.LoadWorld());
+
+            Vector2Int[] chunkPositions = BytesToVector2Ints(chunkPositionBytes);
+            var chunks = GameFile.Instance.LoadChunks(chunkPositions); // Load chunks
             World.AddChunks(chunks);
+            // Update controllers
+            StartCoroutine(UpdateChunkControllers(World.GetChunks(Chunk.ListOfSurroundingChunksOfWorldPosition(transform.position.Vec2Int()))));
         }
 
-        [ClientRpc]
-        private void RpcReceiveChunksWithDependencies(NetworkChunk[] networkChunks, int playerId, byte[] chunkPositionBytes)
+        [TargetRpc]
+        private void TargetUpdateChunks(NetworkConnection conn, byte[] loadChunks, byte[] unloadChunks)
         {
-            Vector2Int[] chunkPositions = BytesToVector2Ints(chunkPositionBytes);
+            if(!isServer && Local.HasInitialised)
+            {
+                Vector2Int[] chunkPositions = BytesToVector2Ints(loadChunks);
+                var chunks = GameFile.Instance.LoadChunks(chunkPositions);
+                Local.World.AddChunks(chunks);
 
-            Chunk[] unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks).ToArray();
-            Local.World.AddChunks(unpackedChunks);
-            if(!isServer)
-            {
-                //Local.World.UpdatePlayerChunks(playerId, chunkPositions);
-            }
-            if(Local.GameManager.PlayerController.Id == playerId)
-            {
-                Local.UpdateChunkControllers(Local.World.GetPlayerLoadedChunks(playerId), null);
+                chunkPositions = BytesToVector2Ints(unloadChunks);
+                chunks = Local.World.RemoveChunks(chunkPositions);
+                GameFile.Instance.Save(chunks);
+
+                foreach(var chunk in chunks)
+                {
+                    chunk.Unload();
+                }
             }
         }
         #endregion
@@ -561,9 +456,132 @@ namespace TheWorkforce
         //            + "playerId: " + playerId.ToString() + "\n"
         //            + "Server playerId: " + playerControllerId);
         //}
+
+
+        ///// <summary>
+        ///// Rpc informing all clients to remove the chunks provided from their list of loaded chunks
+        ///// </summary>
+        ///// <param name="chunksOrderedToUnload">A collection of chunk positions to unload</param>
+        //[ClientRpc]
+        //private void RpcUnloadChunks(Vector2Int[] chunksOrderedToUnload)
+        //{
+        //    foreach (var chunk in chunksOrderedToUnload)
+        //    {
+        //        World.LoadedChunks.Remove(chunk);
+        //    }
+        //}
+
+        //[ClientRpc]
+        //private void RpcReceiveChunkDependencies(int playerId, Vector2Int[] chunkPositions)
+        //{
+        //    if(!isServer)
+        //    {
+        //        Local.World.UpdatePlayerChunks(playerId, chunkPositions);
+        //    }
+        //}
+
+        //[ClientRpc]
+        //private void RpcReceiveChunks(NetworkChunk[] networkChunks, int playerId)
+        //{
+        //    var unpackedChunks = Chunk.UnpackNetworkChunks(networkChunks);
+        //    Local.World.AddChunks(unpackedChunks);
+
+        //    if (!isServer)
+        //    {
+        //        List<Vector2Int> chunkPositions = new List<Vector2Int>();
+        //        foreach(var chunk in unpackedChunks)
+        //        {
+        //            chunkPositions.Add(chunk.Position);
+        //        }
+        //        Local.World.UpdatePlayerChunks(playerId, chunkPositions);
+        //    }
+        //    if (Local.GameManager.PlayerController.Id == playerId)
+        //    {
+        //        Local.UpdateChunkControllers(Local.World.GetPlayerLoadedChunks(playerId), null);
+        //    }
+        //}
+
+        //[Command]
+        //private void CmdRequestAllEntities()
+        //{
+        //    int bytesLeft = 1400 - sizeof(bool); // packet size - bool
+
+        //    List<uint> entityIds = new List<uint>();
+        //    List<ushort> dataIds = new List<ushort>();
+        //    List<byte> payload = new List<byte>();
+
+        //    int numberOfEntities = EntityCollection.Instance.ActiveEntities.Count;
+        //    for(int i = 0; i < numberOfEntities; ++i)
+        //    {
+        //        EntityInstance entityInstance = EntityCollection.Instance.ActiveEntities[i];
+        //        EntityData entityData = entityInstance.GetData();
+        //        bytesLeft -= sizeof(uint); // The EntityInstanceId
+        //        bytesLeft -= sizeof(ushort); // The EntityDataId
+        //        bytesLeft -= entityData.PacketSize(); // Payload
+
+        //        // Cannot accomodate this entity within the packet
+        //        if (bytesLeft < 0)
+        //        {
+        //            TargetReceiveEntities(connectionToClient, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray(), false);
+        //            entityIds.Clear();
+        //            dataIds.Clear();
+        //            payload.Clear();
+        //            bytesLeft = 1400 - sizeof(bool);
+        //        }
+
+        //        entityIds.Add(entityInstance.Id);
+        //        dataIds.Add(entityData.Id);
+        //        payload.AddRange(entityInstance.GetPacket());
+
+        //        // Last Entity to add
+        //        if(i == numberOfEntities - 1)
+        //        {
+        //            TargetReceiveEntities(connectionToClient, entityIds.ToArray(), dataIds.ToArray(), payload.ToArray(), true);
+        //            entityIds.Clear();
+        //            dataIds.Clear();
+        //            payload.Clear();
+        //        }
+        //    }
+        //}
+        //#endregion
+
+        //#region Commands - Methods called on the server from a client
+        //[Command]
+        //private void CmdRequestAllLoadedChunks()
+        //{
+        //    const int packetBufferSize = 16;
+
+        //    int chunksLeft = Local.World.LoadedChunks.Count;
+        //    int chunksProcessed = 0;
+        //    List<Chunk> chunksToSend = new List<Chunk>(packetBufferSize);
+
+        //    foreach (var chunkPair in Local.World.LoadedChunks)
+        //    {
+        //        chunksToSend.Add(chunkPair.Value);
+
+        //        --chunksLeft;
+        //        bool lastSend = chunksLeft == 0;
+        //        if(++chunksProcessed == packetBufferSize || lastSend)
+        //        {
+        //            chunksProcessed = 0;
+        //            TargetReceiveChunks(connectionToClient, NetworkChunk.ChunkListToNetworkChunkArray(chunksToSend), lastSend);
+        //            chunksToSend.Clear();
+        //        }
+        //    }
+
+        //    Debug.Log("[WorldController] - CmdRequestAllLoadedChunks()");
+        //}
         #endregion
 
-        private byte[] Vector2IntsToBytes(IEnumerable<Vector2Int> vec2s)
+        #region Utilities
+        public Vector3 GeneratePlayerPosition()
+        {
+            return Vector3.zero;
+            var position = URandom.insideUnitSphere * URandom.Range(0, 10000);
+            position.z = 0f;
+            return position;
+        }
+        public static byte[] Vector2IntsToBytes(IEnumerable<Vector2Int> vec2s)
         {
             //Debug.Log($"vec2s.Length: {vec2s.Length}");
 
@@ -580,7 +598,7 @@ namespace TheWorkforce
                 return ms.ToArray();
             }
         }
-        private Vector2Int[] BytesToVector2Ints(byte[] bytes)
+        public static Vector2Int[] BytesToVector2Ints(byte[] bytes)
         {
             Vector2Int[] vec2s;
 
@@ -600,5 +618,6 @@ namespace TheWorkforce
             }
             return vec2s;
         }
+        #endregion
     }
 }

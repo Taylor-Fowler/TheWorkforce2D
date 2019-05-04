@@ -54,7 +54,7 @@ namespace TheWorkforce
 
         public void SetItem(uint entityId)
         {
-            var entity = EntityCollection.Instance().GetEntity(entityId);
+            var entity = EntityCollection.Instance.GetEntity(entityId);
             entity.OnEntityDestroy += DestroyEntityOnTile;
 
             var entityObject = entity.Spawn();

@@ -14,6 +14,9 @@ namespace TheWorkforce.Network
      * Callback order: https://docs.unity3d.com/Manual/NetworkManagerCallbacks.html
      * UNet NetworkManager: https://docs.unity3d.com/Manual/UNetManager.html
      * 
+     * https://docs.unity3d.com/2018.3/Documentation/ScriptReference/Networking.QosType.html
+     * https://docs.unity3d.com/2018.3/Documentation/ScriptReference/Networking.ChannelOption.html
+     * 
      */
 
     /// <summary>
@@ -47,41 +50,121 @@ namespace TheWorkforce.Network
         /// </summary>
         public GameManager GameManager { get; private set; }
 
+        /// <summary>
+        /// The client controllers connected to the host - including the host client
+        /// </summary>
+        public IEnumerable<ClientControllers> ClientControllers => _networkClientControllers;
+
+        /// <summary>
+        /// The number of client controllers connected to the host - including the host client
+        /// </summary>
+        public int NumberOfClientControllers => _networkClientControllers.Count;
+
         private NetworkClientControllers _networkClientControllers;
         private Tuple<uint, EGameState, List<NetworkConnection>> _awaitingConfirmation;
 
+        // Delegate methods used to update the game manager internal state
         private Action _onBeginConnection;
         private Action _onBeginGame;
         private Action _onBeginLoading;
         private Action _onPause;
         private Action _onResume;
+        private Action _onDisconnect;
+        private bool _isQuitting = false;
 
         private List<KeyValuePair<NetworkConnection, short>> _awaitingProcessing;
         private bool _preparingToProcessIncomingConnections = false;
 
-        private void Update()
+        private void Awake() => Application.wantsToQuit += Application_wantsToQuit;
+
+        /// <summary>
+        /// Intercepts the application quitting message, if there is no active network client, the application quits.
+        /// Otherwise, the client begins its disconnect sequence.
+        /// </summary>
+        /// <returns></returns>
+        private bool Application_wantsToQuit()
         {
-            if(Input.GetKeyDown(KeyCode.Escape))
+            if(client != null)
             {
-                _onPause.Invoke();
-                StopHost();
+                if (!_isQuitting)
+                {
+                    ManualDisconnect();
+                    _isQuitting = true;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        public void ManualDisconnect()
+        {
+            if(client == null || _isQuitting)
+            {
+                return;
+            }
+
+            if (client.connection.connectionId == 0)
+            {
+                // Tell all clients to disconnect before stopping host
+                NetworkGameState newState = new NetworkGameState
+                {
+                    Current = EGameState.Disconnecting,
+                    Previous = GameManager.GameState
+                };
+
+                NetworkServer.SendToAll(MsgGameStateChange, newState);
+                StartCoroutine(StopHostAfterClientsDisconnect());
+            }
+            else
+            {
+                StartCoroutine(StopClientAfterUpdatingData());
             }
         }
 
+        private IEnumerator StopHostAfterClientsDisconnect()
+        {
+            while(_networkClientControllers.Count > 1)
+            {
+                yield return null;
+            }
+            StopHost();
+        }
+
+        private IEnumerator StopClientAfterUpdatingData()
+        {
+            GameManager.PlayerController.CmdUpdatePlayerData(GameManager.PlayerController.GetPlayerData().ByteArray());
+            yield return new WaitForSeconds(1.0f);
+            StopClient();
+        }
+
         #region Initialisation/Dependency Injection
+        /// <summary>
+        /// Stores a reference to the game manager and initialises the client controllers connection
+        /// </summary>
+        /// <param name="gameManager"></param>
         public void Startup(GameManager gameManager)
         {
             GameManager = gameManager;
             _networkClientControllers = new NetworkClientControllers();
         }
 
-        public void Initialise(Action beginConnection, Action beginLoading, Action beginGame, Action pause, Action resume)
+        /// <summary>
+        /// Assigns the game state callback methods to be used by this network manager later when network messages change the state of the game.
+        /// </summary>
+        /// <param name="beginConnection"></param>
+        /// <param name="beginLoading"></param>
+        /// <param name="beginGame"></param>
+        /// <param name="pause"></param>
+        /// <param name="resume"></param>
+        /// <param name="disconnect"></param>
+        public void Initialise(Action beginConnection, Action beginLoading, Action beginGame, Action pause, Action resume, Action disconnect)
         {
             _onBeginConnection = beginConnection;
             _onBeginLoading = beginLoading;
             _onBeginGame = beginGame;
             _onPause = pause;
             _onResume = resume;
+            _onDisconnect = disconnect;
         }
         #endregion
 
@@ -89,11 +172,15 @@ namespace TheWorkforce.Network
         /// <summary>
         /// Called on the server when it is started - including a host started server.
         /// 
-        /// Initialises the collection of new NetworkConnections to process
+        /// Initialises the collection of new NetworkConnections to process and registers
+        /// methods to handle network messages
         /// </summary>
         public override void OnStartServer()
         {
             _awaitingProcessing = new List<KeyValuePair<NetworkConnection, short>>();
+
+            NetworkServer.RegisterHandler(MsgClientIdentifier, OnServerReceiveClientIdentifier);
+            NetworkServer.RegisterHandler(MsgGameStateConfirmation, OnServerReceiveStateConfirmation);
 
             base.OnStartServer();
             Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStartServer()");
@@ -117,9 +204,7 @@ namespace TheWorkforce.Network
                 GameFile.Instance.Save(playerData);
             }
             GameFile.Instance.Save(WorldController.Local.World);
-
-            //Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStopServer() \n"
-            //            + $"_networkClientControllers.Count: {_networkClientControllers.Count}");
+            _networkClientControllers.Clear();
 
             base.OnStopServer();
             Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStopServer()");
@@ -151,11 +236,6 @@ namespace TheWorkforce.Network
             // base.OnServerConnect(conn);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="playerControllerId"></param>
         public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
         {
             Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnServerAddPlayer(NetworkConnection, short)");
@@ -178,11 +258,10 @@ namespace TheWorkforce.Network
 
         public override void OnServerDisconnect(NetworkConnection conn)
         {
-            // TODO: Safer disconnect, release assets assigned to the current connection etc
+            // At this point, the connection that disconnected should have managed their disconnecting and save data, otherwise they lose progress
             _networkClientControllers.Remove(conn);
-            //GameFile.Instance.SavePlayer(playerController.Player);
 
-            base.OnServerDisconnect(conn);
+            NetworkServer.DestroyPlayersForConnection(conn);
         }
         #endregion
 
@@ -194,16 +273,6 @@ namespace TheWorkforce.Network
         /// <param name="client"></param>
         public override void OnStartClient(NetworkClient client)
         {
-            // Only the server needs to register for the following messages
-            // client.connection is only initialised on the host (server + client) at this point...I think based on observations
-            // 
-            // No harm in keeping the Id check incase observation is wrong
-            if(client.connection != null && client.connection.connectionId == 0)
-            {
-                client.RegisterHandler(MsgClientIdentifier, OnServerReceiveClientIdentifier);
-                client.RegisterHandler(MsgGameStateConfirmation, OnServerReceiveStateConfirmation);
-            }
-
             client.RegisterHandler(MsgGameStateChange, OnClientUpdateGameState);
 
             _onBeginConnection?.Invoke();
@@ -214,33 +283,24 @@ namespace TheWorkforce.Network
 
         public override void OnStopClient()
         {
+            if(client == null)
+            {
+                return;
+            }
             client.UnregisterHandler(MsgGameStateChange);
 
             if(client.connection.connectionId != 0)
             {
-                // Delete the temp game world
+                GameFile.Instance.Delete();
             }
+            GameFile.Instance.ExitGame();
+            _onDisconnect?.Invoke();
 
-            base.OnStopClient();
+            if(_isQuitting)
+            {
+                Application.Quit();
+            }
             Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnStopClient()");
-        }
-
-        /// <summary>
-        /// Called on the client when it connects to the server. This includes the host client.
-        /// </summary>
-        /// <param name="conn"></param>
-        public override void OnClientConnect(NetworkConnection conn)
-        {
-            base.OnClientConnect(conn);
-            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnClientConnect(NetworkConnection)");
-        }
-
-        public override void OnClientSceneChanged(NetworkConnection conn)
-        {
-            Debug.Log(client.connection.clientOwnedObjects.Count);
-
-            base.OnClientSceneChanged(conn);
-            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnClientSceneChanged(NetworkConnection)");
         }
         #endregion
 
@@ -273,6 +333,26 @@ namespace TheWorkforce.Network
                 networkConnections
             );
         }
+
+        private void OnServerResumeGame()
+        {
+            // TODO: The network game state should be custom made for each client based on latency
+            //          I.E Client 1 with latency of 5 ticks, Client 2 with latency of 10 ticks
+            //          Send time based on largest latency + x (maybe 5?) (largest latency - latency + x)
+            //          Client 1 receives a timer of 10 
+            //          Client 2 receives a timer of 5
+            NetworkGameState networkGameState = new NetworkGameState
+            {
+                Previous = GameManager.GameState,
+                Current = EGameState.Active,
+
+                Time = 5
+            };
+
+            NetworkServer.SendToAll(MsgGameStateChange, networkGameState);
+
+            Debug.Log("[FileTransfer] - OnServerResumeGame()");
+        }
         #endregion
 
         #region Sending Network Messages - from client to server
@@ -294,7 +374,7 @@ namespace TheWorkforce.Network
             // Server can call the local method
             else
             {
-                OnServerProcessStateConfirmation(new NetworkStateConfirmation { NewState = EGameState.Paused }, client.connection);
+                OnServerProcessPauseConfirmation(new NetworkStateConfirmation { NewState = EGameState.Paused }, client.connection);
             }
         }
         #endregion
@@ -304,14 +384,25 @@ namespace TheWorkforce.Network
         {
             NetworkStateConfirmation networkStateConfirmation = networkMessage.ReadMessage<NetworkStateConfirmation>();
 
-            OnServerProcessStateConfirmation(networkStateConfirmation, networkMessage.conn);
+            switch(networkStateConfirmation.NewState)
+            {
+                case EGameState.Waking:
+                    {
+                        OnServerProcessWakingConfirmation(networkMessage.conn);
+                        break;
+                    }
+                case EGameState.Paused:
+                    {
+                        OnServerProcessPauseConfirmation(networkStateConfirmation, networkMessage.conn);
+                        break;
+                    }
+                default: break;
+            }
         }
 
         private void OnServerReceiveClientIdentifier(NetworkMessage networkMessage)
         {
             NetworkClientIdentifier networkClientIdentifier = networkMessage.ReadMessage<NetworkClientIdentifier>();
-
-
         }
         #endregion
 
@@ -327,33 +418,79 @@ namespace TheWorkforce.Network
             // Find the game state change to process and at which time
             NetworkGameState networkGameState = networkMessage.ReadMessage<NetworkGameState>();
             
-            // From paused to active
-            if(networkGameState.Previous == EGameState.Paused)
+            switch(networkGameState.Previous)
             {
-                if(networkGameState.Current == EGameState.Active)
-                {
-                    GameTime.ListenForSpecificPostTick(networkGameState.Time, _onResume);
-                }
+                case EGameState.NotLoaded:
+                    {
+                        // Ewwww, FindObjectsOfType is nasty
+                        var playerControllers = FindObjectsOfType<PlayerController>();
+                        var worldControllers = FindObjectsOfType<WorldController>();
+
+                        foreach(var playerController in playerControllers)
+                        {
+                            playerController.Startup(GameManager);
+                        }
+                        foreach(var worldController in worldControllers)
+                        {
+                            worldController.Startup(GameManager);
+                        }
+
+                        _onBeginLoading?.Invoke();
+                        client.Send(MsgGameStateConfirmation, new NetworkStateConfirmation { NewState = EGameState.Waking });
+                        break;
+                    }
+
+                case EGameState.Initialised:
+                    {
+
+                        break;
+                    }
+                case EGameState.Paused:
+                    {
+                        if(networkGameState.Current == EGameState.Active)
+                        {
+                            // New client that just connected goes from waking to active, starts the tick timer
+                            if(GameManager.GameState == EGameState.Waking)
+                            {
+                                GameTime.ListenForBackgroundTick(networkGameState.Time, _onBeginGame);
+                            }
+                            else
+                            {
+                                GameTime.ListenForBackgroundTick(networkGameState.Time, _onResume);
+                            }
+                        }
+                        break;
+                    }
+                case EGameState.Active:
+                    {
+                        if (networkGameState.Current == EGameState.Paused)
+                        {
+                            GameTime.ListenForSpecificPostTick(networkGameState.Time, OnClientPause);
+                        }
+                        break;
+                    }
+                default: break;
             }
-            // From active to paused
-            else if (networkGameState.Previous == EGameState.Active)
+
+            if(networkGameState.Current == EGameState.Disconnecting && networkMessage.conn.connectionId != 0)
             {
-                if (networkGameState.Current == EGameState.Paused)
-                {
-                    GameTime.ListenForSpecificPostTick(networkGameState.Time, OnClientPause);
-                }
+                StartCoroutine(StopClientAfterUpdatingData());
             }
+            Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnClientUpdateGameState(NetworkMessage)\n" +
+                        $"Change in game state: {networkGameState.Previous} -> {networkGameState.Current}");
         }
         #endregion
 
+
+        #region Server Only Methods
         /// <summary>
-        /// Called on the server when a state confirmation message has been received and unpackaged.
+        /// Called on the server when a pause state confirmation message has been received and unpackaged.
         /// 
         /// Checks whether all other clients have paused and if so continues its queued process (AddPlayer etc)
         /// </summary>
         /// <param name="networkStateConfirmation"></param>
         /// <param name="conn"></param>
-        private void OnServerProcessStateConfirmation(NetworkStateConfirmation networkStateConfirmation, NetworkConnection conn)
+        private void OnServerProcessPauseConfirmation(NetworkStateConfirmation networkStateConfirmation, NetworkConnection conn)
         {
             if (_awaitingConfirmation.Item2 == networkStateConfirmation.NewState)
             {
@@ -385,9 +522,22 @@ namespace TheWorkforce.Network
             }
         }
 
+        private void OnServerProcessWakingConfirmation(NetworkConnection conn)
+        {
+            var clientControllers = _networkClientControllers.Find(conn);
+
+            PlayerData playerData = OnServerGetPlayerData(conn.connectionId);
+
+            clientControllers.PlayerController.OnServerInitialise(playerData);
+            StartCoroutine(clientControllers.FileTransfer.ServerSendGameFile(conn));
+        }
+
         private IEnumerator OnServerProcessNewPlayers()
         {
             Debug.Log("<color=#4688f2><b>[CustomNetworkManager]</b></color> - OnServerProcessNewPlayers()");
+
+            GameFile.Instance.Save(GameManager.WorldController.World);
+            // Save all other players?
 
             while (_awaitingProcessing.Count > 0)
             {
@@ -441,21 +591,13 @@ namespace TheWorkforce.Network
             {
                 World gameWorld = GameFile.Instance.LoadWorld();
 
+                FileTransfer.SuccessfulTransfer = OnServerConfirmFileTransfer;
                 clientControllers.WorldController.OnServerClientInitialise(gameWorld); // Set the world reference in the world controller
+                clientControllers.Activate();
 
-                byte[] playerBytes;
-                if(!GameFile.Instance.PlayerExists(conn.connectionId, out playerBytes)) // If the player does not exist in the save, create and save their data
-                {
-                    var playerPosition = clientControllers.WorldController.GeneratePlayerPosition();
-                    PlayerData playerData = new PlayerData(conn.connectionId, playerPosition.x, playerPosition.y);
+                PlayerData playerData = OnServerGetPlayerData(conn.connectionId);
 
-                    GameFile.Instance.Save(playerData);
-                    clientControllers.PlayerController.OnServerInitialise(playerData);
-                }
-                else
-                {
-                    clientControllers.PlayerController.OnServerInitialise(new PlayerData(playerBytes));
-                }
+                clientControllers.PlayerController.OnServerInitialise(playerData);
                 _networkClientControllers.Add(clientControllers);
                 _onBeginGame?.Invoke();
             }
@@ -472,11 +614,13 @@ namespace TheWorkforce.Network
             //      5.
             else
             {
-                //networkClientControllers.PlayerController.OnServerInitialise(conn.connectionId);
-                clientControllers.FileTransfer.ServerSendGameFile(conn);
-                // TODO: 
-                // once the file is transferred, onclient initialise for both playerController and
-                // for worldController
+                _networkClientControllers.Add(clientControllers);
+                NetworkServer.SendToClient(conn.connectionId, MsgGameStateChange, new NetworkGameState
+                {
+                    Current = EGameState.Waking,
+                    Previous = EGameState.NotLoaded,
+                    Time = 0
+                });
             }
         }
 
@@ -487,10 +631,53 @@ namespace TheWorkforce.Network
         /// the client's controllers are initialised from file.
         /// </summary>
         /// 
-        /// <param name="controllers"></param>
-        private void OnServerConfirmFileTransfer(NetworkClientControllers controllers)
+        /// <param name="clientConnection"></param>
+        private void OnServerConfirmFileTransfer(NetworkConnection clientConnection)
         {
+            var clientControllers = _networkClientControllers.Find(clientConnection);
 
+            byte[] playerBytes = clientControllers.PlayerController.GetPlayerData().ByteArray();
+            clientControllers.PlayerController.RpcInitialiseNewPlayer(playerBytes);
+
+            byte[] chunkPositions = WorldController.Vector2IntsToBytes(WorldController.Local.World.GetLoadedChunkPositions());
+            clientControllers.WorldController.TargetFinishInitialisation(clientConnection, chunkPositions);
+            clientControllers.Activate();
+
+
+            foreach (var otherClientControllers in _networkClientControllers)
+            {
+                if (otherClientControllers == clientControllers)
+                {
+                    continue;
+                }
+                byte[] otherPlayerBytes = otherClientControllers.PlayerController.GetPlayerData().ByteArray();
+                otherClientControllers.PlayerController.TargetInitialisePlayer(clientConnection, otherPlayerBytes);
+            }
+            // TODO: Store a reference to the last player being added, and check that this player was the last, then resume
+            //          OR - Store a list of all the players receiving the game, then remove each and the last one resumes
+            OnServerResumeGame();
         }
+
+        /// <summary>
+        /// Retrieves the player data associated with the connection Id if it exists. When the player data does not exist,
+        /// the player data is generated and saved before being returned.
+        /// </summary>
+        /// <param name="connectionId">The connection Id to get player data for</param>
+        /// <returns>The player data associated with the connection Id</returns>
+        private PlayerData OnServerGetPlayerData(int connectionId)
+        {
+            byte[] playerBytes;
+            if (!GameFile.Instance.PlayerExists(connectionId, out playerBytes)) // If the player does not exist in the save, create and save their data
+            {
+                var playerPosition = WorldController.Local.GeneratePlayerPosition();
+                PlayerData playerData = new PlayerData(connectionId, playerPosition.x, playerPosition.y);
+
+                GameFile.Instance.Save(playerData);
+                return playerData;
+            }
+            
+            return new PlayerData(playerBytes);
+        }
+        #endregion
     }
 }

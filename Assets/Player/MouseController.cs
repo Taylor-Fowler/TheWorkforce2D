@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace TheWorkforce
 {
@@ -18,6 +19,7 @@ namespace TheWorkforce
         private Vector2Int _worldPositionInt;
 
         #region Private Members
+        [SerializeField] private Image _itemInHandImage;
         [SerializeField] private SpriteRenderer _outlinerRenderer;
         [SerializeField] private EntityCollection _entityCollection;
         [SerializeField] private EntityInteractionDisplay _entityInteractionDisplay;
@@ -89,7 +91,8 @@ namespace TheWorkforce
             // the mouse was over previously
             if (EventSystem.current.IsPointerOverGameObject())
             {
-                NullifyEntityReference();
+                _activeInstance = null;
+                _entityView.SetEntity(_activeInstance);
             }
             // The mouse is not over UI so update which entity it is over
             else
@@ -97,6 +100,17 @@ namespace TheWorkforce
                 UpdateMouseOverEntity();
             }
             UpdateInteraction();
+
+            if(_itemInHand != null)
+            {
+                _itemInHandImage.enabled = true;
+                _itemInHandImage.sprite = _itemInHand.Item.Sprite;
+                _itemInHandImage.rectTransform.anchoredPosition = Input.mousePosition;
+            }
+            else
+            {
+                _itemInHandImage.enabled = false;
+            }
         }
 
         public void CalculateWorldPosition()
@@ -107,8 +121,8 @@ namespace TheWorkforce
             mousePosition.z = 10f;
 
             _worldPosition = _personalCamera.ScreenToWorldPoint(mousePosition);
-            _worldPositionInt.x = (int)_worldPosition.x;
-            _worldPositionInt.y = (int)_worldPosition.y;
+            _worldPositionInt.x = (int)Mathf.Floor(_worldPosition.x);
+            _worldPositionInt.y = (int)Mathf.Floor(_worldPosition.y);
         }
 
         public ItemStack AddItemStackToHand(ItemStack itemStack)
@@ -218,15 +232,6 @@ namespace TheWorkforce
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        private void NullifyEntityReference()
-        {
-            _activeInstance = null;
-            _entityView.SetEntity(_activeInstance);
-        }
-
-        /// <summary>
         /// Checks if there is an active interaction and if so:
         /// - Hides the interaction display
         /// - Stops listening for when the interaction is destroyed/finished
@@ -240,6 +245,8 @@ namespace TheWorkforce
                 _activeInteraction.OnDestroy -= ResetInteraction;
                 _activeInteraction = null;
             }
+            _activeInstance = null;
+            SetOutline();
         }
 
         /// <summary>

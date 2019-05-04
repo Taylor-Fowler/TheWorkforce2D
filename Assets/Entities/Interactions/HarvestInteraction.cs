@@ -28,6 +28,8 @@ namespace TheWorkforce.Entities.Interactions
                 if (_onHarvest())
                 {
                     _initiatorInventory.Inventory.Add(new ItemStack(_targetData, 1));
+
+                    // tell the initiator entity that the interaction is over?
                 }
             }            
         }

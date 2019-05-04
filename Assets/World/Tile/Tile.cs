@@ -13,7 +13,9 @@ namespace TheWorkforce
         public float Elevation { get; }
         public Vector2Int Position { get; }
 
-        public uint StaticEntityInstanceId;
+        public uint StaticEntityInstanceId { get; private set; }
+
+        public event Action OnUnload;
 
 
         public Tile(NetworkTile networkTile, Vector2Int position)
@@ -39,6 +41,11 @@ namespace TheWorkforce
             StaticEntityInstanceId = entityInstanceId;
         }
 
+        public void RemoveEntity()
+        {
+            StaticEntityInstanceId = 0;
+        }
+
         public byte[] GetByteArray()
         {
             const int floatSize = sizeof(float);
@@ -61,19 +68,16 @@ namespace TheWorkforce
             return bytes;
         }
 
-        public Vector3 GetWorldPosition(Vector2Int chunkPosition)
+        public void Unload()
         {
-            chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
-            return new Vector3(chunkPosition.x + Position.x, chunkPosition.y + Position.y, 1f);
+            OnUnload?.Invoke();
         }
 
-        public Vector3 GetWorldPositionPrecedence(Vector2Int chunkPosition, int paddingTileSetId)
-        {
-            Vector3 position = GetWorldPosition(chunkPosition);
-            position.z -= TerrainTileSet.LoadedTileSets[paddingTileSetId].Precedence;
-
-            return position;
-        }
+        //public Vector3 GetWorldPosition(Vector2Int chunkPosition)
+        //{
+        //    chunkPosition = Chunk.CalculateWorldPosition(chunkPosition);
+        //    return new Vector3(chunkPosition.x + Position.x, chunkPosition.y + Position.y, 1f);
+        //}
 
         /// <summary>
         /// Calculates the relative tile position from a given world position

@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace TheWorkforce
 {
+    using Entities;
+
     public class WorldGeneration
     {
         #region Public Properties
@@ -31,17 +33,19 @@ namespace TheWorkforce
                 { 
                     for (int y = 0; y < Chunk.SIZE; y++)
                     {
-                        Vector2 worldChunkPosition = chunk.WorldPosition();
+                        Vector2Int worldPosition = chunk.WorldPosition() + new Vector2Int(x, y);
     
-                        float noise = GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y);
+                        float noise = GetNoise(worldPosition.x, worldPosition.y);
                         
-                        Tile tile = new Tile(
-                            (byte)(noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2),
-                            GetNoise((int)worldChunkPosition.x + x, (int)worldChunkPosition.y + y, noise),
-                            noise,
-                            new Vector2Int(x, y));
+                        Tile tile = new Tile
+                            (
+                                (byte)(noise < 0.333f ? 0 : noise > 0.666f ? 1 : 2),
+                                GetNoise(worldPosition.x, worldPosition.y, noise),
+                                noise,
+                                new Vector2Int(x, y)
+                            );
 
-                        GenerateGeneratableItems(tile, worldChunkPosition);
+                        GenerateGeneratableItems(tile, worldPosition);
                         chunk.Tiles[x, y] = tile;
                     }
                 }
@@ -50,9 +54,10 @@ namespace TheWorkforce
             return chunks;
         }
 
-        private void GenerateGeneratableItems(Tile tile, Vector2 chunkWorldPosition)
+        private void GenerateGeneratableItems(Tile tile, Vector2Int worldPosition)
         {
-            float noise = GetNoise((int)(chunkWorldPosition.x + tile.Position.x), (int)(chunkWorldPosition.y + tile.Position.y), tile.Elevation + tile.Moisture);
+            float noise = GetNoise(worldPosition.x, worldPosition.y, tile.Elevation + tile.Moisture);
+
             if(tile.Elevation + tile.Moisture >= 0.133f)
             {
                 List<Generatable> generatables = Generation.GetGeneratables(tile.Moisture, tile.Elevation);
@@ -74,8 +79,8 @@ namespace TheWorkforce
                         index = generatables.Count - 1;
                     }
 
-                    Vector2 worldPosition = tile.Position + chunkWorldPosition;
-                    tile.PlaceEntity(Entities.EntityCollection.Instance().CreateEntity(generatables[index].ItemId, (int)worldPosition.x, (int)worldPosition.y));
+                    var entityId = EntityCollection.Instance.CreateEntity(generatables[index].ItemId, tile, worldPosition);
+                    tile.PlaceEntity(entityId);
                 }
             }
         }

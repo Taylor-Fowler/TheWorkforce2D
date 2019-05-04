@@ -6,11 +6,9 @@ namespace TheWorkforce
     public class HudMenuOptions : MonoBehaviour
     {
         public DisplayHudOption InventoryHudOption => _inventoryHudOption;
-        public DisplayHudOption ToolbeltHudOption => _toolbeltHudOption;
         public DisplayHudOption CraftingHudOption => _craftingHudOption;
 
         [SerializeField] private DisplayHudOption _inventoryHudOption;
-        [SerializeField] private DisplayHudOption _toolbeltHudOption;
         [SerializeField] private DisplayHudOption _craftingHudOption;
 
         //private HudOption[] _hudOptions;
@@ -20,7 +18,6 @@ namespace TheWorkforce
         private void Start()
         {
             _inventoryHudOption.Startup(this);
-            //_toolbeltHudOption.Startup(this);
             _craftingHudOption.Startup(this);
             //_hudOptions = gameObject.GetComponentsInChildren<HudOption>();
             //Debug.Log("[HudMenuOptions] - Start() \n" 

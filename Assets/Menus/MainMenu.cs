@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -12,16 +9,9 @@ namespace TheWorkforce.UI
 
     public class MainMenu : MonoBehaviour
     {
-        public Button SelectFilePrefab;
 
         [SerializeField] private GameManager _gameManager;
-
-        #region Display Panel Buttons
-        [SerializeField] private Button _displayCreateGamePanelButton;
-        [SerializeField] private Button _displayLoadGamePanelButton;
-        [SerializeField] private Button _displayJoinGamePanelButton;
-        [SerializeField] private Button _quitGameButton;
-        #endregion
+        [SerializeField] private LoadMenu _loadMenu;
 
         #region UI Panel Members
         [SerializeField] private GameObject _mainPanel;
@@ -46,7 +36,6 @@ namespace TheWorkforce.UI
         #region Unity API
         private void Awake()
         {
-            gameObject.SetActive(false);
             _backButton.gameObject.SetActive(false);
             _gameManager.OnApplicationStateChange += GameManager_OnApplicationStateChange;
 
@@ -59,10 +48,6 @@ namespace TheWorkforce.UI
             {
                 _gameManager.NetworkManager.StartClient();
             });
-            //_clientPlayButton.onClick.AddListener(delegate
-            //{
-            //    _gameManager.NetworkManager.StartClient();
-            //});
         }
         #endregion
 
@@ -78,6 +63,13 @@ namespace TheWorkforce.UI
             if(applicationStateArgs.Current == EApplicationState.Menu)
             {
                 gameObject.SetActive(true);
+                if(applicationStateArgs.Previous == EApplicationState.ReturningToMenu)
+                {
+                    _backButton.gameObject.SetActive(false);
+                    _activePanel.SetActive(false);
+                    _activePanel = _mainPanel;
+                    _mainPanel.SetActive(true);
+                }
             }
             // Transition from menu state, this could be due to closing the application or due to loading a game
             else if(applicationStateArgs.Previous == EApplicationState.Menu)
@@ -85,8 +77,6 @@ namespace TheWorkforce.UI
                 gameObject.SetActive(false);
             }
         }
-
-        
 
         /// <summary>
         /// Creates a game with the user input game-name then proceeds to start the network host
@@ -101,13 +91,13 @@ namespace TheWorkforce.UI
                 return;
             }
 
-
             string worldSeed = _worldSeedInput.text;
             int seed = 784893570;
 
             if(worldSeed != null && worldSeed != string.Empty)
             {
                 // turn the string into an int
+                seed = worldSeed.GetHashCode();
             }
 
             if(!GameFile.CreateGame(worldName, seed))
@@ -130,6 +120,7 @@ namespace TheWorkforce.UI
 
         public void DisplayLoadGamePanel()
         {
+            _loadMenu.InitialiseButtons();
             _mainPanel.SetActive(false);
             _loadGamePanel.SetActive(true);
             _activePanel = _loadGamePanel;

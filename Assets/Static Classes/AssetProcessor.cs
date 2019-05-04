@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
-using TheWorkforce.Crafting;
 using UnityEngine;
-using TheWorkforce.Items;
 
 namespace TheWorkforce.Static_Classes
 {
+    using Crafting;
+
     public static class AssetProcessor
     {
         // TODO: Add a method that returns the directoryInfo requested only if the directory exists

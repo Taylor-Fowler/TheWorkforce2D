@@ -1,72 +1,102 @@
 ﻿using System;
 using System.Collections.Generic;
-using TheWorkforce.Game_State;
 using UnityEngine;
 
 namespace TheWorkforce.Entities
 {
+    using Game_State; using Interfaces;
+
     [CreateAssetMenu(fileName = "Entity Collection", menuName = "Entity Data/Collection")]
-    public class EntityCollection : ScriptableObject
+    public class EntityCollection : ScriptableObject, IManager
     {
         #region Singleton
-        public static EntityCollection Instance()
-        {
-            return _instance;
-        }
-
-        private static EntityCollection _instance;
+        public static EntityCollection Instance { get; private set; }
         #endregion
 
+        public GameManager GameManager { get; private set; }
+        public uint EntityIdCounter { get; private set; }
         public List<EntityData> Collection;
         public List<EntityInstance> ActiveEntities;
         public Dictionary<ushort, EntityData> DataMappedToId;
         public Dictionary<uint, EntityInstance> InstanceMappedToId;
-        public List<EntityInstance> EntitiesToDestroy;
+        public List<EntityInstance> EntitiesToUnload;
 
         private ushort _dataIdCounter;
-        private uint _entityIdCounter;
 
-        public void Initialise()
+        public void Startup(GameManager gameManager)
         {
-            _entityIdCounter = _dataIdCounter = 0;
-            //Debug.Log("[EntityCollection] - Initialise() \n" 
-            //        + "_dataIdCounter: " + _dataIdCounter.ToString());
+            Instance = this;
+            GameManager = gameManager;
+            GameManager.OnApplicationStateChange += GameManager_OnApplicationStateChange;
 
-            _instance = this;
-            ActiveEntities = new List<EntityInstance>();
+            EntityIdCounter = _dataIdCounter = 0;
             DataMappedToId = new Dictionary<ushort, EntityData>();
-            InstanceMappedToId = new Dictionary<uint, EntityInstance>();
-            EntitiesToDestroy = new List<EntityInstance>();
 
-            foreach(var value in Collection)
+            foreach (var value in Collection)
             {
                 value.Initialise(++_dataIdCounter);
                 DataMappedToId.Add(_dataIdCounter, value);
             }
 
-            GameTime.SubscribeToPostUpdate(DestroyEntities);
+            GameTime.SubscribeToPostUpdate(UnloadEntities);
         }
 
-        public uint CreateEntity(ushort dataIdKey, int x, int y)
+        private void GameManager_OnApplicationStateChange(ApplicationStateChangeArgs applicationStateChange)
         {
-            //Debug.Log("[EntityCollection] - CreateEntity(ushort)");
-            EntityData value = null;
+            switch(applicationStateChange.Current)
+            {
+                case (EApplicationState.Connecting):
+                    {
+                        Initialise();
+                        break;
+                    }
+                case (EApplicationState.ReturningToMenu):
+                    {
+                        ActiveEntities.Clear();
+                        InstanceMappedToId.Clear();
+                        EntitiesToUnload.Clear();
+                        EntityIdCounter = 0;
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+
+        private void Initialise()
+        {
+            ActiveEntities = new List<EntityInstance>();
+            InstanceMappedToId = new Dictionary<uint, EntityInstance>();
+            EntitiesToUnload = new List<EntityInstance>();
+        }
+
+        public EntityInstance GetEntity(uint entityInstanceId)
+        {
+            EntityInstance value;
+            InstanceMappedToId.TryGetValue(entityInstanceId, out value);
+            return value;
+        }
+
+        public void UpdateEntityCounter(uint counter) => EntityIdCounter = counter;
+
+        // Server side
+        public uint CreateEntity(ushort dataIdKey, Tile tile, Vector2Int worldPosition)
+        {
+            EntityData value;
             if(DataMappedToId.TryGetValue(dataIdKey, out value))
             {
-                _entityIdCounter++;
+                EntityIdCounter++;
 
-                EntityInstance instance = value.CreateInstance(_entityIdCounter, x, y, DestroyEntity);
-                ActiveEntities.Add(instance);
-                InstanceMappedToId.Add(_entityIdCounter, instance);
+                EntityInstance instance = value.CreateInstance(EntityIdCounter, worldPosition.x, worldPosition.y, UnloadEntity);
+                AddInstance(instance, tile);
 
-                //Debug.Log("[EntityCollection] - CreateEntity(ushort, int, int) \n" +
-                //            "X: " + x.ToString() + ", Y: " + y.ToString());
-                return _entityIdCounter;
+                return EntityIdCounter;
             }
             return 0;
         }
 
-        public void LoadEntity(ushort dataIdKey, uint entityId, int x, int y, byte[] saveData, int offset)
+        // Server and client side
+        public void LoadEntity(ushort dataIdKey, uint entityId, Tile tile, Vector2Int worldPosition, byte[] saveData, int offset)
         {
             EntityData value = null;
             if (DataMappedToId.TryGetValue(dataIdKey, out value))
@@ -74,15 +104,12 @@ namespace TheWorkforce.Entities
                 byte[] entityData = new byte[saveData.Length - offset];
                 Array.Copy(saveData, offset, entityData, 0, entityData.Length);
 
-                EntityInstance entityInstance = value.CreateInstance(entityId, x, y, DestroyEntity, entityData);
-                ActiveEntities.Add(entityInstance);
-                InstanceMappedToId.Add(entityId, entityInstance);
-
-                Debug.Log("[EntityCollection] - LoadEntity(ushort, uint, int, int) \n" +
-                            "X: " + x.ToString() + ", Y: " + y.ToString());
+                EntityInstance entityInstance = value.CreateInstance(entityId, worldPosition.x, worldPosition.y, UnloadEntity, entityData);
+                AddInstance(entityInstance, tile);
             }
         }
 
+        // Client side - from network message
         public void CreateEntity(ushort dataIdKey, uint entityId, byte[] payload, ref int offset)
         {
             EntityData value = null;
@@ -98,42 +125,41 @@ namespace TheWorkforce.Entities
                 Array.Copy(payload, offset, arr, 0, actualPacketSize);
                 offset += actualPacketSize;
 
-                EntityInstance entityInstance = value.CreateInstance(entityId, x, y, DestroyEntity, arr);
-                ActiveEntities.Add(entityInstance);
-                InstanceMappedToId.Add(entityId, entityInstance);
+                Tile tile = GameManager.WorldController.World[new Vector2Int(x, y)];
+                EntityInstance entityInstance = value.CreateInstance(entityId, x, y, UnloadEntity, arr);
 
-                Debug.Log("[EntityCollection] - CreateEntity(ushort, int, int) \n" +
-                            "X: " + x.ToString() + ", Y: " + y.ToString());
+                AddInstance(entityInstance, tile);
             }
         }
 
-        public EntityInstance GetEntity(uint entityInstanceId)
+        private void AddInstance(EntityInstance entityInstance, Tile tile)
         {
-            EntityInstance value = null;
-            InstanceMappedToId.TryGetValue(entityInstanceId, out value);
-            return value;
+            ActiveEntities.Add(entityInstance);
+            InstanceMappedToId.Add(entityInstance.Id, entityInstance);
+ 
+            tile.OnUnload += entityInstance.Unload;
+            entityInstance.OnEntityDestroy += tile.RemoveEntity;
         }
 
-        private void DestroyEntity(uint entityInstanceId)
+        private void UnloadEntity(uint entityInstanceId)
         {
-            Debug.Log("[EntityCollection] - DestroyEntity(uint) \n" 
-                    + "entityInstanceId: " + entityInstanceId.ToString());
+            //Debug.Log($"[EntityCollection] - UnloadEntity(uint) \nEntity ID: {entityInstanceId.ToString()}");
 
             var instance = GetEntity(entityInstanceId);
             if(instance != null)
             {
-                EntitiesToDestroy.Add(instance);
+                EntitiesToUnload.Add(instance);
             }
         }
 
-        private void DestroyEntities()
+        private void UnloadEntities()
         {
-            foreach (var entity in EntitiesToDestroy)
+            foreach (var entity in EntitiesToUnload)
             {
                 InstanceMappedToId.Remove(entity.Id);
                 ActiveEntities.Remove(entity);
             }
-            EntitiesToDestroy.Clear();
+            EntitiesToUnload.Clear();
         }
     }
 }

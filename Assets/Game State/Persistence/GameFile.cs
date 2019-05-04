@@ -14,12 +14,7 @@ namespace TheWorkforce.Game_State
         /// <summary>
         /// Get the singleton instance of GameFile
         /// </summary>
-        public static GameFile Instance => _instance;
-
-        /// <summary>
-        /// Backing field for Instance property, stores reference to GameFile singleton
-        /// </summary>
-        private static GameFile _instance;
+        public static GameFile Instance { get; private set; }
 
         #region Directory Names
         /// <summary>
@@ -46,14 +41,14 @@ namespace TheWorkforce.Game_State
         /// <returns>A collection of all valid save directories</returns>
         public static DirectoryInfo[] GetSaveDirectories()
         {
-            var savesDirectory = GetSavesDirectory(Path.Combine(Application.persistentDataPath, SavesDirectoryName));
+            var savesDirectory = GetOrCreateDirectory(Path.Combine(Application.persistentDataPath, SavesDirectoryName));
             // Debug.Log(Path.Combine(Application.persistentDataPath, SavesDirectoryName));
             return savesDirectory.GetDirectories();
         }
 
         public static bool LoadGame(DirectoryInfo saveDirectory)
         {
-            if(_instance != null)
+            if(Instance != null)
             {
                 // Must unload previous game first
                 return false;
@@ -78,20 +73,20 @@ namespace TheWorkforce.Game_State
                 return false;
             }
 
-            _instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
+            Instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
             return true;
         }
 
         public static bool CreateGame(string gameName, int worldSeed)
         {
             // The activate game must be unloaded before a new game can be created
-            if(_instance != null)
+            if(Instance != null)
             {
                 return false;
             }
 
             string savesDirectoryPath = Path.Combine(Application.persistentDataPath, SavesDirectoryName);
-            GetSavesDirectory(savesDirectoryPath);
+            GetOrCreateDirectory(savesDirectoryPath);
 
             string newSaveDirectoryPath = Path.Combine(savesDirectoryPath, gameName);
 
@@ -106,23 +101,27 @@ namespace TheWorkforce.Game_State
             DirectoryInfo chunksDirectory = Directory.CreateDirectory(Path.Combine(newSaveDirectoryPath, RegionsDirectoryName));
 
             // Initialise the instance of game save
-            _instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
-            _instance.Save(new World(worldSeed));
+            Instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
+            Instance.Save(new World(worldSeed));
             return true;
         }
 
-        public static bool CreateTemporaryGame(string gameName)
+        public static bool CreateTemporaryGame(string gameName, int playerId, byte[] worldData)
         {
             // The activate game must be unloaded before a new game can be created
-            if (_instance != null)
+            if (Instance != null)
             {
                 return false;
             }
 
-            string savesDirectoryPath = Path.Combine(Application.persistentDataPath, TemporaryCopyDirectoryName);
-            GetSavesDirectory(savesDirectoryPath);
+            string playerSavesDirectoryPath = Path.Combine(Application.persistentDataPath, playerId.ToString());
+            GetOrCreateDirectory(playerSavesDirectoryPath);
+
+            string savesDirectoryPath = Path.Combine(playerSavesDirectoryPath, TemporaryCopyDirectoryName);
+            GetOrCreateDirectory(savesDirectoryPath);
 
             string newSaveDirectoryPath = Path.Combine(savesDirectoryPath, gameName);
+            Debug.Log(gameName);
 
             // If the new save game directory path exists, delete it as it is only temporary anyways
             // this will most likely happen with disconnects followed by reconnects OR default game names
@@ -139,13 +138,14 @@ namespace TheWorkforce.Game_State
             DirectoryInfo chunksDirectory = Directory.CreateDirectory(Path.Combine(newSaveDirectoryPath, RegionsDirectoryName));
 
             // Initialise the instance of game save
-            _instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
+            Instance = new GameFile(saveDirectory, playersDirectory, chunksDirectory);
+            Instance.SaveWorldBytes(worldData);
 
             return true;
         }
 
 
-        private static DirectoryInfo GetSavesDirectory(string path)
+        private static DirectoryInfo GetOrCreateDirectory(string path)
         {
             // Check that the saves folder path exists, if not, create the directory
             if (!Directory.Exists(path))
@@ -204,19 +204,38 @@ namespace TheWorkforce.Game_State
             if (worldInfo == null)
             {
                 worldInfo = new FileInfo(_saveDirectory.FullName + "\\" + WorldFileName + FileFormat);
-                byte[] worldSeed = BitConverter.GetBytes(world.Seed);
-
-                using (FileStream fs = worldInfo.OpenWrite())
-                {
-                    fs.Write(worldSeed, 0, worldSeed.Length);
-                }
             }
 
-            foreach(var chunk in world.LoadedChunks)
+            byte[] worldSeed = BitConverter.GetBytes(world.Seed);
+            byte[] entityIdCounter = BitConverter.GetBytes(EntityCollection.Instance.EntityIdCounter);
+
+            using (FileStream fs = worldInfo.OpenWrite())
+            {
+                fs.Write(worldSeed, 0, worldSeed.Length);
+                fs.Write(entityIdCounter, 0, entityIdCounter.Length);
+            }
+
+            foreach (var chunk in world.LoadedChunks)
             {
                 Save(chunk.Value);
             }
             Debug.Log($"[GameFile] - Save(World)\nNumber of Chunks being saved <color=green>{world.LoadedChunks.Count}</color>");
+        }
+
+        public void SaveWorldBytes(byte[] worldData)
+        {
+            FileInfo worldInfo = SearchForFile(_saveDirectory, WorldFileName + FileFormat);
+
+            // First time saving world
+            if (worldInfo == null)
+            {
+                worldInfo = new FileInfo(_saveDirectory.FullName + "\\" + WorldFileName + FileFormat);
+            }
+
+            using (FileStream fileStream = worldInfo.OpenWrite())
+            {
+                fileStream.Write(worldData, 0, worldData.Length);
+            }
         }
 
         public void Save(Chunk chunk)
@@ -237,8 +256,13 @@ namespace TheWorkforce.Game_State
 
         public void Save(IEnumerable<Chunk> chunks)
         {
+            // TODO: Come back and optimise this as defined below.
             // Organise each chunk into the correct region 
             // Then save the collection of chunks per region
+            foreach(var chunk in chunks)
+            {
+                Save(chunk);
+            }
         }
 
         public void Save(PlayerData playerData) => Save(playerData.Id, playerData.ByteArray());
@@ -258,6 +282,22 @@ namespace TheWorkforce.Game_State
             {
                 fs.Write(playerData, 0, playerData.Length);
             }
+
+            Debug.Log("[GameFile] - Save(int, byte[])");
+        }
+
+        public void Save(string regionName, byte[] regionData)
+        {
+            FileInfo regionFileInfo = SearchForFile(_regionsDirectory, regionName);
+
+            if(regionFileInfo == null)
+            {
+                regionFileInfo = new FileInfo(_regionsDirectory.FullName + "\\" + regionName);
+            }
+            using (FileStream fileStream = regionFileInfo.OpenWrite())
+            {
+                fileStream.Write(regionData, 0, regionData.Length);
+            }
         }
         #endregion
 
@@ -273,13 +313,20 @@ namespace TheWorkforce.Game_State
             }
 
             int worldSeed = 0;
-            using (FileStream fs = worldInfo.OpenRead())
+            uint entityIdCounter = 0;
+
+            using (FileStream fileStream = worldInfo.OpenRead())
             {
                 var seedBytes = new byte[sizeof(int)];
-                fs.Read(seedBytes, 0, seedBytes.Length);
+                fileStream.Read(seedBytes, 0, seedBytes.Length);
                 worldSeed = BitConverter.ToInt32(seedBytes, 0);
+
+                var entityIdBytes = new byte[sizeof(uint)];
+                fileStream.Read(entityIdBytes, 0, entityIdBytes.Length);
+                entityIdCounter = BitConverter.ToUInt32(entityIdBytes, 0);
             }
 
+            EntityCollection.Instance.UpdateEntityCounter(entityIdCounter);
             World world = new World(worldSeed);
             LoadRegions();
 
@@ -288,7 +335,6 @@ namespace TheWorkforce.Game_State
                 var knownChunks = regionFilePair.Value.GetGeneratedChunks();
                 world.RegisterKnownChunks(knownChunks);
             }
-
 
             return world;
         }
@@ -301,7 +347,7 @@ namespace TheWorkforce.Game_State
             {
                 var chunk = new Chunk(chunkPosition);
                 chunks.Add(chunk);
-
+                chunk.Initialise();
 
                 var regionPosition = RegionFile.CalculateRegion(chunkPosition.x, chunkPosition.y);
 
@@ -340,26 +386,44 @@ namespace TheWorkforce.Game_State
                         ushort entityType = BitConverter.ToUInt16(chunkData[x][z], byteOffset);
                         byteOffset += sizeof(ushort);
 
-                        EntityCollection.Instance().LoadEntity(
-                            entityType, 
+                        EntityCollection.Instance.LoadEntity(
+                            entityType,
                             entityId,
-                            x + chunkWorldPosition.x,
-                            z + chunkWorldPosition.y,
+                            tile,
+                            new Vector2Int(x, z) + chunkWorldPosition,
                             chunkData[x][z], 
                             byteOffset);
 
                         tile.PlaceEntity(entityId);
                     }
-
                 }
             }
 
             return chunks;
         }
 
-        public List<Tuple<int, byte[]>> LoadPlayerData()
+        #region Serializing Game Data - used for sending files over network
+        public byte[] SerializeWorldData()
         {
-            var playerFiles = _saveDirectory.GetFiles();
+            FileInfo worldInfo = SearchForFile(_saveDirectory, WorldFileName + FileFormat);
+
+            if (worldInfo == null)
+            {
+                Debug.LogError($"[GameFile] - SerializeWorldData() \nFatal Error - {WorldFileName}{FileFormat} file does not exist!");
+            }
+
+            byte[] worldBytes = new byte[worldInfo.Length];
+            using (FileStream fileStream = worldInfo.OpenRead())
+            {
+                fileStream.Read(worldBytes, 0, worldBytes.Length);
+            }
+
+            return worldBytes;
+        }
+
+        public List<Tuple<int, byte[]>> SerializePlayerData()
+        {
+            var playerFiles = _playersDirectory.GetFiles();
 
             // If there are no player files
             // This should not happen!
@@ -382,6 +446,23 @@ namespace TheWorkforce.Game_State
 
             return playerData;
         }
+
+        public List<Tuple<string, byte[]>> SerializeRegionFiles()
+        {
+            List<Tuple<string, byte[]>> regionData = new List<Tuple<string, byte[]>>();
+            foreach(var regionFile in _regionFiles)
+            {
+                regionData.Add(new Tuple<string, byte[]>
+                    (
+                        regionFile.Value.File.Name,
+                        File.ReadAllBytes(regionFile.Value.File.FullName)
+                    )
+                );
+            }
+
+            return regionData;
+        }
+        #endregion
 
         private void LoadRegions()
         {
@@ -420,12 +501,15 @@ namespace TheWorkforce.Game_State
             return true;
         }
 
+        public void Delete()
+        {
+            _saveDirectory.Delete(true);
+        }
+
         public void ExitGame()
         {
             // unloaded
-            _instance = null;
+            Instance = null;
         }
-    }
-
-    
+    } 
 }

@@ -14,29 +14,51 @@ namespace TheWorkforce.UI
         public const string NoFileSelectedMessage = "No File Selected";
 
         public TextMeshProUGUI SelectedFileNameText;
-        public Button SelectFileButtonPrefab;
+        public MyButton SelectFileButtonPrefab;
 
         [SerializeField] private CustomNetworkManager _customNetworkManager;
         [SerializeField] private Transform _selectFileScrollView;
-        [SerializeField] private Button _loadButton;
-        [SerializeField] private Button _deleteButton;
+        [SerializeField] private MyButton _loadButton;
+        [SerializeField] private MyButton _deleteButton;
 
-        private List<Button> _selectFileButtons;
-        private Button _selectedFileButton;
+        private List<MyButton> _selectFileButtons;
+        private MyButton _selectedFileButton;
         private DirectoryInfo _selectedFileDirectory;
 
         private void Awake()
         {
+            _loadButton.enabled = false;
+            _deleteButton.enabled = false;
+
+            _loadButton.gameObject.SetActive(false);
+            _deleteButton.gameObject.SetActive(false);
+
+            _loadButton.OnClick.AddListener(LoadFile);
+            _deleteButton.OnClick.AddListener(DeleteFile);
+        }
+
+        public void InitialiseButtons()
+        {
+            if(_selectFileButtons != null)
+            {
+                foreach(var button in _selectFileButtons)
+                {
+                    Destroy(button.gameObject);
+                }
+                _selectedFileButton = null;
+                _selectFileButtons.Clear();
+            }
+
             var saveDirectories = GameFile.GetSaveDirectories();
-            _selectFileButtons = new List<Button>();
+            _selectFileButtons = new List<MyButton>();
 
             // Create a new load save button for each save game on the client
             for (int i = 0; i < saveDirectories.Length; ++i)
             {
-                Button selectFileButton = Instantiate(SelectFileButtonPrefab, _selectFileScrollView);
+                MyButton selectFileButton = Instantiate(SelectFileButtonPrefab, _selectFileScrollView);
 
                 int e = i;
-                selectFileButton.onClick.AddListener(delegate
+                selectFileButton.OnClick.AddListener(delegate
                 {
                     SelectFileButton(selectFileButton, saveDirectories[e]);
                 });
@@ -45,15 +67,6 @@ namespace TheWorkforce.UI
 
                 _selectFileButtons.Add(selectFileButton);
             }
-
-            _loadButton.enabled = false;
-            _deleteButton.enabled = false;
-
-            _loadButton.gameObject.SetActive(false);
-            _deleteButton.gameObject.SetActive(false);
-
-            _loadButton.onClick.AddListener(LoadFile);
-            _deleteButton.onClick.AddListener(DeleteFile);
         }
 
         /// <summary>
@@ -62,12 +75,13 @@ namespace TheWorkforce.UI
         /// </summary>
         /// <param name="button"></param>
         /// <param name="directory"></param>
-        private void SelectFileButton(Button button, DirectoryInfo directory)
+        private void SelectFileButton(MyButton button, DirectoryInfo directory)
         {
             if (_selectedFileButton != null)
             {
                 DeselectFileButton(_selectedFileButton);
             }
+            button.Interactable = false;
             _selectedFileButton = button;
             _selectedFileDirectory = directory;
 
@@ -80,9 +94,10 @@ namespace TheWorkforce.UI
             _deleteButton.gameObject.SetActive(true);
         }
 
-        private void DeselectFileButton(Button button)
+        private void DeselectFileButton(MyButton button)
         {
-
+            button.Interactable = true;
+            button.OnPointerExit(null);
         }
 
         private void LoadFile()

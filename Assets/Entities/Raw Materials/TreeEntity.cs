@@ -45,7 +45,7 @@ namespace TheWorkforce.Entities
             Array.Copy(BitConverter.GetBytes(_data.Id), 0, bytes, sizeof(uint), sizeof(ushort));
             Array.Copy(BitConverter.GetBytes(Amount), 0, bytes, sizeof(uint) + sizeof(ushort), sizeof(ushort));
 
-            return BitConverter.GetBytes(Amount);
+            return bytes;
         }
 
         public override uint GetDataTypeId()

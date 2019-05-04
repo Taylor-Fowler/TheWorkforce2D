@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TheWorkforce
@@ -21,7 +22,7 @@ namespace TheWorkforce
         /// The default number of Chunks to keep loaded in both the x and y direction,
         /// so the actual default number of chunks to keep loaded is KEEP_LOADED^2.
         /// </summary>
-        public const int KEEP_LOADED = 5;
+        public const int KEEP_LOADED = 7;
 
         /// <summary>
         /// Calculates whether the given tile offset is valid.
@@ -42,12 +43,10 @@ namespace TheWorkforce
         /// <returns>The Chunk that the `worldPosition` belongs in.</returns>
         public static Vector2Int CalculateResidingChunk(Vector2Int worldPosition)
         {
-            //Vector2 current = worldPosition / SIZE;
-            //current.x = Mathf.Floor(current.x);
-            //current.y = Mathf.Floor(current.y);
-
-            //return current;
-            return new Vector2Int(worldPosition.x / SIZE, worldPosition.y / SIZE);
+            
+            int x = (int)Mathf.Floor((float)worldPosition.x / SIZE);
+            int y = (int)Mathf.Floor((float)worldPosition.y / SIZE);
+            return new Vector2Int(x, y);
         }
 
         /// <summary>
@@ -57,10 +56,7 @@ namespace TheWorkforce
         /// </summary>
         /// <param name="chunkPosition">The position of a Chunk.</param>
         /// <returns>The World Position of the Chunk.</returns>
-        public static Vector2Int CalculateWorldPosition(Vector2Int chunkPosition)
-        {
-            return chunkPosition * SIZE;
-        }
+        public static Vector2Int CalculateWorldPosition(Vector2Int chunkPosition) => chunkPosition * SIZE;
 
         /// <summary>
         /// Unpacks NetworkChunks into regular Chunks.
@@ -118,13 +114,15 @@ namespace TheWorkforce
         }
         #endregion
 
+        public event Action<Chunk> OnInitialise;
+
+        public bool IsInitialised { get; private set; }
+
         /// <summary>
-        ///     Gets a value indicating whether the chunk should stay loaded regardless of
-        ///     player vicinity.
+        /// Gets a value indicating whether the chunk should stay loaded regardless of
+        /// player vicinity.
         /// </summary>
-        /// <value>
-        ///     <c>true</c> if [keep loaded]; otherwise, <c>false</c>.
-        /// </value>
+        /// <returns>True if the chunk needs to be kept loaded</returns>
         public bool KeepLoaded { get; }
 
         /// <summary>
@@ -184,9 +182,21 @@ namespace TheWorkforce
         /// Chunk.
         /// </summary>
         /// <returns>The World Position of the Chunk.</returns>
-        public Vector2Int WorldPosition()
+        public Vector2Int WorldPosition() => Position * SIZE;
+
+        public void Unload()
         {
-            return Position * SIZE;
+            foreach(var tile in Tiles)
+            {
+                tile.Unload();
+            }
+        }
+
+        public void Initialise()
+        {
+            IsInitialised = true;
+            OnInitialise?.Invoke(this);
+            OnInitialise = null;
         }
     }    
 }

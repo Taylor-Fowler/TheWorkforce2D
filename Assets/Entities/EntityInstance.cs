@@ -14,14 +14,14 @@ namespace TheWorkforce.Entities
         public readonly int Y;
         public readonly uint Id;
 
-        private readonly Action<uint> _onDestroy;
+        private readonly Action<uint> _onUnload;
 
-        public EntityInstance(uint id, int x, int y, Action<uint> onDestroy)
+        public EntityInstance(uint id, int x, int y, Action<uint> onUnload)
         {
             Id = id;
             X = x;
             Y = y;
-            _onDestroy = onDestroy;
+            _onUnload = onUnload;
         }
 
         public abstract byte[] GetPacket();
@@ -38,8 +38,10 @@ namespace TheWorkforce.Entities
         public void Destroy()
         {
             OnEntityDestroy?.Invoke();
-            _onDestroy(Id);
+            _onUnload(Id);
         }
+
+        public void Unload() => _onUnload?.Invoke(Id);
 
         protected void OnDirty()
         {

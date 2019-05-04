@@ -17,6 +17,8 @@ namespace TheWorkforce.Game_State
         private static Dictionary<uint, List<Action>> _specificTickActions = new Dictionary<uint, List<Action>>();
         private static Dictionary<uint, List<Action>> _specificPostTickActions = new Dictionary<uint, List<Action>>();
 
+        private static Dictionary<uint, List<Action>> _specificBackgroundTickActions = new Dictionary<uint, List<Action>>();
+
         public static void SubscribeToUpdate(Action action) => _tickActions.Add(action);
         public static void UnsubscribeToUpdate(Action action) => _tickActionsToRemove.Add(action);
 
@@ -63,7 +65,31 @@ namespace TheWorkforce.Game_State
             actions.Add(action);
         }
 
+        public static void ListenForBackgroundTick(uint ticksToWait, Action action) => ListenForSpecificBackgroundTick(BackgroundTime + ticksToWait, action);
+
+        public static void ListenForSpecificBackgroundTick(uint tick, Action action)
+        {
+            if(tick < BackgroundTime)
+            {
+                return;
+            }
+
+            List<Action> actions;
+
+            // Try to find a list of actions already designated for the specified tick
+            // If none are found, create a new list and add it to the dictionary
+            if (!_specificBackgroundTickActions.TryGetValue(tick, out actions))
+            {
+                actions = new List<Action>();
+                _specificBackgroundTickActions.Add(tick, actions);
+            }
+            actions.Add(action);
+        }
+
+
         // TODO: Add listen for tick in x ticks
+
+
 
         public static void Update()
         {
@@ -91,6 +117,7 @@ namespace TheWorkforce.Game_State
                 }
                 _specificTickActions.Remove(Time);
             }
+
         }
 
         public static void PostUpdate()
@@ -120,6 +147,30 @@ namespace TheWorkforce.Game_State
         public static void UpdateBackgroundTimer()
         {
             ++BackgroundTime;
+
+            List<Action> actions;
+            if (_specificBackgroundTickActions.TryGetValue(BackgroundTime, out actions))
+            {
+                foreach (var action in actions)
+                {
+                    action.Invoke();
+                }
+                _specificBackgroundTickActions.Remove(BackgroundTime);
+            }
+        }
+
+        public static void Reset()
+        {
+            _tickActions.Clear();
+            _tickActionsToRemove.Clear();
+            _specificTickActions.Clear();
+
+            _specificBackgroundTickActions.Clear();
+
+            _postTickActions.Clear();
+            _postTickActionsToRemove.Clear();
+            _specificPostTickActions.Clear();
+
         }
     } 
 }

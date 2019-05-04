@@ -10,14 +10,14 @@ namespace TheWorkforce.Entities
         public ushort Amount;
         private readonly OreData _data;
 
-        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data, ushort amount) : base(id, x, y, onDestroy)
+        public OreEntity(uint id, int x, int y, Action<uint> onUnload, OreData data, ushort amount) : base(id, x, y, onUnload)
         {
             Amount = amount;
             _data = data;
         }
 
-        public OreEntity(uint id, int x, int y, Action<uint> onDestroy, OreData data) 
-            : this(id, x, y, onDestroy, data, 10)
+        public OreEntity(uint id, int x, int y, Action<uint> onUnload, OreData data) 
+            : this(id, x, y, onUnload, data, 10)
         {
         }
 
@@ -38,7 +38,7 @@ namespace TheWorkforce.Entities
             Array.Copy(BitConverter.GetBytes(_data.Id), 0, bytes, sizeof(uint), sizeof(ushort));
             Array.Copy(BitConverter.GetBytes(Amount), 0, bytes, sizeof(uint) + sizeof(ushort), sizeof(ushort));
 
-            return BitConverter.GetBytes(Amount);
+            return bytes;
         }
 
         public override uint GetDataTypeId()
@@ -82,6 +82,7 @@ namespace TheWorkforce.Entities
         {
             if(Amount == 0)
             {
+                Debug.LogError("Fatal Error in OreEntity, cannot decrease the amount below zero!");
                 return false;
             }
             --Amount;

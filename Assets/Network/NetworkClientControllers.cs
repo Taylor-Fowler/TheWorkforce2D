@@ -9,6 +9,11 @@ namespace TheWorkforce.Network
         public NetworkClientControllers(IEnumerable<ClientControllers> collection) : base(collection) { }
         public NetworkClientControllers(int capacity) : base(capacity) { }
 
+        public ClientControllers Find(NetworkConnection conn)
+        {
+            return Find(clientControllers => clientControllers.Connection == conn);
+        }
+
         public bool Remove(NetworkConnection conn)
         {
             return RemoveAll(clientControllers => clientControllers.Connection == conn) > 0;
@@ -22,6 +27,8 @@ namespace TheWorkforce.Network
         public readonly WorldController WorldController;
         public readonly FileTransfer FileTransfer;
 
+        public bool IsActive { get; private set; }
+
         public ClientControllers(NetworkConnection connection, PlayerController playerController, WorldController worldController, FileTransfer fileTransfer)
         {
             this.Connection = connection;
@@ -29,5 +36,7 @@ namespace TheWorkforce.Network
             this.WorldController = worldController;
             this.FileTransfer = fileTransfer;
         }
+
+        public void Activate() => IsActive = true;
     }
 }

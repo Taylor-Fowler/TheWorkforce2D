@@ -18,6 +18,7 @@ namespace TheWorkforce
     {
         #region Constants + Statics
         private const int PlayerInventorySize = 45;
+        private const float PlayerMovementSpeed = 5f;
 
         /// <summary>
         /// An event that is invoked when a Player Controller starts
@@ -39,20 +40,6 @@ namespace TheWorkforce
         [SerializeField] private PlayerSetup _playerSetup;
 
         private MouseController _mouseController;
-        //private ToolbeltDisplay _toolbeltDisplay;
-
-        #region NetworkBehaviour Overrides
-        /// <summary>
-        /// Called when the local player starts, sets the local player controller reference and invokes the 
-        /// local player controller startup event
-        /// </summary>
-        public override void OnStartLocalPlayer()
-        {
-            // TODO: Move to startup
-            //Local = this;
-            //GameTime.SubscribeToPostUpdate(UpdateController);
-        }
-        #endregion
 
         /// <summary>
         /// Should only be called on the local player, from the game manager, this is because the method requires a valid reference to the game manager
@@ -70,22 +57,16 @@ namespace TheWorkforce
                 Local = this;
                 OnPlayerControllerStartup?.Invoke(this);
                 GameTime.SubscribeToPostUpdate(UpdateController);
-            }
-            // CreateLocalPlayer();
-            // _mouseController = _playerSetup.AddComponents(this, gameManager.WorldController);
 
-            
-            // CmdStartAll();
-            // All other players on the client should listen for when the player is ready and then initialise themselves also.
-            // Local Player tells other players on this client (who are already in game) that they should initialise
+                GameManager.OnGameStateChange += GameManager_OnGameStateChange;
+            }
         }
 
-        public void OnClientInitialise(PlayerData playerData)
+        private void GameManager_OnGameStateChange(GameStateChangeArgs gameStateChangeArgs)
         {
-            // Add the local player components (new camera, mouse controller etc)
-            if (isLocalPlayer)
+            if(gameStateChangeArgs.Current == EGameState.Disconnecting)
             {
-                _mouseController = _playerSetup.AddComponents(this, GameManager.WorldController);
+                Local = null;
             }
         }
 
@@ -95,45 +76,19 @@ namespace TheWorkforce
         /// <param name="playerData"></param>
         public void OnServerInitialise(PlayerData playerData)
         {
-            Id = playerData.Id;
-            transform.position = new Vector3(playerData.X, playerData.Y, transform.position.z);
-
-            SlotCollection inventorySlots;
-            if(playerData.InventoryItems == null)
-            {
-                inventorySlots = new SlotCollection(PlayerInventorySize);
-            }
-            else
-            {
-                inventorySlots = new SlotCollection(PlayerInventorySize, playerData.InventoryItems);
-            }
-            
             // As soon as the player is created, the world area is also created
             // Because PlayerChunkUpdate is called which requests up-to-date world information
-            Player = new Player(this, inventorySlots, new PlayerMovement(
-                        Id,
-                        15f,
-                        GetComponent<Animator>(),
-                        PlayerChunkUpdate,
-                        transform
-                    )
-                );
+            CreateLocalPlayer(playerData);
 
-            // Add the local player components (new camera, mouse controller etc)
             if(isLocalPlayer)
             {
-                _mouseController = _playerSetup.AddComponents(this, GameManager.WorldController);
+                InitialiseMouseController();
             }
         }
-
-        public void LoadPlayer()
+        private void OnLocalClientInitialise(PlayerData playerData)
         {
-
-        }
-
-        public void CreatePlayer()
-        {
-
+            CreateLocalPlayer(playerData);
+            InitialiseMouseController();
         }
 
         public PlayerData GetPlayerData()
@@ -146,6 +101,11 @@ namespace TheWorkforce
 
 
         #region Keyboard and Mouse controls
+        private void InitialiseMouseController()
+        {
+            _mouseController = _playerSetup.AddComponents(this, GameManager.WorldController);
+        }
+
         /// <summary>
         /// Update method that does not rely on Unity callbacks. 
         /// Processes keyboard and mouse actions.
@@ -178,20 +138,53 @@ namespace TheWorkforce
                 horizontal -= 1;
             }
 
-            CmdMove(horizontal, vertical);
+            Player.Movement.Move(horizontal, vertical, transform);
+
+            CmdMove(horizontal, vertical, transform.position);
         }
         #endregion
 
-        private void CreateLocalPlayer()
+        private void CreateLocalPlayer(PlayerData playerData)
         {
-            Player = new Player(this, new SlotCollection(PlayerInventorySize), new PlayerMovement(
+            Id = playerData.Id;
+            transform.position = new Vector3(playerData.X, playerData.Y, transform.position.z);
+
+            SlotCollection inventorySlots;
+            if (playerData.InventoryItems == null)
+            {
+                inventorySlots = new SlotCollection(PlayerInventorySize);
+            }
+            else
+            {
+                inventorySlots = new SlotCollection(PlayerInventorySize, playerData.InventoryItems);
+            }
+
+            Player = new Player(this, inventorySlots, new PlayerMovement(
                         Id,
-                        15f,
+                        PlayerMovementSpeed,
                         GetComponent<Animator>(),
                         PlayerChunkUpdate,
                         transform
                     )
                 );
+        }
+
+        private void CreateRemotePlayer(PlayerData playerData)
+        {
+            transform.position = new Vector3(playerData.X, playerData.Y, transform.position.z);
+
+
+            SlotCollection inventorySlots;
+            if (playerData.InventoryItems == null)
+            {
+                inventorySlots = new SlotCollection(PlayerInventorySize);
+            }
+            else
+            {
+                inventorySlots = new SlotCollection(PlayerInventorySize, playerData.InventoryItems);
+            }
+
+            Player = new Player(this, inventorySlots, new AnimatedMovement(PlayerMovementSpeed, GetComponent<Animator>()));
         }
 
         private void PlayerChunkUpdate(Vector2 position)
@@ -204,26 +197,51 @@ namespace TheWorkforce
             }
         }
 
-        private void CreateRemotePlayer()
-        {
-            Player = new Player(this, new SlotCollection(45), new AnimatedMovement(3f, GetComponent<Animator>()));
-        }
-
-
         #region Custom Event Invoking
         #endregion
 
         #region Custom Network Messages
         [Command]
-        private void CmdMove(int horizontal, int vertical) => RpcMove(horizontal, vertical);
+        public void CmdUpdatePlayerData(byte[] playerBytes)
+        {
+            GameFile.Instance.Save(new PlayerData(playerBytes));
+            Debug.Log("[CmdUpdatePlayerDate(byte[])");
+        }
+
+
+        [Command]
+        private void CmdMove(int horizontal, int vertical, Vector2 position) => RpcMove(horizontal, vertical, position);
 
         [ClientRpc]
-        private void RpcMove(int horizontal, int vertical)
+        private void RpcMove(int horizontal, int vertical, Vector2 position)
         {
-            if(Player != null)
+            if(Player != null && !isLocalPlayer)
             {
-                Player.Movement.Move(horizontal, vertical, transform);            
+                Player.Movement.Move(horizontal, vertical, transform);
+                transform.position = new Vector3(position.x, position.y, transform.position.z); // Fix?
             }
+        }
+
+        [ClientRpc]
+        public void RpcInitialiseNewPlayer(byte[] playerBytes)
+        {
+            if (!isServer)
+            {
+                if (isLocalPlayer)
+                {
+                    OnLocalClientInitialise(new PlayerData(playerBytes));
+                }
+                else
+                {
+                    CreateRemotePlayer(new PlayerData(playerBytes));
+                }
+            }
+        }
+
+        [TargetRpc]
+        public void TargetInitialisePlayer(NetworkConnection conn, byte[] playerBytes)
+        {
+            CreateRemotePlayer(new PlayerData(playerBytes));
         }
         #endregion
     }

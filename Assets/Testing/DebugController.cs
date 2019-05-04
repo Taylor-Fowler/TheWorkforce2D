@@ -11,6 +11,7 @@ namespace TheWorkforce.Testing
         public DebugItemsLoaded DebugItemsLoaded;
 
         [SerializeField] private DebugPlayerDetails _debugPlayerDetails;
+        [SerializeField] private DebugWorldDetails _debugWorldDetails;
 
         #region Unity API
         private void Update()
@@ -24,6 +25,7 @@ namespace TheWorkforce.Testing
             if(DebugCanvas.activeInHierarchy)
             {
                 _debugPlayerDetails.OnUpdate();
+                _debugWorldDetails.OnUpdate();
             }
         }
         #endregion
@@ -37,17 +39,15 @@ namespace TheWorkforce.Testing
         #region Custom Event Responses
         private void GameManager_OnApplicationStateChange(ApplicationStateChangeArgs applicationStateArgs)
         {
-            if(applicationStateArgs.Current == EApplicationState.Ingame)
+            if (applicationStateArgs.Current == EApplicationState.Ingame)
             {
-                GameManager.WorldController.OnWorldPlayerPositionUpdate += _debugPlayerDetails.DrawLines;
+                GameManager.PlayerController.OnPlayerChunkUpdate += _debugPlayerDetails.DrawLines;
                 _debugPlayerDetails.Initialise(GameManager.PlayerController);
+                _debugWorldDetails.Initialise(GameManager.WorldController, GameManager.PlayerController);
                 _debugPlayerDetails.DrawLines(GameManager.PlayerController.transform.position);
-
-                // NOTE: Added before the resource generation was added
-                // StartCoroutine(WaitToSpawn());
             }
-            Debug.Log("[DebugController] - GameManager_OnApplicationStateChange(object, ApplicationStateArgs) \n " 
-                    + "applicationStateArgs.Current: " + applicationStateArgs.Current.ToString());
+            Debug.Log("[DebugController] - GameManager_OnApplicationStateChange(object, ApplicationStateArgs) \n "
+                    + $"applicationStateArgs.Current: {applicationStateArgs.Current.ToString()}");
         }
         #endregion
     }

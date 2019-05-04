@@ -36,7 +36,7 @@ namespace TheWorkforce.Game_State
         public CustomNetworkManager NetworkManager => _networkManager;
 
         /// <summary>
-        /// 
+        /// The entity collection that stores all entity data and instances for the game
         /// </summary>
         public EntityCollection EntityCollection => _entityCollection;
 
@@ -87,13 +87,13 @@ namespace TheWorkforce.Game_State
         private IEnumerator InitialiseAssets()
         {
             TerrainTileSet.InitialiseTileSets();
-            _entityCollection.Initialise();
+            _entityCollection.Startup(this);
             _recipes.Initialise();
 
             _networkManager.Startup(this);
             _debugController.Startup(this);
 
-            _networkManager.Initialise(StartConnecting, StartLoading, StartGame, Pause, Resume);
+            _networkManager.Initialise(StartConnecting, StartLoading, StartGame, Pause, Resume, Disconnect);
             
             yield return new WaitForSeconds(1f);
             ApplicationStateChange(EApplicationState.Menu);
@@ -140,16 +140,27 @@ namespace TheWorkforce.Game_State
             ApplicationStateChange(EApplicationState.Ingame);
             GameStateChange(EGameState.Active);
             StartCoroutine(IncrementTickTime());
+            Debug.Log("<color=brown>[GameManager]</color> - StartGame()");
         }
 
         private void Pause()
         {
             GameStateChange(EGameState.Paused);
+            Debug.Log("<color=brown>[GameManager]</color> - Pause()");
         }
 
         private void Resume()
         {
             GameStateChange(EGameState.Active);
+            Debug.Log("<color=brown>[GameManager]</color> - Resume()");
+        }
+
+        private void Disconnect()
+        {
+            GameStateChange(EGameState.Disconnecting);
+            ApplicationStateChange(EApplicationState.ReturningToMenu);
+            GameTime.Reset(); // Clear game timer events
+            ApplicationStateChange(EApplicationState.Menu);
         }
         #endregion
 
@@ -172,15 +183,9 @@ namespace TheWorkforce.Game_State
         #endregion
 
         #region Custom Event Response
-        private void WorldController_OnWorldControllerStartup(WorldController worldController)
-        {
-            WorldController = worldController;
-        }
+        private void WorldController_OnWorldControllerStartup(WorldController worldController) => WorldController = worldController;
 
-        private void PlayerController_OnLocalPlayerControllerStartup(PlayerController playerController)
-        {
-            PlayerController = playerController;
-        }
+        private void PlayerController_OnLocalPlayerControllerStartup(PlayerController playerController) => PlayerController = playerController;
         #endregion
     }
 }

@@ -42,7 +42,7 @@ namespace TheWorkforce.Entities
         ///     3. A player places an item in the world
         /// </summary>
         /// <param name="arr"></param>
-        public abstract EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onDestroy, byte[] arr);
+        public abstract EntityInstance CreateInstance(uint id, int x, int y, Action<uint> onUnload, byte[] arr);
 
         public virtual GameObject Template()
         {

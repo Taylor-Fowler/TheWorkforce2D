@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
-using TheWorkforce.Static_Classes;
 
 namespace TheWorkforce
 {
@@ -28,12 +27,10 @@ namespace TheWorkforce
         /// </summary>
         public Dictionary<Vector2Int, Chunk> LoadedChunks { get; }
 
-        public HashSet<Vector2Int> KnownChunks { get; }
-    
         /// <summary>
-        /// Stores all of the chunks that directly surround the local player.
+        /// A collection of all of the chunks known to the world, both loaded and unloaded.
         /// </summary>
-        public List<Vector2Int> ChunksSurroundingLocalPlayer;
+        public HashSet<Vector2Int> KnownChunks { get; }
 
         /// <summary>
         /// Stores each chunk with a list of players which are keeping it loaded.
@@ -60,9 +57,22 @@ namespace TheWorkforce
 
             KnownChunks = new HashSet<Vector2Int>();
             LoadedChunks = new Dictionary<Vector2Int, Chunk>();
-            ChunksSurroundingLocalPlayer = new List<Vector2Int>();
             ChunkLoadedByPlayers = new Dictionary<Vector2Int, List<int>>();
             PlayerLoadedChunks = new Dictionary<int, List<Vector2Int>>();
+        }
+
+        public Tile this[Vector2Int worldPosition]
+        {
+            get
+            {
+                Vector2Int chunkPosition = Chunk.CalculateResidingChunk(worldPosition);
+                Chunk chunk;
+                if(LoadedChunks.TryGetValue(chunkPosition, out chunk))
+                {
+                    return chunk.GetTile(Tile.TilePositionInRelationToChunk(worldPosition));
+                }
+                return null;
+            }
         }
 
         public void RegisterKnownChunks(IEnumerable<Vector2Int> chunkPositions)
@@ -78,10 +88,80 @@ namespace TheWorkforce
                         $"Chunks registered: {count}");
         }
 
+        public List<Chunk> RemoveChunks(int playerId, IEnumerable<Vector2Int> chunksToUnloadForPlayer)
+        {
+            List<Chunk> chunks = new List<Chunk>();
+            List<Vector2Int> chunksLoadedByPlayer;
+            
+            if(PlayerLoadedChunks.TryGetValue(playerId, out chunksLoadedByPlayer))
+            {
+                foreach(var chunkToUnload in chunksToUnloadForPlayer)
+                {
+                    chunksLoadedByPlayer.Remove(chunkToUnload);
+                    var playersDependantOnChunk = ChunkLoadedByPlayers[chunkToUnload];
+                    playersDependantOnChunk.Remove(playerId);
+                    
+
+                    if(playersDependantOnChunk.Count == 0)
+                    {
+                        chunks.Add(LoadedChunks[chunkToUnload]);
+                        ChunkLoadedByPlayers.Remove(chunkToUnload);
+                        LoadedChunks.Remove(chunkToUnload);
+                    }
+                }
+            }
+
+            return chunks;
+        }
+
+        public List<Chunk> RemoveChunks(IEnumerable<Vector2Int> chunkPositions)
+        {
+            List<Chunk> removedChunks = new List<Chunk>();
+            foreach(var chunkPosition in chunkPositions)
+            {
+                removedChunks.Add(LoadedChunks[chunkPosition]);
+                LoadedChunks.Remove(chunkPosition);
+            }
+            return removedChunks;
+        }
+
         public void UpdatePlayerChunks(int playerId, IEnumerable<Vector2Int> chunks)
         {
-            SetChunksLoadedByPlayers(playerId, chunks);
-            SetPlayerLoadedChunks(playerId, chunks);
+            List<Vector2Int> result;
+
+            if (!PlayerLoadedChunks.TryGetValue(playerId, out result))
+            {
+                result = new List<Vector2Int>();
+                PlayerLoadedChunks.Add(playerId, result);
+            }
+            result.AddRange(chunks);
+            
+            foreach(var chunk in chunks)
+            {
+                List<int> playerIds;
+                if(!ChunkLoadedByPlayers.TryGetValue(chunk, out playerIds))
+                {
+                    playerIds = new List<int>();
+                    ChunkLoadedByPlayers.Add(chunk, playerIds);
+                }
+
+                playerIds.Add(playerId);
+            }
+        }
+
+        /// <summary>
+        /// Iterates over the loaded chunk collection and records the chunk world position into a new list.
+        /// </summary>
+        /// <returns></returns>
+        public List<Vector2Int> GetLoadedChunkPositions()
+        {
+            var loadedPositions = new List<Vector2Int>(LoadedChunks.Count);
+            foreach(var chunkPair in LoadedChunks)
+            {
+                loadedPositions.Add(chunkPair.Key);
+            }
+
+            return loadedPositions;
         }
 
         /// <summary>
@@ -120,16 +200,6 @@ namespace TheWorkforce
             return chunks;
         }
 
-        /// <summary>
-        /// Clears the ChunksSurroundingLocalPlayer and adds the given chunk positions.
-        /// </summary>
-        /// <param name="chunksSurroundingPlayer"></param>
-        /// 
-        public void SetChunksSurroundingLocalPlayer(IEnumerable<Vector2Int> chunksSurroundingPlayer)
-        {
-            ChunksSurroundingLocalPlayer.Clear();
-            ChunksSurroundingLocalPlayer.AddRange(chunksSurroundingPlayer);
-        }
 
         /// <summary>
         /// 
@@ -142,7 +212,7 @@ namespace TheWorkforce
             foreach (var chunk in chunks)
             {
                 LoadedChunks.Add(chunk.Position, chunk);
-                Game_State.GameFile.Instance.Save(chunk);
+                KnownChunks.Add(chunk.Position);
                 ++count;
             }
 
@@ -207,10 +277,7 @@ namespace TheWorkforce
             return knownChunks;
         }
     
-        public bool CanUnloadChunk(Vector2Int chunkPositionToUnload)
-        {
-            return !LoadedChunks[chunkPositionToUnload].KeepLoaded;
-        }
+        public bool CanUnloadChunk(Vector2Int chunkPositionToUnload) => !LoadedChunks[chunkPositionToUnload].KeepLoaded;
     
         public Dictionary<int, TilePadding> GetTilePadding(Chunk chunk, Tile tile)
         {
@@ -290,57 +357,6 @@ namespace TheWorkforce
             }
             tile = null;
             return false;
-        }
-
-        private void SetChunksLoadedByPlayers(int playerId, IEnumerable<Vector2Int> chunks)
-        {
-
-        }
-
-
-        private void SetPlayerLoadedChunks(int playerId, IEnumerable<Vector2Int> chunks)
-        {
-            List<Vector2Int> result = null;
-
-            if (PlayerLoadedChunks.TryGetValue(playerId, out result))
-            {
-                result.Clear();
-            }
-            else
-            {
-                result = new List<Vector2Int>();
-                PlayerLoadedChunks.Add(playerId, result);
-            }
-            result.AddRange(chunks);
-        }
-
-
-
-        /// <summary>
-        /// Looks for a set of chunk positions within the currently loaded chunks and adds
-        /// them to the given chunk list whilst removing the position from the positions list.
-        /// </summary>
-        /// <param name="chunkPositions">The chunk positions list to iterate through.</param>
-        /// <param name="lookupResult">The list of chunks to add any found chunks to.</param>
-        private void LookupLoadedChunks(List<Vector2Int> chunkPositions, List<Chunk> lookupResult)
-        {
-            // No chunks loaded so none to look up
-            if (LoadedChunks.Count == 0)
-            {
-                return;
-            }
-    
-            // Loop through the LoadedChunks and add any chunks that have a position specified 
-            // within the chunkPositions list to the lookupResult list, remove the position also
-            // as the chunk does not need to be looked for any longer
-            for (int i = chunkPositions.Count - 1; i >= 0; i--)
-            {
-                if (LoadedChunks.ContainsKey(chunkPositions[i]))
-                {
-                    lookupResult.Add(LoadedChunks[chunkPositions[i]]);
-                    chunkPositions.RemoveAt(i);
-                }
-            }
         }
     }
 }

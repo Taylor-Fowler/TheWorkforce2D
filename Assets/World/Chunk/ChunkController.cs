@@ -22,11 +22,11 @@ namespace TheWorkforce
         {
             get
             {
-                if (tilePosition.x < 0 || tilePosition.x > Chunk.SIZE - 1 || tilePosition.y < 0 || tilePosition.y > Chunk.SIZE - 1)
+                if(Chunk.ValidTileOffset(tilePosition))
                 {
-                    return null;
+                    return _tileControllers[tilePosition.x * Chunk.SIZE + tilePosition.y];
                 }
-                return _tileControllers[tilePosition.x * Chunk.SIZE + tilePosition.y];
+                return null;
             }
         }
         #endregion
